@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:     Coinsnap For Woocommerce Vers. 1 (2023-07)
- * Plugin URI:      https://wordpress.org/plugins/coinsnap-for-woocommerce/
+ * Plugin Name:     Coinsnap For Woocommerce 1.0
+ * Plugin URI:      https://wordpress.org/plugins/coinsnap-woocommerce/
  * Description:     With Coinsnap payment processing, you can accept Bitcoin and Lightning payments on your website or online store. You do not need your own Lightning Node or other technical requirements.
  * Author:          Coinsnap
  * Author URI:      https://coinsnap.io/
- * Text Domain:     coinsnap-for-woocommerce
+ * Text Domain:     coinsnap-woocommerce
  * Domain Path:     /languages
  * Version:         1.0
  * Requires PHP:    7.4
@@ -17,7 +17,7 @@
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
  * Network:         true
- * Update URI:      https://coinsnap.io/plugins/coinsnap-for-woocommerce/update/
+ * Update URI:      https://coinsnap.io/en/coinsnap-woocommerce-plugin/update/
  */
 
 use Coinsnap\WC\Admin\Notice;
@@ -33,7 +33,7 @@ define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );
 define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );
 define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );
-define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' ); // /api/v1/websites/
+define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );
 
 class CoinsnapWCPlugin {
     
@@ -47,7 +47,7 @@ class CoinsnapWCPlugin {
 		//add_action( 'wp_ajax_nopriv_coinsnap_modal_checkout', [$this, 'processAjaxModalCheckout'] );
 
 		// Run the updates.
-		//\Coinsnap\WC\Helper\UpdateManager::processUpdates();
+		\Coinsnap\WC\Helper\UpdateManager::processUpdates();
 
 	if (is_admin()) {
             // Register our custom global settings page.
@@ -163,7 +163,7 @@ class CoinsnapWCPlugin {
 				// Return the redirect url.
 				wp_send_json_success(['url' => $url]);
 			} catch (\Throwable $e) {
-				Logger::debug('Error fetching redirect url from BTCPay Server.');
+				Logger::debug('Error fetching redirect url from Coinsnap Server.');
 			}
 		}
 
@@ -178,7 +178,7 @@ class CoinsnapWCPlugin {
 		Logger::debug('Entering ' . __METHOD__);
 
 		$nonce = $_POST['apiNonce'];
-		if ( ! wp_verify_nonce( $nonce, 'btcpay-nonce' ) ) {
+		if ( ! wp_verify_nonce( $nonce, 'coinsnap-nonce' ) ) {
 			wp_die('Unauthorized!', '', ['response' => 401]);
 		}
 
@@ -260,8 +260,8 @@ add_filter( 'plugin_action_links_coinsnap-for-woocommerce/coinsnap-for-woocommer
     $settings_url = esc_url( add_query_arg(['page' => 'wc-settings','tab' => 'coinsnap_settings'],get_admin_url() . 'admin.php') );
     $settings_link = "<a href='$settings_url'>" . __( 'Settings', 'coinsnap-for-woocommerce' ) . '</a>';
     $logs_link = "<a target='_blank' href='" . Logger::getLogFileUrl() . "'>" . __('Debug log', 'coinsnap-for-woocommerce') . "</a>";
-    $docs_link = "<a target='_blank' href='". esc_url('https://coinsnap.io') . "'>" . __('Docs', 'coinsnap-for-woocommerce') . "</a>";
-    $support_link = "<a target='_blank' href='". esc_url('https://coinsnap.io') . "'>" . __('Support Chat', 'coinsnap-for-woocommerce') . "</a>";
+    $docs_link = "<a target='_blank' href='". esc_url('https://coinsnap.io/en/coinsnap-woocommerce-plugin/') . "'>" . __('Docs', 'coinsnap-for-woocommerce') . "</a>";
+    //$support_link = "<a target='_blank' href='". esc_url('https://coinsnap.io') . "'>" . __('Support Chat', 'coinsnap-for-woocommerce') . "</a>";
 
     array_unshift($links,$settings_link,$logs_link,$docs_link,$support_link);
     return $links;
