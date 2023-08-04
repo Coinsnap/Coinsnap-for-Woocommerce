@@ -1,15 +1,14 @@
-=== BTCPay for WooCommerce V2 ===
-Contributors: ndeet, kukks, nicolasdorier
-Donate link: https://btcpayserver.org/donate/
-Tags: bitcoin, btcpay, BTCPay Server, btcpayserver, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, Litecoin, cryptocurrency
+=== Coinsnap for WooCommerce 1.0 ===
+Contributors: Coinsnap
+Tags: bitcoin, btcpay, sats, BTCPay Server, btcpayserver, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, Litecoin, cryptocurrency
 Requires at least: 5.2
 Tested up to: 6.2
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 1.0
 License: MIT
-License URI: https://github.com/btcpayserver/woocommerce-greenfield-plugin/blob/master/license.txt
+License URI: https://github.com/Coinsnap/coinsnap-woocommerce/license.txt
 
-BTCPay Server is a free and open-source bitcoin payment processor which allows you to receive payments in Bitcoin and altcoins directly, with no fees, transaction cost or a middleman.
+Coinsnap is a free and open-source bitcoin payment processor which allows you to receive payments in Bitcoin and altcoins directly, with no fees, transaction cost or a middleman.
 
 == Description ==
 
@@ -70,10 +69,6 @@ https://www.youtube.com/watch?v=IT2K8It3S3o
 BTCPay WooCommerce plugin is a bridge between your BTCPay Server (payment processor) and your e-commerce store. No matter if you are using a self-hosted or third-party solution from step 1., the connection process is identical.
 
 You can find detailed installation instructions on our [WooCommerce documentation](https://docs.btcpayserver.org/WooCommerce/).
-
-Here is a quick walk through if you prefer a video:
-
-https://www.youtube.com/watch?v=ULcocDKZ1Mw
 
 ###  3. Connecting your wallet ###
 
