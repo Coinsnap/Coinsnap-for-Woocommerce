@@ -20,16 +20,20 @@ class Invoice extends AbstractClient{
         ?array $metaData = null,
         ?InvoiceCheckoutOptions $checkoutOptions = null): \Coinsnap\Result\Invoice 
     {
-        $url = $this->getApiUrl().'websites/'.urlencode($storeId).'/invoices';
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices';
         $headers = $this->getRequestHeaders();
         $method = 'POST';
 
         // Prepare metadata.
         $metaDataMerged = [];
+        if(!empty($orderId)) $metaDataMerged['orderNumber'] = $orderId;
+        if(!empty($customerName)) $metaDataMerged['customerName'] = $customerName;
+        
+        /*
 
         // Set metaData if any.
-        if ($metaData) {
-            $metaDataMerged = $metaData;
+        if (is_array($metaData)) {
+            if(isset($metaData[]))$metaDataMerged = $metaData;
         }
 
         // $orderId and $buyerEmail are checked explicitly as they are optional.
@@ -46,6 +50,7 @@ class Invoice extends AbstractClient{
             }
             $metaDataMerged['customerName'] = $customerName;
         }
+        */
 
         $body = json_encode(
             [
@@ -54,7 +59,7 @@ class Invoice extends AbstractClient{
                 'buyerEmail' => $buyerEmail,
                 'redirectUrl' => $redirectUrl,
                 'orderId' => $orderId,
-                'metadata' => !empty($metaDataMerged) ? $metaDataMerged : null,
+                'metadata' => (count($metaDataMerged) > 0)? $metaDataMerged : null,
                 'checkout' => $checkoutOptions ? $checkoutOptions->toArray() : null,
                 'referralCode' => $referralCode
             ],
@@ -72,10 +77,9 @@ class Invoice extends AbstractClient{
         }
     }
 
-    public function getInvoice(string $storeId,string $invoiceId): \Coinsnap\Result\Invoice
-    {
+    public function getInvoice(string $storeId,string $invoiceId): \Coinsnap\Result\Invoice {
         
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/invoices/' . urlencode($invoiceId);
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices/'.urlencode($invoiceId);
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -97,11 +101,8 @@ class Invoice extends AbstractClient{
         return $this->_getAllInvoicesWithFilter($storeId, $orderIds);
     }
 
-    private function _getAllInvoicesWithFilter(
-        string $storeId,
-        array $filterByOrderIds = null
-    ): \Coinsnap\Result\InvoiceList {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/invoices?';
+    private function _getAllInvoicesWithFilter(string $storeId,array $filterByOrderIds = null): \Coinsnap\Result\InvoiceList {
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices?';
         if ($filterByOrderIds !== null) {
             foreach ($filterByOrderIds as $filterByOrderId) {
                 $url .= 'orderId=' . urlencode($filterByOrderId) . '&';
@@ -131,7 +132,7 @@ class Invoice extends AbstractClient{
     public function getPaymentMethods(string $storeId, string $invoiceId): array
     {
         $method = 'GET';
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/invoices/' . urlencode($invoiceId) . '/payment-methods';
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices/'.urlencode($invoiceId).'/payment-methods';
         $headers = $this->getRequestHeaders();
         $response = $this->getHttpClient()->request($method, $url, $headers);
 
@@ -155,9 +156,7 @@ class Invoice extends AbstractClient{
 
     public function markInvoiceStatus(string $storeId, string $invoiceId, string $markAs): \Coinsnap\Result\Invoice
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode(
-            $storeId
-        ) . '/invoices/' . urlencode($invoiceId) . '/status';
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices/'.urlencode($invoiceId).'/status';
         $headers = $this->getRequestHeaders();
         $method = 'POST';
 

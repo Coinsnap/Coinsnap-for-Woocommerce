@@ -123,7 +123,7 @@ msgstr ""
 
 #: src/Admin/GlobalSettings.php:97
 msgctxt "global_settings"
-msgid "You will be redirected to BTCPay to complete your purchase."
+msgid "You will be redirected to the Bitcoin Payment Page to complete your purchase."
 msgstr ""
 
 #: src/Admin/GlobalSettings.php:104

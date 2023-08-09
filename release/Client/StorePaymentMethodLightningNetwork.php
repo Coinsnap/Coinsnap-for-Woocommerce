@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace BTCPayServer\Client;
+namespace Coinsnap\Client;
 
 /**
  * Handles a stores LightningNetwork payment methods.
- *
- * @see https://docs.btcpayserver.org/API/Greenfield/v1/#tag/Store-Payment-Methods-(Lightning-Network)
  */
 class StorePaymentMethodLightningNetwork extends AbstractStorePaymentMethodClient
 {
@@ -19,7 +17,7 @@ class StorePaymentMethodLightningNetwork extends AbstractStorePaymentMethodClien
      */
     public function getPaymentMethods(string $storeId): array
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING;
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -38,7 +36,7 @@ class StorePaymentMethodLightningNetwork extends AbstractStorePaymentMethodClien
 
     public function getPaymentMethod(string $storeId, string $cryptoCode): \BTCPayServer\Result\StorePaymentMethodLightningNetwork
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING . '/' . $cryptoCode;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -69,7 +67,7 @@ class StorePaymentMethodLightningNetwork extends AbstractStorePaymentMethodClien
      */
     public function updatePaymentMethod(string $storeId, string $cryptoCode, array $settings): \BTCPayServer\Result\StorePaymentMethodLightningNetwork
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING . '/' . $cryptoCode;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
         $method = 'PUT';
         $response = $this->getHttpClient()->request($method, $url, $headers, json_encode($settings));
@@ -92,7 +90,7 @@ class StorePaymentMethodLightningNetwork extends AbstractStorePaymentMethodClien
      */
     public function removePaymentMethod(string $storeId, string $cryptoCode): bool
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING . '/' . $cryptoCode;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_LIGHTNING . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
         $method = 'DELETE';
         $response = $this->getHttpClient()->request($method, $url, $headers);

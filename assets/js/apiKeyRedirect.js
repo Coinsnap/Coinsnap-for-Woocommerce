@@ -14,7 +14,7 @@ jQuery(document).ready(function($) {
 
 	$('.coinsnap-api-key-link').click(function(e) {
 		e.preventDefault();
-		const host = 'https://app.coinsnap.io/api/v1/websites/'+$('#coinsnap_store_id').val(); //$('#btcpay_gf_url').val();
+		const host = 'https://app.coinsnap.io/api/v1/stores/'+$('#coinsnap_store_id').val(); //$('#btcpay_gf_url').val();
 		if (isValidUrl(host)) {
 			let data = {
 				'action': 'handle_ajax_api_url',

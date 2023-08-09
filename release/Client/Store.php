@@ -7,7 +7,7 @@ namespace Coinsnap\Client;
 class Store extends AbstractClient{
     public function getStore($storeId): \Coinsnap\Result\Store
     {
-        $url = $this->getApiUrl().'websites/' . urlencode($storeId);
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId);
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);

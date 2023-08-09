@@ -8,7 +8,7 @@ class LightningStore extends AbstractClient
 {
     public function getNodeInformation(string $cryptoCode, string $storeId): \Coinsnap\Result\LightningNode
     {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/lightning/' .
                     urlencode($cryptoCode) . '/info';
 
@@ -31,7 +31,7 @@ class LightningStore extends AbstractClient
         string $storeId,
         ?string $nodeURI
     ): bool {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                 urlencode($storeId) . '/lightning/' .
                 urlencode($cryptoCode) . '/connect';
 
@@ -56,7 +56,7 @@ class LightningStore extends AbstractClient
 
     public function getChannels(string $cryptoCode, string $storeId): \Coinsnap\Result\LightningChannelList
     {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/lightning/' .
                     urlencode($cryptoCode) . '/channels';
 
@@ -81,7 +81,7 @@ class LightningStore extends AbstractClient
         string $channelAmount,
         int $feeRate
     ): bool {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                 urlencode($storeId) . '/lightning/' .
                 urlencode($cryptoCode) . '/channels';
 
@@ -108,7 +108,7 @@ class LightningStore extends AbstractClient
 
     public function getDepositAddress(string $cryptoCode, string $storeId): string
     {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/lightning/' .
                     urlencode($cryptoCode) . '/address';
 
@@ -129,7 +129,7 @@ class LightningStore extends AbstractClient
         string $storeId,
         string $id
     ): \Coinsnap\Result\Invoice {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' .
             urlencode($storeId) . '/lightning/' .
             urlencode($cryptoCode) . '/invoices/' .
             urlencode($id);
@@ -152,7 +152,7 @@ class LightningStore extends AbstractClient
         string $storeId,
         string $BOLT11
     ): bool {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' .
                 urlencode($storeId) . '/lightning/' .
                 urlencode($cryptoCode) . '/info';
 
@@ -189,7 +189,7 @@ class LightningStore extends AbstractClient
         ?string $description = null,
         ?bool $privateRouteHints = false
     ): \Coinsnap\Result\Invoice {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/lightning/' .
                     urlencode($cryptoCode) . '/invoices';
 

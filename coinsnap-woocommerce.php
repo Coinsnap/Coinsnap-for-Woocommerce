@@ -34,6 +34,8 @@ define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );
 define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );
 define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );
+define( 'COINSNAP_SERVER_PATH', 'websites' );
+define( 'COINSNAP_REFERRAL_CODE', '' );
 
 class CoinsnapWCPlugin {
     
@@ -68,7 +70,7 @@ class CoinsnapWCPlugin {
 
     public function includes(): void {
 	
-        $autoloader = COINSNAP_PLUGIN_FILE_PATH . 'vendor/autoload.php';
+        $autoloader = COINSNAP_PLUGIN_FILE_PATH . 'loader/autoload.php';
 	if (file_exists($autoloader)) {
             // @noinspection PhpIncludeInspection 
             require_once $autoloader;

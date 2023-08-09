@@ -1,8 +1,8 @@
 <?php
 
-namespace Composer\Autoload;
+namespace Loader;
 
-class CoinsnapComposerStaticInit
+class CoinsnapLoaderStaticInit
 {
     public static $prefixLengthsPsr4 = array (
         'C' => 
@@ -15,24 +15,24 @@ class CoinsnapComposerStaticInit
     public static $prefixDirsPsr4 = array (
         'Coinsnap\\WC\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src',
+            0 => __DIR__ . '/..' . '/src',
         ),
         'Coinsnap\\' => 
         array (
-            0 => __DIR__ . '/..' . '/coinsnap/coinsnap-php/src',
+            0 => __DIR__ . '/..' . '/release',
         ),
     );
 
     public static $classMap = array (
-        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Loader\\InstalledVersions' => __DIR__ . '/..' . '/loader/InstalledVersions.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = CoinsnapComposerStaticInit::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = CoinsnapComposerStaticInit::$prefixDirsPsr4;
-            $loader->classMap = CoinsnapComposerStaticInit::$classMap;
+            $loader->prefixLengthsPsr4 = CoinsnapLoaderStaticInit::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = CoinsnapLoaderStaticInit::$prefixDirsPsr4;
+            $loader->classMap = CoinsnapLoaderStaticInit::$classMap;
 
         }, null, ClassLoader::class);
     }

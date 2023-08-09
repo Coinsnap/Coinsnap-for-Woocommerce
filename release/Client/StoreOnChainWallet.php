@@ -10,7 +10,7 @@ class StoreOnChainWallet extends AbstractClient
         string $storeId,
         string $cryptoCode
     ): \Coinsnap\Result\StoreOnChainWallet {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet';
 
@@ -33,7 +33,7 @@ class StoreOnChainWallet extends AbstractClient
         string $cryptoCode,
         ?int $blockTarget = null
     ): \Coinsnap\Result\StoreOnChainWalletFeeRate {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet' . '/feeRate';
 
@@ -60,7 +60,7 @@ class StoreOnChainWallet extends AbstractClient
         string $cryptoCode,
         ?string $forceGenerate = 'false'
     ): \Coinsnap\Result\StoreOnChainWalletAddress {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet' . '/address';
 
@@ -86,7 +86,7 @@ class StoreOnChainWallet extends AbstractClient
         string $storeId,
         string $cryptoCode
     ): bool {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet' . '/address';
 
@@ -109,7 +109,7 @@ class StoreOnChainWallet extends AbstractClient
         ?int $skip = null,
         ?int $limit = null
     ): \Coinsnap\Result\StoreOnChainWalletTransactionList {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet' . '/transactions/?';
 
@@ -152,7 +152,7 @@ class StoreOnChainWallet extends AbstractClient
         ?bool $rbf = null,
         ?array $selectedInputs = null
     ): \Coinsnap\Result\StoreOnChainWalletTransaction {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet' . '/transactions';
 
@@ -188,7 +188,7 @@ class StoreOnChainWallet extends AbstractClient
         string $cryptoCode,
         string $transactionId
     ): \Coinsnap\Result\StoreOnChainWalletTransaction {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet' . '/transactions' . '/' .
                     urlencode($transactionId);
@@ -211,7 +211,7 @@ class StoreOnChainWallet extends AbstractClient
         string $storeId,
         string $cryptoCode
     ): \Coinsnap\Result\StoreOnChainWalletUTXOList {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/payment-methods' . '/OnChain' . '/' .
                     urlencode($cryptoCode) . '/wallet' . '/utxos';
 

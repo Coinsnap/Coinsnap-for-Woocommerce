@@ -54,7 +54,7 @@ class GlobalSettings extends \WC_Settings_Page {
 		return [
 			'title' => [
 				'title' => esc_html_x(
-					'Coinsnap Server Payments Settings',
+					'Bitcoin & Lightning Server Payments Settings',
 					'global_settings',
 					'coinsnap-for-woocommerce'
 				),
@@ -63,7 +63,7 @@ class GlobalSettings extends \WC_Settings_Page {
 				'id' => 'coinsnap'
 			],
                         'store_id' => [
-				'title'       => esc_html_x( 'Coinsnap Store ID*', 'global_settings','coinsnap-for-woocommerce' ),
+				'title'       => esc_html_x( 'Store ID*', 'global_settings','coinsnap-for-woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => _x( 'Your Coinsnap Store ID. You can find it on the store settings page on your <a href="https://app.coinsnap.io/" target="_blank">Coinsnap account</a>.', 'global_settings', 'coinsnap-for-woocommerce' ),
 				//'desc'        => _x( '<a href="#" class="coinsnap-api-key-link">Check connection</a>', 'global_settings', 'coinsnap-for-woocommerce' ),
@@ -74,7 +74,7 @@ class GlobalSettings extends \WC_Settings_Page {
 				'id' => 'coinsnap_store_id'
 			],
 			'api_key' => [
-				'title'       => esc_html_x( 'Coinsnap API Key*', 'global_settings','coinsnap-for-woocommerce' ),
+				'title'       => esc_html_x( 'API Key*', 'global_settings','coinsnap-for-woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => _x( 'Your Coinsnap API Key. You can find it on the store settings page on your Coinsnap Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
 				'default'     => '',
@@ -84,10 +84,10 @@ class GlobalSettings extends \WC_Settings_Page {
 				'id' => 'coinsnap_api_key'
 			],
 			'default_description' => [
-				'title'       => esc_html_x( 'Default Customer Message', 'global_settings', 'coinsnap-for-woocommerce' ),
+				'title'       => esc_html_x('Default Customer Message', 'global_settings', 'coinsnap-for-woocommerce' ),
 				'type'        => 'textarea',
-				'desc'        => esc_html_x( 'Message to explain how the customer will be paying for the purchase. Can be overwritten on a per gateway basis.', 'global_settings', 'coinsnap-for-woocommerce' ),
-				'default'     => esc_html_x('You will be redirected to Coinsnap to complete your purchase.', 'global_settings', 'coinsnap-for-woocommerce'),
+				'desc'        => esc_html_x('Message to explain how the customer will be paying for the purchase. Can be overwritten on a per gateway basis.', 'global_settings', 'coinsnap-for-woocommerce' ),
+				'default'     => esc_html_x('You will be redirected to the Bitcoin Payment Page to complete your purchase', 'global_settings', 'coinsnap-for-woocommerce'),
 				'desc_tip'    => true,
 				'id' => 'coinsnap_default_description'
 			],
@@ -99,7 +99,7 @@ class GlobalSettings extends \WC_Settings_Page {
 				'title' => __( 'Send customer data to Coinsnap', 'coinsnap-for-woocommerce' ),
 				'type' => 'checkbox',
 				'default' => 'no',
-				'desc' => _x( 'If you want customer email, address, etc. sent to Coinsnap Server enable this option. By default for privacy and GDPR reasons this is disabled.', 'global_settings', 'coinsnap-for-woocommerce' ),
+				'desc' => _x( 'If you want customer email, address, etc. sent to Coinsnap enable this option. By default for privacy and GDPR reasons this is disabled.', 'global_settings', 'coinsnap-for-woocommerce' ),
 				'id' => 'coinsnap_send_customer_data'
 			],
 			'sats_mode' => [
@@ -290,26 +290,22 @@ class GlobalSettings extends \WC_Settings_Page {
 			}
 
 		} else {
-			$messageNotConnecting = 'Did not try to connect to Coinsnap Server API because one of the required information was missing: API key or Store ID';
+			$messageNotConnecting = 'Did not try to connect to Coinsnap API because one of the required information was missing: API key or Store ID';
 			Notice::addNotice('warning', $messageNotConnecting);
 			Logger::debug($messageNotConnecting);
 		}
 
 		parent::save();
 
-		// Purge separate payment methods cache.
+		//  Purge separate payment methods cache.
 		//  SeparateGateways::cleanUpGeneratedFilesAndCache();
 		CoinsnapApiHelper::clearSupportedPaymentMethodsCache();
 	}
 
-	private function hasNeededApiCredentials(): bool {
-                    if(
-			//!empty($_POST['coinsnap_url']) &&
-			!empty($_POST['coinsnap_api_key']) &&
-			!empty($_POST['coinsnap_store_id'])
-		) {
-			return true;
-		}
-		return false;
+    private function hasNeededApiCredentials(): bool {
+        if(!empty($_POST['coinsnap_api_key']) && !empty($_POST['coinsnap_store_id'])) {
+            return true;
 	}
+	return false;
+    }
 }

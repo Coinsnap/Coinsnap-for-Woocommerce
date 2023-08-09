@@ -19,7 +19,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
      */
     public function getPaymentMethods(string $storeId): array
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN;
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -38,7 +38,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
 
     public function getPaymentMethod(string $storeId, string $cryptoCode): \BTCPayServer\Result\StorePaymentMethodOnChain
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -71,7 +71,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
      */
     public function updatePaymentMethod(string $storeId, string $cryptoCode, array $settings): \BTCPayServer\Result\StorePaymentMethodOnChain
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
         $method = 'PUT';
         $response = $this->getHttpClient()->request($method, $url, $headers, json_encode($settings));
@@ -97,7 +97,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
     {
         // todo: add offset + amount query parameters
 
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode . '/preview';
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode . '/preview';
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -135,7 +135,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
     ): array {
         // todo: add offset + amount query parameters + check structure of derivationScheme etc.
 
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode . '/preview';
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode . '/preview';
         $headers = $this->getRequestHeaders();
         $method = 'POST';
         $body = json_encode([
@@ -165,7 +165,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
      */
     public function removePaymentMethod(string $storeId, string $cryptoCode): bool
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
         $method = 'DELETE';
         $response = $this->getHttpClient()->request($method, $url, $headers);

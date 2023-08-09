@@ -307,7 +307,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			}
 		}
 
-		return $icon ?? COINSNAP_PLUGIN_URL . 'assets/images/btcpay-logo.png';
+		return $icon ?? COINSNAP_PLUGIN_URL . 'assets/images/bitcoin-lightning-logos.png';
 	}
 
 	/**
@@ -639,11 +639,16 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		Logger::debug( 'Got order number: ' . $orderNumber . ' and order ID: ' . $order->get_id() );
 
 		$metadata = [];
+                
 
 		// Send customer data only if option is set.
 		if ( get_option( 'coinsnap_send_customer_data' ) === 'yes' ) {
-			$metadata += $this->prepareCustomerMetadata( $order );
+			$metadata = $this->prepareCustomerMetadata( $order );
 		}
+                
+                
+                $buyerEmail = $this->prepareCustomerMetadata( $order )['buyerEmail'];
+                $buyerName = $this->prepareCustomerMetadata( $order )['buyerName'];
 
 		// Set included tax amount.
 		$metadata['taxIncluded'] = $order->get_cart_tax();
@@ -704,10 +709,10 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				$currency,                  //$currency
 				$amount,                    //$amount
 				$orderNumber,               //$orderId
-                                null,                       //$buyerEmail
-                                null,                       //$customerName
-                                null,                       //$redirectUrl
-                                null,                       //$referralCode
+                                $buyerEmail,                //$buyerEmail
+                                $buyerName,                 //$customerName
+                                $redirectUrl,               //$redirectUrl
+                                COINSNAP_REFERRAL_CODE,     //$referralCode
 				$metadata,
 				$checkoutOptions
 			);
@@ -788,7 +793,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Get customer facing gateway description.
 	 */
 	public function getDescription(): string {
-		return $this->get_option('description', 'You will be redirected to BTCPay to complete your purchase.');
+		return $this->get_option('description', 'You will be redirected to the Bitcoin Payment Page to complete your purchase');
 	}
 
 	/**

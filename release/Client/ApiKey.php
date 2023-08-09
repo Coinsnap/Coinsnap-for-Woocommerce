@@ -7,7 +7,7 @@ class ApiKey extends AbstractClient{
 //  Create a URL you can send the user to. He/she will be prompted to create an API key that corresponds with your needs.    
     public static function getAuthorizeUrl(string $baseUrl, array $permissions, ?string $applicationName, ?bool $strict, ?bool $selectiveStores, ?string $redirectToUrlAfterCreation, ?string $applicationIdentifier): string
     {
-        $url = rtrim($baseUrl, '/') . '/api/v1/websites/';
+        $url = rtrim($baseUrl, '/') . '/api/v1/'.COINSNAP_SERVER_PATH.'/';
 
         $params = [];
         $params['permissions'] = $permissions;
@@ -48,10 +48,7 @@ class ApiKey extends AbstractClient{
         }
 
         $queryParams = implode("&", $queryParams);
-
-
         $url .= '?' . $queryParams;
-
         return $url;
     }
 
@@ -59,7 +56,7 @@ class ApiKey extends AbstractClient{
 
     public function getCurrent(): \Coinsnap\Result\ApiKey
     {
-        $url = $this->getApiUrl() . '/api/v1/websites/';
+        $url = $this->getApiUrl() . '/api/v1/'.COINSNAP_SERVER_PATH.'/';
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);

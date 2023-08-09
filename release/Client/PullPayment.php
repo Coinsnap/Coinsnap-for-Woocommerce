@@ -8,13 +8,9 @@ use Coinsnap\Util\PreciseNumber;
 
 class PullPayment extends AbstractClient
 {
-    public function getStorePullPayments(
-        string $storeId,
-        bool $includeArchived
-    ): \Coinsnap\Result\PullPaymentList {
-        $url = $this->getApiUrl() . 'websites/' .
-                    urlencode($storeId) . '/pull-payments';
-
+    public function getStorePullPayments(string $storeId, bool $includeArchived): \Coinsnap\Result\PullPaymentList {
+        
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/pull-payments';
         $headers = $this->getRequestHeaders();
         $method = 'GET';
 
@@ -48,7 +44,7 @@ class PullPayment extends AbstractClient
         ?int $expiresAt,
         array $paymentMethods
     ): \Coinsnap\Result\PullPayment {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/pull-payments';
 
         $headers = $this->getRequestHeaders();
@@ -84,7 +80,7 @@ class PullPayment extends AbstractClient
         string $storeId,
         string $pullPaymentId
     ): bool {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
         urlencode($storeId) . '/' . 'pull-payments/' .
         urlencode($pullPaymentId);
 
@@ -106,7 +102,7 @@ class PullPayment extends AbstractClient
         int $revision,
         ?string $rateRule
     ): \Coinsnap\Result\PullPaymentPayout {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/' . 'payouts/' .
                     urlencode($payoutId);
 
@@ -136,7 +132,7 @@ class PullPayment extends AbstractClient
         string $storeId,
         string $payoutId
     ): bool {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/' . 'payouts/' .
                     urlencode($payoutId);
 
@@ -156,7 +152,7 @@ class PullPayment extends AbstractClient
         string $storeId,
         string $payoutId
     ): bool {
-        $url = $this->getApiUrl() . 'websites/' .
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' .
                     urlencode($storeId) . '/' . 'payouts/' .
                     urlencode($payoutId) . '/mark-paid';
 

@@ -10,9 +10,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Composer;
+namespace Loader;
 
-use Composer\Autoload\ClassLoader;
+use Loader\ClassLoader;
 use Composer\Semver\VersionParser;
 
 /**

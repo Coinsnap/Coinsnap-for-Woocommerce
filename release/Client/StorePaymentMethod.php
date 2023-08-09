@@ -14,7 +14,7 @@ class StorePaymentMethod extends AbstractClient
 {
     public function getPaymentMethods(string $storeId): array
     {
-        $url = $this->getApiUrl() . 'websites/' . urlencode($storeId) . '/payment-methods';
+        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods';
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);

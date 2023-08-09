@@ -1,8 +1,8 @@
 <?php
 
 spl_autoload_register(function ($className) {
-    $searchPattern = 'BTCPayServer';
-    // Abort here if we do not try to load BTCPayServer namespace.
+    $searchPattern = 'Coinsnap';
+    // Abort here if we do not try to load Coinsnap namespace.
     if (strpos($className, $searchPattern) !== 0) {
         return;
     }

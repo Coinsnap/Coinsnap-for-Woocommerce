@@ -2,17 +2,14 @@
 
 namespace Coinsnap\WC\Gateway;
 
-/**
- * Default Gateway that provides all available payment methods of BTCPay Server store configuration.
- */
+//  Default Gateway that provides all available payment methods of BTCPay Server store configuration.
 class DefaultGateway extends AbstractGateway {
+    public function __construct() {
+        // Set the id first.
+	$this->id = 'coinsnap_default';
 
-	public function __construct() {
-		// Set the id first.
-		$this->id                 = 'coinsnap_default';
-
-		// Call parent constructor.
-		parent::__construct();
+	// Call parent constructor.
+	parent::__construct();
 
 		// todo: maybe make the button text configurable via settings.
 		// General gateway setup.
@@ -29,14 +26,14 @@ class DefaultGateway extends AbstractGateway {
 	 * @inheritDoc
 	 */
 	public function getTitle(): string {
-		return $this->get_option('title', 'Coinsnap (Bitcoin, Lightning Network, ...)');
+		return $this->get_option('title', 'Coinsnap (Bitcoin, Lightning Network)');
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function getDescription(): string {
-		return $this->get_option('description', 'You will be redirected to Coinsnap to complete your purchase.');
+		return $this->get_option('description', 'You will be redirected to the Bitcoin Payment Page to complete your purchase.');
 	}
 
 	/**
