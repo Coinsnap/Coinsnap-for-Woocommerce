@@ -1,6 +1,6 @@
 === Coinsnap for WooCommerce 1.0 ===
 Contributors: Coinsnap
-Tags: bitcoin, btcpay, sats, BTCPay Server, btcpayserver, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, Litecoin, cryptocurrency
+Tags: bitcoin, sats, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency
 Requires at least: 5.2
 Tested up to: 6.2
 Requires PHP: 7.4
@@ -8,41 +8,25 @@ Stable tag: 1.0
 License: MIT
 License URI: https://github.com/Coinsnap/coinsnap-woocommerce/license.txt
 
-Coinsnap is a free and open-source bitcoin payment processor which allows you to receive payments in Bitcoin and altcoins directly, with no fees, transaction cost or a middleman.
+Coinsnap is a Lightning payment provider and offers a payment gateway for processing Bitcoin and Lightning payments.
+A merchant only needs a Lightning address to accept Bitcoin and Lightning payments on their website.
 
 == Description ==
 
-BTCPay Server is a free and open-source cryptocurrency payment processor which allows you to receive payments in Bitcoin and altcoins directly, with no fees, transaction cost or a middleman.
+If you run an online store based on WooCommerce or a WordPress plugin that accesses WooCommerce for payment processing, then you can easily integrate payment processing via Bitcoin and Lightning with the Coinsnap WooCommerce plugin.
+Just install the Coinsnap WooCommerce plugin, connect it to your Coinsnap account and your customers will be able to pay you with Bitcoin and Lightning.
+Incoming Bitcoin payments are directly forwarded and credited to your Lightning Wallet.
+With Coinsnap payment processing, you can accept Bitcoin and Lightning payments on your website or online store. You don’t need your own Lightning Node or other technical requirements.
+Bitcoin and Lightning payments from your customers will be credited directly to your own Lightning address.
+With the Coinsnap WooCommerce Payment Plugins you can integrate Bitcoin and Lightning payments into your website or online store without any technical effort.
+Simply register with Coinsnap, enter your own Lightning address and your customers can pay you with Bitcoin and Lightning.
 
-BTCPay Server is a non-custodial invoicing system which eliminates the involvement of a third-party. Payments with BTCPay WooCommerce Plugin go directly to your wallet, which increases the privacy and security. Your private keys are never uploaded to the server. There is no address re-use since each invoice generates a new address deriving from your xPub key.
-
-You can run BTCPay as a self-hosted solution on your own server, or use a third-party host.
-
-The self-hosted solution allows you not only to attach an unlimited number of stores and use the Lightning Network but also become the payment processor for others.
-
-* Direct, peer-to-peer Bitcoin and altcoin payments
-* No transaction fees (other than mining fees by cryptocurrency network itself)
-* No processing fees
-* No middleman
-* No KYC
-* User has complete control over private keys
-* Enhanced privacy (no address re-use, no IP leaks to third parties)
-* Enhanced security
-* Self-hosted
-* SegWit, Taproot support
-* Lightning Network support (LND, c-lightning and Eclair)
-* Altcoin support
-* Attach unlimited stores, process payments for friends
-* Easy-embeddable Payment buttons
-* Point of Sale app
 
 == Installation ==
 
 This plugin requires WooCommerce. Please make sure you have WooCommerce installed.
 
-<img src="https://github.com/btcpayserver/btcpayserver-doc/blob/master/img/BTCPayWooCommerceInfoggraphic.png" alt="Infographic" />
-
-To integrate BTCPay Server into an existing WooCommerce store, follow the steps below or check our official [installation instructions](https://docs.btcpayserver.org/WooCommerce/).
+To integrate Coinsnap WooCommerce plugin into an existing WooCommerce store, follow the steps below or check our official [installation instructions](https://coinsnap.io/en/coinsnap-woocommerce-plugin/).
 
 ### 1. Deploy BTCPay Server (optional) ###
 
