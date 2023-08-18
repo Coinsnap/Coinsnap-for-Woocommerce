@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Coinsnap\Client;
@@ -7,13 +6,17 @@ namespace Coinsnap\Client;
 class Store extends AbstractClient{
     public function getStore($storeId): \Coinsnap\Result\Store
     {
-        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId);
+        $url = $this->getApiUrl().COINSNAP_SERVER_PATH.'/' . urlencode($storeId);
+        
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
 
-        if ($response->getStatus() === 200) {
-            return new \Coinsnap\Result\Store(json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR));
+        if ($response->getStatus() === 200) {            
+            $json_decode = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            // \Coinsnap\WC\Helper\Logger::debug( 'ConnectionSettings: ' . print_r( $json_decode, true ), true );
+            if(json_last_error() === JSON_ERROR_NONE) return new \Coinsnap\Result\Store($json_decode);
+            else return new \Coinsnap\Result\Store(array('result' => false, 'error' => 'Coinsnap server is not available'));
         } else {
             throw $this->getExceptionByStatusCode($method, $url, $response);
         }
@@ -24,7 +27,7 @@ class Store extends AbstractClient{
      */
     public function getStores(): array
     {
-        $url = $this->getApiUrl().'websites';
+        $url = $this->getApiUrl().COINSNAP_SERVER_PATH;
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);

@@ -51,20 +51,21 @@ class Invoice extends AbstractClient{
             $metaDataMerged['customerName'] = $customerName;
         }
         */
-
-        $body = json_encode(
-            [
-                'amount' => $amount !== null ? $amount->__toString() : null,
+        
+        $body_array = array(
+            'amount' => $amount !== null ? $amount->__toString() : null,
                 'currency' => $currency,
                 'buyerEmail' => $buyerEmail,
                 'redirectUrl' => $redirectUrl,
                 'orderId' => $orderId,
                 'metadata' => (count($metaDataMerged) > 0)? $metaDataMerged : null,
-                'checkout' => $checkoutOptions ? $checkoutOptions->toArray() : null,
+        //        'checkout' => $checkoutOptions ? $checkoutOptions->toArray() : null,
                 'referralCode' => $referralCode
-            ],
-            JSON_THROW_ON_ERROR
         );
+        
+        \Coinsnap\WC\Helper\Logger::debug( 'InvoiceBoody: ' . print_r( $body_array, true ), true );
+
+        $body = json_encode($body_array,JSON_THROW_ON_ERROR);
 
         $response = $this->getHttpClient()->request($method, $url, $headers, $body);
 

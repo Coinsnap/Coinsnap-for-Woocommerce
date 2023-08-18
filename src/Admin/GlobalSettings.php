@@ -102,6 +102,13 @@ class GlobalSettings extends \WC_Settings_Page {
 				'desc' => _x( 'If you want customer email, address, etc. sent to Coinsnap enable this option. By default for privacy and GDPR reasons this is disabled.', 'global_settings', 'coinsnap-for-woocommerce' ),
 				'id' => 'coinsnap_send_customer_data'
 			],
+			'separate_gateways' => [
+				'title' => __( 'Separate Payment Gateways', 'coinsnap-for-woocommerce' ),
+				'type' => 'checkbox',
+				'default' => 'no',
+				'desc' => _x( 'Make all payment methods available as their own payment gateway. It will open new possibilities for every payment methods. (<a href="https://docs.btcpayserver.org/FAQ/Integrations/#how-to-configure-additional-token-support-separate-payment-gateways" target="_blank">Full guide</a>)', 'global_settings', 'coinsnap-for-woocommerce' ),
+				'id' => 'coinsnap_separate_gateways'
+			],
 			'sats_mode' => [
 				'title' => __( 'Sats-Mode', 'coinsnap-for-woocommerce' ),
 				'type' => 'checkbox',
@@ -156,13 +163,6 @@ class GlobalSettings extends \WC_Settings_Page {
 				'default' => 'no',
 				'desc' => _x( 'Opens a modal overlay on the checkout page instead of redirecting to Coinsnap Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
 				'id' => 'coinsnap_modal_checkout'
-			],
-			'separate_gateways' => [
-				'title' => __( 'Separate Payment Gateways', 'coinsnap-for-woocommerce' ),
-				'type' => 'checkbox',
-				'default' => 'no',
-				'desc' => _x( 'Make all supported and enabled payment methods available as their own payment gateway. This opens new possibilities like discounts for specific payment methods. See our <a href="https://docs.btcpayserver.org/FAQ/Integrations/#how-to-configure-additional-token-support-separate-payment-gateways" target="_blank">full guide here</a>', 'global_settings', 'coinsnap-for-woocommerce' ),
-				'id' => 'coinsnap_separate_gateways'
 			],*/
                     
                     
@@ -177,22 +177,27 @@ class GlobalSettings extends \WC_Settings_Page {
 		Logger::debug('Saving GlobalSettings.');
 		if ( $this->hasNeededApiCredentials() ) {
 			// Check if api key works for this store.
-			$apiUrl  = COINSNAP_SERVER_URL; //esc_url_raw( $_POST['coinsnap_url'] );
+			$apiUrl  = COINSNAP_SERVER_URL;
 			$apiKey  = sanitize_text_field( $_POST['coinsnap_api_key'] );
 			$storeId = sanitize_text_field( $_POST['coinsnap_store_id'] );
 
-			// todo: fix change of url + key + storeid not leading to recreation of webhook.
-			// Check if the provided API key has the right scope and permissions.
+			//  todo: fix change of url + key + storeid not leading to recreation of webhook.
+			//  Check if the provided API key has the right scope and permissions.
+                        //  $serverInfo = CoinsnapApiHelper::getApiConnectionSettings();
+                        //  $messageDebug = __( implode(' - ',$serverInfo), 'coinsnap-for-woocommerce' );
+                        //  \Coinsnap\WC\Helper\Logger::debug($messageDebug);
+                        
+                        Logger::debug('API URL: ' . WC()->api_request_url( 'coinsnap' ));
+                                    
 			try {
-				$apiClient  = new ApiKey( $apiUrl, $apiKey );
-				//$apiKeyData = $apiClient->getCurrent();
-				//new CoinsnapApiAuthorization($apiKeyData->getData());
-				$apiAuth    = CoinsnapApiHelper::checkApiConnection();
-                                $hasError   = false;
-                                
-                                /*
+				/*
 
-				if ( ! $apiAuth->hasSingleStore() ) {
+				$apiClient  = new ApiKey( $apiUrl, $apiKey );
+				$apiKeyData = $apiClient->getCurrent();
+				new CoinsnapApiAuthorization($apiKeyData->getData());
+				$apiAuth    = CoinsnapApiHelper::checkApiConnection();
+                                
+                                if ( ! $apiAuth->hasSingleStore() ) {
 					$messageSingleStore = __( 'The provided API key scope is valid for multiple stores, please make sure to create one for a single store.', 'coinsnap-for-woocommerce' );
 					Notice::addNotice('error', $messageSingleStore );
 					Logger::debug($messageSingleStore, true);
@@ -209,13 +214,14 @@ class GlobalSettings extends \WC_Settings_Page {
 					$hasError = true;
 				}
                                 
-                                */
+                                $hasError   = false;
                                 
-                                
-
 				// Check server info and sync status.
-				if ($serverInfo = CoinsnapApiHelper::getServerInfo()) {
-					Logger::debug( 'Serverinfo: ' . print_r( $serverInfo, true ), true );
+                                
+				if ($serverInfo = CoinsnapApiHelper::getApiConnectionSettings()) {
+				$serverinfo_string = "";
+                                foreach($serverInfo as $key => $value) $serverinfo_string .= "$key - ";
+                                    Logger::debug( 'Serverinfo: ' . $serverinfo_string, true );
 
 					// Show/log notice if the node is not fully synced yet and no invoice creation is possible.
 					if ((int) $serverInfo->getData()['fullySynched'] !== 1 ) {
@@ -240,26 +246,41 @@ class GlobalSettings extends \WC_Settings_Page {
 						}
 					}
 				}
-
-				// Continue creating the webhook if the API key permissions are OK.
-				if ( false === $hasError ) {
-					// Check if we already have a webhook registered for that store.
-					if ( CoinsnapApiWebhook::webhookExists( $apiUrl, $apiKey, $storeId ) ) {
-						$messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation.', 'coinsnap-for-woocommerce' );
-						Notice::addNotice('info', $messageReuseWebhook, true);
-						Logger::debug($messageReuseWebhook);
-					} else {
-						// Register a new webhook.
-						if ( CoinsnapApiWebhook::registerWebhook( $apiUrl, $apiKey, $storeId ) ) {
-							$messageWebhookSuccess = __( 'Successfully registered a new webhook on Coinsnap Server.', 'coinsnap-for-woocommerce' );
-							Notice::addNotice('success', $messageWebhookSuccess, true );
-							Logger::debug( $messageWebhookSuccess );
-						} else {
-							$messageWebhookError = __( 'Could not register a new webhook on the store.', 'coinsnap-for-woocommerce' );
-							Notice::addNotice('error', $messageWebhookError );
-							Logger::debug($messageWebhookError, true);
-						}
-					}
+                                //false === $hasError
+                                */
+                                
+                            // Continue creating the webhook if the API key permissions are OK.
+                            if ( $apiAuth = CoinsnapApiHelper::checkApiConnection() ){
+                                    
+                                    //  $webhooks_array = CoinsnapApiWebhook::getWebhooks($storeId);
+                                    //  $messageWebhooksArray = 'API URL: ' . WC()->api_request_url( 'coinsnap' ). ' Webhook:' . __( print_r($webhooks_array,true), 'coinsnap-for-woocommerce' );
+                                    //  Logger::debug($messageWebhooksArray);
+                                    //  deleteWebhook(string $storeId, string $webhookId)
+                                
+                                //  Check if we already have a webhook registered for that store.
+				if (CoinsnapApiWebhook::webhookExists( $apiUrl, $apiKey, $storeId )){
+                                    $messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation.', 'coinsnap-for-woocommerce' );
+                                    Notice::addNotice('info', $messageReuseWebhook, true);
+                                    Logger::debug($messageReuseWebhook);
+				}
+                                else {
+				// Register a new webhook.
+                                    $webhook = CoinsnapApiWebhook::registerWebhook( $apiUrl, $apiKey, $storeId );
+                                    $messageWebhook = __( print_r($webhook,true), 'coinsnap-for-woocommerce' );
+                                    Logger::debug($messageWebhook);
+                                
+                                //  if webhook is created
+                                    if ( $webhook ) {
+                                        $messageWebhookSuccess = __( 'Successfully registered a new webhook on Coinsnap Server.', 'coinsnap-for-woocommerce' );
+                                        Notice::addNotice('success', $messageWebhookSuccess, true );
+                                        Logger::debug( $messageWebhookSuccess );
+                                    }
+                                    else {
+					$messageWebhookError = __( 'Could not register a new webhook on the store.', 'coinsnap-for-woocommerce' );
+					Notice::addNotice('error', $messageWebhookError );
+					Logger::debug($messageWebhookError, true);
+                                    }
+				}
 
 					// Make sure there is at least one payment method configured - DOESN'T EXIST ON COINSNAP SERVER
                                         /*
@@ -280,7 +301,9 @@ class GlobalSettings extends \WC_Settings_Page {
 					}
                                         */
 				}
-			} catch ( \Throwable $e ) {
+			} 
+                        
+                        catch ( \Throwable $e ) {
 				$messageException = sprintf(
 					__( 'Error fetching data for this API key from server. Please check if the key is valid. Error: %s', 'coinsnap-for-woocommerce' ),
 					$e->getMessage()

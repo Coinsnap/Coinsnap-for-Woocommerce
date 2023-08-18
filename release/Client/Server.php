@@ -9,7 +9,7 @@ use Coinsnap\Result\ServerInfo;
 class Server extends AbstractClient {
     public function getInfo(): ServerInfo
     {
-        $url = $this->getApiUrl() . 'server/info';
+        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/';//.urlencode($storeId);
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);

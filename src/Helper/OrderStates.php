@@ -5,38 +5,38 @@ namespace Coinsnap\WC\Helper;
 //  Helper class to render the order_states as a custom field in global settings form.
 class OrderStates {
 	const NEW = 'New';
-	const PROCESSING = 'Processing';
-	const SETTLED = 'Settled';
-	const SETTLED_PAID_OVER = 'SettledPaidOver';
-	const INVALID = 'Invalid';
 	const EXPIRED = 'Expired';
-	const EXPIRED_PAID_PARTIAL = 'ExpiredPaidPartial';
-	const EXPIRED_PAID_LATE = 'ExpiredPaidLate';
+	const SETTLED = 'Settled';
+	const PROCESSING = 'Processing';
+	//const SETTLED_PAID_OVER = 'SettledPaidOver';
+	//const INVALID = 'Invalid';
+	//const EXPIRED_PAID_PARTIAL = 'ExpiredPaidPartial';
+	//const EXPIRED_PAID_LATE = 'ExpiredPaidLate';
 	const IGNORE = 'COINSNAP_IGNORE';
 
 	public function getDefaultOrderStateMappings(): array {
 		return [
 			self::NEW                  => 'wc-pending',
-			self::PROCESSING           => 'wc-on-hold',
-			self::SETTLED              => self::IGNORE,
-			self::SETTLED_PAID_OVER    => 'wc-processing',
-			self::INVALID              => 'wc-failed',
 			self::EXPIRED              => 'wc-cancelled',
-			self::EXPIRED_PAID_PARTIAL => 'wc-failed',
-			self::EXPIRED_PAID_LATE    => 'wc-processing'
+			self::SETTLED              => self::IGNORE,
+			self::PROCESSING           => 'wc-on-hold',
+			//self::SETTLED_PAID_OVER    => 'wc-processing',
+			//self::INVALID              => 'wc-failed',
+			//self::EXPIRED_PAID_PARTIAL => 'wc-failed',
+			//self::EXPIRED_PAID_LATE    => 'wc-processing'
 		];
 	}
 
 	public function getOrderStateLabels(): array {
 		return [
 			self::NEW                  => _x('New', 'global_settings', 'coinsnap-for-woocommerce'),
-			self::PROCESSING           => _x('Paid', 'global_settings', 'coinsnap-for-woocommerce'),
-			self::SETTLED              => _x('Settled', 'global_settings', 'coinsnap-for-woocommerce'),
-			self::SETTLED_PAID_OVER    => _x('Settled (paid over)', 'global_settings', 'coinsnap-for-woocommerce'),
-			self::INVALID              => _x('Invalid', 'global_settings', 'coinsnap-for-woocommerce'),
 			self::EXPIRED              => _x('Expired', 'global_settings', 'coinsnap-for-woocommerce'),
-			self::EXPIRED_PAID_PARTIAL => _x('Expired with partial payment', 'global_settings', 'coinsnap-for-woocommerce'),
-			self::EXPIRED_PAID_LATE    => _x('Expired (paid late)', 'global_settings', 'coinsnap-for-woocommerce')
+			self::SETTLED              => _x('Settled', 'global_settings', 'coinsnap-for-woocommerce'),
+			self::PROCESSING           => _x('Processing', 'global_settings', 'coinsnap-for-woocommerce'),
+			//self::SETTLED_PAID_OVER    => _x('Settled (paid over)', 'global_settings', 'coinsnap-for-woocommerce'),
+			//self::INVALID              => _x('Invalid', 'global_settings', 'coinsnap-for-woocommerce'),
+			//self::EXPIRED_PAID_PARTIAL => _x('Expired with partial payment', 'global_settings', 'coinsnap-for-woocommerce'),
+			//self::EXPIRED_PAID_LATE    => _x('Expired (paid late)', 'global_settings', 'coinsnap-for-woocommerce')
 		];
 	}
 

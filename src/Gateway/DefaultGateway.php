@@ -6,20 +6,20 @@ namespace Coinsnap\WC\Gateway;
 class DefaultGateway extends AbstractGateway {
     public function __construct() {
         // Set the id first.
-	$this->id = 'coinsnap_default';
+	$this->id = 'coinsnap';
 
 	// Call parent constructor.
 	parent::__construct();
 
 		// todo: maybe make the button text configurable via settings.
 		// General gateway setup.
-		$this->order_button_text  = __('Proceed to Coinspan Payment', 'coinsnap-for-woocommerce');
+		$this->order_button_text  = __('Proceed to Coinsnap Payment', 'coinsnap-for-woocommerce');
 		// Admin facing title and description.
 		$this->method_title       = 'Coinsnap (default)';
 		$this->method_description = __('Coinsnap default gateway supporting all available tokens on your BTCPay store.', 'coinsnap-for-woocommerce');
 
 		// Actions.
-		add_action('woocommerce_api_coinsnap_default', [$this, 'processWebhook']);
+		add_action('woocommerce_api_coinsnap', [$this, 'processWebhook']);
 	}
 
 	/**

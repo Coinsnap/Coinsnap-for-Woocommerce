@@ -118,38 +118,27 @@ class Webhook extends AbstractClient
         }
     }
 
-    public function createWebhook(
-        string $storeId,
-        string $url,
-        ?array $specificEvents,
-        ?string $secret,
-        bool $enabled = true,
-        bool $automaticRedelivery = true
-    ): \Coinsnap\Result\WebhookCreated {
+    public function createWebhook(string $storeId, string $url, ?array $specificEvents, ?string $secret): \Coinsnap\Result\WebhookCreated { //bool $enabled = true,bool $automaticRedelivery = true
         $data = [
-            'enabled' => $enabled,
-            'automaticRedelivery' => $automaticRedelivery,
+            //'enabled' => $enabled,
+            //'automaticRedelivery' => $automaticRedelivery,
             'url' => $url
         ];
 
         if ($specificEvents === null) {
-            $data['authorizedEvents'] = [
-                'everything' => true
-            ];
-        } elseif (count($specificEvents) === 0) {
+            $data['authorizedEvents'] = ['everything' => true];
+        } 
+        elseif (count($specificEvents) === 0) {
             throw new \InvalidArgumentException('Argument $specificEvents should be NULL or contains at least 1 item.');
-        } else {
-            $data['authorizedEvents'] = [
-                'everything' => false,
-                'specificEvents' => $specificEvents
-            ];
+        } 
+        else {
+            $data['authorizedEvents'] = ['everything' => false,'specificEvents' => $specificEvents];
         }
 
         if ($secret === '') {
             throw new \InvalidArgumentException('Argument $secret should be NULL (let BTCPay Server auto-generate a secret) or you should provide a long and safe secret string.');
-        } elseif ($secret !== null) {
-            $data['secret'] = $secret;
-        }
+        } 
+        elseif ($secret !== null) $data['secret'] = $secret;
 
         $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks';
         $headers = $this->getRequestHeaders();
@@ -220,17 +209,13 @@ class Webhook extends AbstractClient
         }
     }
 
-    /**
-     * Check if the request your received from a webhook is authentic and can be trusted.
-     * @param string $requestBody Most likely you will use `$requestBody = file_get_contents('php://input');`
-     * @param string $btcpaySigHeader Most likely you will use `$_SERVER['HTTP_BTCPay-Sig']` for this.
-     * @param string $secret The secret that's registered with the webhook in BTCPay Server as a security precaution.
-     * @return bool
-     */
+    //  Check if the request your received from a webhook is authentic and can be trusted.
     public static function isIncomingWebhookRequestValid(string $requestBody, string $btcpaySigHeader, string $secret): bool
     {
         if ($requestBody && $btcpaySigHeader) {
-            $expectedHeader = 'sha256=' . hash_hmac('sha256', $requestBody, $secret);
+            
+            $expectedHeader = hash_hmac('sha256', $requestBody, $secret);
+            //$expectedHeader = 'sha256=' . hash_hmac('sha256', $requestBody, $secret);
 
             if ($expectedHeader === $btcpaySigHeader) {
                 return true;

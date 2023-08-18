@@ -38,7 +38,7 @@ class CoinsnapApiHelper {
         $key = get_option('coinsnap_api_key');
         if($url && $key) {
             return [
-                'url' => rtrim( $url, '/' ),//.'/'.get_option( 'coinsnap_store_id', null ),
+                'url' => rtrim( $url, '/' ),
                 'api_key' => $key,
                 'store_id' => get_option( 'coinsnap_store_id', null ),
 		'webhook' => get_option('coinsnap_webhook', null)
@@ -47,7 +47,7 @@ class CoinsnapApiHelper {
         else return [];
     }
     
-   public static function checkApiConnection(): bool {
+    public static function checkApiConnection(): bool {
         if ($config = self::getConfig()) {
             $client = new Store($config['url'], $config['api_key']);
             if (!empty($store = $client->getStore($config['store_id']))) {
@@ -55,6 +55,17 @@ class CoinsnapApiHelper {
             }
         }
         return false;
+    }
+    
+   public static function getApiConnectionSettings() {
+        if ($config = self::getConfig()) {
+            $client = new Store($config['url'], $config['api_key']);
+            $store = $client->getStore($config['store_id']);
+            
+            if (!isset($store['error'])) return (array)$store;
+            else return array('result' => false, 'error' => 'Coinsnap server is not available');
+        }
+        return array('result' => false, 'error' => 'Plugin is not configured');
     }
 
 	public static function getServerInfo(): ?ServerInfo {

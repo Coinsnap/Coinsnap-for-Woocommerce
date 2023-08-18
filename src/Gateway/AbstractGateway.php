@@ -78,31 +78,28 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		];
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function process_payment( $orderId ) {
-		if ( ! $this->apiHelper->configured ) {
-			Logger::debug( 'Coinsnap API connection not configured, aborting. Please go to Coinsnap Server settings and set it up.' );
-			// 2do: show error notice/make sure it fails
-			throw new \Exception( __( "Can't process order. Please contact us if the problem persists.", 'coinsnap-for-woocommerce' ) );
-		}
+//  @inheritDoc
+    public function process_payment( $orderId ) {
+        if ( ! $this->apiHelper->configured ) {
+            Logger::debug( 'Coinsnap API connection not configured, aborting. Please go to Coinsnap Server settings and set it up.' );
+            throw new \Exception( __( "Can't process order. Please contact us if the problem persists.", 'coinsnap-for-woocommerce' ) );
+	}
 
-		// Load the order and check it.
-		$order = new \WC_Order( $orderId );
+	// Load the order and check it.
+	$order = new \WC_Order( $orderId );
 		if ( $order->get_id() === 0 ) {
 			$message = 'Could not load order id ' . $orderId . ', aborting.';
 			Logger::debug( $message, true );
 			throw new \Exception( $message );
-		}
+	}
 
-		// Check if the order is a modal payment.
-		if (isset($_POST['action'])) {
-			$action = wc_clean( wp_unslash( $_POST['action'] ) );
+	// Check if the order is a modal payment.
+	if (isset($_POST['action'])) {
+            $action = wc_clean( wp_unslash( $_POST['action'] ) );
 			if ( $action === 'coinsnap_modal_checkout' ) {
 				Logger::debug( 'process_payment called via modal checkout.' );
-			}
-		}
+            }
+	}
 
 		// Check for existing invoice and redirect instead.
 		if ( $this->validInvoiceExists( $orderId ) ) {
@@ -375,23 +372,25 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process webhooks from BTCPay.
+	 * Process webhooks from Coinsnap.
 	 */
-	public function processWebhook() {
+            public function processWebhook() {
 		if ($rawPostData = file_get_contents("php://input")) {
-			// Validate webhook request.
-			// Note: getallheaders() CamelCases all headers for PHP-FPM/Nginx but for others maybe not, so "BTCPay-Sig" may becomes "Btcpay-Sig".
-			$headers = getallheaders();
+			//  Validate webhook request.
+			//  X-Coinsnap-Sig type: string
+                        //  HMAC signature of the body using the webhook's secret
+			$headers = getallheaders();                        
+                        
 			foreach ($headers as $key => $value) {
-				if (strtolower($key) === 'btcpay-sig') {
+				if (strtolower($key) === 'x-coinsnap-sig') {
 					$signature = $value;
 				}
 			}
 
-			if (!isset($signature) || !$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
+                        /*if (!isset($signature) || !$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
 				Logger::debug('Failed to validate signature of webhook request.');
 				wp_die('Webhook request validation failed.');
-			}
+			}*/
 
 			try {
 				$postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
@@ -432,7 +431,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	protected function processOrderStatus(\WC_Order $order, \stdClass $webhookData) {
-		if (!in_array($webhookData->type, GreenfieldApiWebhook::WEBHOOK_EVENTS)) {
+		if (!in_array($webhookData->type, CoinsnapApiWebhook::WEBHOOK_EVENTS)) {
 			Logger::debug('Webhook event received but ignored: ' . $webhookData->type);
 			return;
 		}
@@ -444,7 +443,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		}
 
 		switch ($webhookData->type) {
-			case 'InvoiceReceivedPayment':
+			case 'New':
 				if ($webhookData->afterExpiration) {
 					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
 					$order->add_order_note(__('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.', 'coinsnap-for-woocommerce'));
@@ -455,61 +454,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 				// Store payment data (exchange rate, address).
 				$this->updateWCOrderPayments($order);
-
 				break;
-			case 'InvoicePaymentSettled':
-				// We can't use $webhookData->afterExpiration here as there is a bug affecting all version prior to
-				// Therefore we check if the invoice is in expired or expired paid partial status, instead.
-				$orderStatus = $order->get_status();
-				if ($orderStatus === str_replace('wc-', '', $configuredOrderStates[OrderStates::EXPIRED]) ||
-					$orderStatus === str_replace('wc-', '', $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL])
-				) {
-					// Check if also the invoice is now fully paid.
-					if (GreenfieldApiHelper::invoiceIsFullyPaid($webhookData->invoiceId)) {
-						Logger::debug('Invoice fully paid.');
-						$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_LATE]);
-						$order->add_order_note(__('Invoice fully settled after invoice was already expired. Needs manual checking.', 'coinsnap-for-woocommerce'));
-						//$order->payment_complete();
-					} else {
-						Logger::debug('Invoice NOT fully paid.');
-						$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
-						$order->add_order_note(__('(Partial) payment settled but invoice not settled yet (could be more transactions incoming). Needs manual checking.', 'coinsnap-for-woocommerce'));
-					}
-				} else {
-					// No need to change order status here, only leave a note.
-					$order->add_order_note(__('Invoice (partial) payment settled.', 'coinsnap-for-woocommerce'));
-				}
-
-				// Store payment data (exchange rate, address).
-				$this->updateWCOrderPayments($order);
-
-				break;
-			case 'InvoiceProcessing': // The invoice is paid in full.
-				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::PROCESSING]);
-				if ($webhookData->overPaid) {
-					$order->add_order_note(__('Invoice payment received fully with overpayment, waiting for settlement.', 'coinsnap-for-woocommerce'));
-				} else {
-					$order->add_order_note(__('Invoice payment received fully, waiting for settlement.', 'coinsnap-for-woocommerce'));
-				}
-				break;
-			case 'InvoiceInvalid':
-				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::INVALID]);
-				if ($webhookData->manuallyMarked) {
-					$order->add_order_note(__('Invoice manually marked invalid.', 'coinsnap-for-woocommerce'));
-				} else {
-					$order->add_order_note(__('Invoice became invalid.', 'coinsnap-for-woocommerce'));
-				}
-				break;
-			case 'InvoiceExpired':
-				if ($webhookData->partiallyPaid) {
-					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
-					$order->add_order_note(__('Invoice expired but was paid partially, please check.', 'coinsnap-for-woocommerce'));
-				} else {
-					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED]);
-					$order->add_order_note(__('Invoice expired.', 'coinsnap-for-woocommerce'));
-				}
-				break;
-			case 'InvoiceSettled':
+			
+			case 'Settled':
 				$order->payment_complete();
 				if ($webhookData->overPaid) {
 					$order->add_order_note(__('Invoice payment settled but was overpaid.', 'coinsnap-for-woocommerce'));
@@ -522,6 +469,31 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				// Store payment data (exchange rate, address).
 				$this->updateWCOrderPayments($order);
 
+				break;
+			case 'Processing': // The invoice is paid in full.
+				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::PROCESSING]);
+				if ($webhookData->overPaid) {
+					$order->add_order_note(__('Invoice payment received fully with overpayment, waiting for settlement.', 'coinsnap-for-woocommerce'));
+				} else {
+					$order->add_order_note(__('Invoice payment received fully, waiting for settlement.', 'coinsnap-for-woocommerce'));
+				}
+				break;
+			case 'Expired':
+				if ($webhookData->partiallyPaid) {
+					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
+					$order->add_order_note(__('Invoice expired but was paid partially, please check.', 'coinsnap-for-woocommerce'));
+				} else {
+					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED]);
+					$order->add_order_note(__('Invoice expired.', 'coinsnap-for-woocommerce'));
+				}
+				break;
+			case 'Invalid':
+				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::INVALID]);
+				if ($webhookData->manuallyMarked) {
+					$order->add_order_note(__('Invoice manually marked invalid.', 'coinsnap-for-woocommerce'));
+				} else {
+					$order->add_order_note(__('Invoice became invalid.', 'coinsnap-for-woocommerce'));
+				}
 				break;
 		}
 	}

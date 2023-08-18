@@ -8,13 +8,13 @@ use Coinsnap\Client\Webhook;
 use Coinsnap\Result\Webhook as WebhookResult;
 
 class CoinsnapApiWebhook {
-    public const WEBHOOK_EVENTS = [
-        'InvoiceReceivedPayment',
-	'InvoicePaymentSettled',
-	'InvoiceProcessing',
-	'InvoiceExpired',
-	'InvoiceSettled',
-	'InvoiceInvalid'
+    public const WEBHOOK_EVENTS = ['New','Expired','Settled','Processing'
+        //'InvoiceReceivedPayment',
+	//'InvoicePaymentSettled',
+	//'InvoiceProcessing',
+	//'InvoiceExpired',
+	//'InvoiceSettled',
+	//'InvoiceInvalid'
     ];
 
 //  Get locally stored webhook data and check if it exists on the store.
@@ -45,10 +45,10 @@ class CoinsnapApiWebhook {
 		try {
 			$whClient = new Webhook( $apiUrl, $apiKey );
 			$webhook = $whClient->createWebhook(
-				$storeId,
-				WC()->api_request_url( 'coinsnap' ),
-				self::WEBHOOK_EVENTS,
-				null
+				$storeId,   //$storeId
+				WC()->api_request_url( 'coinsnap' ), //$url
+				self::WEBHOOK_EVENTS,   //$specificEvents
+				null    //$secret
 			);
 
 			// Store in option table.
@@ -121,6 +121,23 @@ class CoinsnapApiWebhook {
 				);
 
 			return $webhook;
+		} catch (\Throwable $e) {
+			Logger::debug('Error fetching existing Webhook from Coinsnap: ' . $e->getMessage());
+		}
+
+		return null;
+	}
+        
+        //  Load existing webhook data from Coinsnap, defaults to locally stored webhook.
+	public static function getWebhooks(?string $storeId): ?WebhookResult {
+		
+            $config = CoinsnapApiHelper::getConfig();
+
+		try {
+			$whClient = new Webhook( $config['url'], $config['api_key'] );
+			$webhooks = $whClient->getWebhooks($storeId);
+
+			return $webhooks;
 		} catch (\Throwable $e) {
 			Logger::debug('Error fetching existing Webhook from Coinsnap: ' . $e->getMessage());
 		}

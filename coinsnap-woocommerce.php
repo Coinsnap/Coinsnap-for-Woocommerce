@@ -34,7 +34,7 @@ define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );
 define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );
 define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );
-define( 'COINSNAP_SERVER_PATH', 'websites' );
+define( 'COINSNAP_SERVER_PATH', 'stores' );
 define( 'COINSNAP_REFERRAL_CODE', '' );
 
 class CoinsnapWCPlugin {
@@ -45,11 +45,11 @@ class CoinsnapWCPlugin {
 	$this->includes();
 
 	add_action('woocommerce_thankyou_coinsnap', [$this, 'orderStatusThankYouPage'], 10, 1);
-		//add_action( 'wp_ajax_coinsnap_modal_checkout', [$this, 'processAjaxModalCheckout'] );
-		//add_action( 'wp_ajax_nopriv_coinsnap_modal_checkout', [$this, 'processAjaxModalCheckout'] );
+	//add_action( 'wp_ajax_coinsnap_modal_checkout', [$this, 'processAjaxModalCheckout'] );
+	//add_action( 'wp_ajax_nopriv_coinsnap_modal_checkout', [$this, 'processAjaxModalCheckout'] );
 
-		// Run the updates.
-		\Coinsnap\WC\Helper\UpdateManager::processUpdates();
+	// Run the updates.
+	\Coinsnap\WC\Helper\UpdateManager::processUpdates();
 
 	if (is_admin()) {
             // Register our custom global settings page.
@@ -130,15 +130,17 @@ class CoinsnapWCPlugin {
             Notice::addNotice('error', $curlMessage);
 	}
     }
-
+    
+/*
 //  Handles the AJAX callback from the GlobalSettings form.
+    
     public function processAjaxApiUrl() {
         $nonce = $_POST['apiNonce'];
-		if ( ! wp_verify_nonce( $nonce, 'coinsnap-api-url-nonce' ) ) {
-			wp_die('Unauthorized!', '', ['response' => 401]);
-		}
+	if ( ! wp_verify_nonce( $nonce, 'coinsnap-api-url-nonce' ) ) {
+            wp_die('Unauthorized!', '', ['response' => 401]);
+	}
 
-		if ( current_user_can( 'manage_options' ) ) {
+	if ( current_user_can( 'manage_options' ) ) {
 			$host = filter_var($_POST['host'], FILTER_VALIDATE_URL);
 
 			if ($host === false || (substr( $host, 0, 7 ) !== "http://" && substr( $host, 0, 8 ) !== "https://")) {
@@ -167,35 +169,33 @@ class CoinsnapWCPlugin {
 			} catch (\Throwable $e) {
 				Logger::debug('Error fetching redirect url from Coinsnap Server.');
 			}
-		}
+	}
 
         wp_send_json_error("Error processing Ajax request.");
     }
 
-	/**
-	 * Handles the AJAX callback from the Payment Request on the checkout page.
-	
-	public function processAjaxModalCheckout() {
+// Handles the AJAX callback from the Payment Request on the checkout page.
 
-		Logger::debug('Entering ' . __METHOD__);
+    public function processAjaxModalCheckout(){
+        Logger::debug('Entering ' . __METHOD__);
+        $nonce = $_POST['apiNonce'];
+	if ( ! wp_verify_nonce( $nonce, 'coinsnap-nonce' ) ) {
+            wp_die('Unauthorized!', '', ['response' => 401]);
+	}
 
-		$nonce = $_POST['apiNonce'];
-		if ( ! wp_verify_nonce( $nonce, 'coinsnap-nonce' ) ) {
-			wp_die('Unauthorized!', '', ['response' => 401]);
-		}
+	if ( get_option('coinsnap_modal_checkout') !== 'yes' ) {
+            wp_die('Modal checkout mode not enabled.', '', ['response' => 400]);
+	}
 
-		if ( get_option('coinsnap_modal_checkout') !== 'yes' ) {
-			wp_die('Modal checkout mode not enabled.', '', ['response' => 400]);
-		}
-
-		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
-
-		try {
-			WC()->checkout()->process_checkout();
-		} catch (\Throwable $e) {
-			Logger::debug('Error processing modal checkout ajax callback: ' . $e->getMessage());
-		}
-	}*/
+	wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+            try {
+                WC()->checkout()->process_checkout();
+            }
+        catch (\Throwable $e) {
+            Logger::debug('Error processing modal checkout ajax callback: ' . $e->getMessage());
+        }
+    }
+*/
 
     public static function orderStatusThankYouPage($order_id){
 	if (!$order = wc_get_order($order_id)) {
@@ -257,7 +257,7 @@ add_action('init', function() {
 });
 
 // Action links on plugin overview.
-add_filter( 'plugin_action_links_coinsnap-for-woocommerce/coinsnap-for-woocommerce.php', function ($links){
+add_filter( 'plugin_action_links_coinsnap-woocommerce/coinsnap-woocommerce.php', function ($links){
     // Settings link.
     $settings_url = esc_url( add_query_arg(['page' => 'wc-settings','tab' => 'coinsnap_settings'],get_admin_url() . 'admin.php') );
     $settings_link = "<a href='$settings_url'>" . __( 'Settings', 'coinsnap-for-woocommerce' ) . '</a>';
@@ -309,7 +309,8 @@ add_action( 'template_redirect', function() {
 			update_option('coinsnap_store_id', $apiData->getStoreID());
 			Notice::addNotice('success', __('Successfully received api key and store id from Coinsnap Server API. Please finish setup by saving this settings form.', 'coinsnap-for-woocommerce'));
 			wp_redirect($coinsnapSettingsUrl);
-		} else {
+		}
+                else {
 			Notice::addNotice('error', __('Please make sure you only select one store on the Coinsnap API authorization page.', 'coinsnap-for-woocommerce'));
 			wp_redirect($coinsnapSettingsUrl);
 		}
