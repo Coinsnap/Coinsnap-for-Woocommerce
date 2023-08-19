@@ -210,14 +210,10 @@ class Webhook extends AbstractClient
     }
 
     //  Check if the request your received from a webhook is authentic and can be trusted.
-    public static function isIncomingWebhookRequestValid(string $requestBody, string $btcpaySigHeader, string $secret): bool
-    {
-        if ($requestBody && $btcpaySigHeader) {
-            
-            $expectedHeader = hash_hmac('sha256', $requestBody, $secret);
-            //$expectedHeader = 'sha256=' . hash_hmac('sha256', $requestBody, $secret);
-
-            if ($expectedHeader === $btcpaySigHeader) {
+    public static function isIncomingWebhookRequestValid(string $requestBody, string $coinsnapSignatureHeader, string $secret): bool{
+        if ($requestBody && $coinsnapSignatureHeader) {            
+            $expectedHeader = 'sha256='.hash_hmac('sha256', $requestBody, $secret);
+            if ($expectedHeader === $coinsnapSignatureHeader) {
                 return true;
             }
         }

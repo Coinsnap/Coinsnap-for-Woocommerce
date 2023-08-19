@@ -144,6 +144,9 @@ class CoinsnapApiHelper {
 	 * Check webhook signature to be a valid request.
 	 */
 	public function validWebhookRequest(string $signature, string $requestData): bool {
+            
+            \Coinsnap\WC\Helper\Logger::debug( $signature . ' - ' . $requestData . ' - ' . $this->webhook['secret'], true );
+            
 		if ($this->configured) {
 			return Webhook::isIncomingWebhookRequestValid($requestData, $signature, $this->webhook['secret']);
 		}

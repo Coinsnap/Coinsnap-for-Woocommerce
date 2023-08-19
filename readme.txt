@@ -21,6 +21,7 @@ Incoming Bitcoin payments are directly forwarded and credited to your Lightning 
 
 == Installation ==
 
+### 1. Install the Coinsnap WooCommerce plugin from the WordPress directory. ###
 
 The Coinsnap WooCommerce plugin can be searched and installed in the WordPress plugin directory.
 
@@ -31,64 +32,103 @@ Then click Install.
 
 After successful installation, click Activate and then you can start setting up the plugin.
 
-<img src="https://github.com/btcpayserver/btcpayserver-doc/blob/master/img/BTCPayWooCommerceInfoggraphic.png" alt="Infographic" />
+### 1.1. Add plugin ###
 
-To integrate BTCPay Server into an existing WooCommerce store, follow the steps below or check our official [installation instructions](https://docs.btcpayserver.org/WooCommerce/).
+If you don’t want to install Coinsnap WooCommerce plugin directly via plugin, you can download Coinsnap WooCommerce plugin from Coinsnap Github page or from WordPress directory and install it via “Upload Plugin” function.
 
-### 1. Deploy BTCPay Server (optional) ###
+Click “Install now” and Coinsnap WooCommerce plugin will be installed in WordPress.
 
-This step is optional, if you already have a BTCPay Server instance setup you can skip to section 2. below. To launch your BTCPay server, you can self-host it, or use a third party host.
+After you have successfully installed the plugin, you can proceed with the connection to Coinsnap payment gateway.
 
-#### 1.1 Self-hosted BTCPay ####
+### 1.2. Configure Coinsnap WooCommerce Plugin ###
 
-There are various ways to [launch a self-hosted BTCPay](https://github.com/btcpayserver/btcpayserver-doc#deployment). If you do not have technical knowledge, use the [web-wizard method](https://launchbtcpay.lunanode.com) and follow the video below.
+After the Coinsnap WooCommerce plugin is installed and activated, a notice appears that the plugin still needs to be configured.
 
-https://www.youtube.com/watch?v=NjslXYvp8bk
+### 1.3. Deposit Coinsnap data ###
 
-For the self-hosted solutions, you will have to wait for your node to sync fully before proceeding to step 3.
+After clicking on the displayed link or via the Coinsnap Settings tab, you will get to an input mask where you have to enter the Coinsnap Store ID and the Coinsnap API Key. You will receive these two data via your Coinsnap account.
 
-#### 1.2 Third-party host ####
+If you don’t have a Coinsnap account yet, you can do so via the link shown: Coinsnap Registration
 
-Those who want to test BTCPay out, or are okay with the limitations of a third-party hosting (dependency and privacy, as well as lack of some features) can use a one of many [third-party hosts](ThirdPartyHosting.md).
+### 2. Create Coinsnap account ####
 
-The video below shows you how to connect your store to such a host.
+### 2.1. Create a Coinsnap Account ####
 
-https://www.youtube.com/watch?v=IT2K8It3S3o
+Now go to the Coinsnap website at: https://app.coinsnap.io/register and open an account by entering your email address and a password of your choice.
 
-### 2. Install BTCPay WooCommerce Plugin ###
+If you are using a Lightning Wallet with Lightning Login, then you can also open a Coinsnap account with it.
 
-BTCPay WooCommerce plugin is a bridge between your BTCPay Server (payment processor) and your e-commerce store. No matter if you are using a self-hosted or third-party solution from step 1., the connection process is identical.
+### 2.2. Confirm email address ####
 
-You can find detailed installation instructions on our [WooCommerce documentation](https://docs.btcpayserver.org/WooCommerce/).
+You will receive an email to the given email address with a confirmation link, which you have to confirm. If you do not find the email, please check your spam folder.
 
-Here is a quick walk through if you prefer a video:
+Then please log in to the Coinsnap backend with the appropriate credentials.
 
-https://www.youtube.com/watch?v=ULcocDKZ1Mw
+### 2.3. Set up website at Coinsnap ###
 
-###  3. Connecting your wallet ###
+After you sign up, you will be asked to provide two pieces of information.
 
-No matter if you're using self-hosted or server hosted by a third-party, the process of configuring your wallet is the same.
+In the Website Name field, enter the name of your online store that you want customers to see when they check out.
 
-https://www.youtube.com/watch?v=xX6LyQej0NQ
+In the Lightning Address field, enter the Lightning address to which the Bitcoin and Lightning transactions should be forwarded.
 
-### 4. Testing the checkout ###
+A Lightning address is similar to an e-mail address. Lightning payments are forwarded to this Lightning address and paid out. If you don’t have a Lightning address yet, set up a Lightning wallet that will provide you with a Lightning address.
 
-Making a small test-purchase from your own store, will give you a piece of mind. Always make sure that everything is set up correctly before going live. The final video, guides you through the steps of setting a gap limit in your Electrum wallet and testing the checkout process.
+For more information on Lightning addresses and the corresponding Lightning wallet providers, click here:
+https://coinsnap.io/lightning-wallet-mit-lightning-adresse/
 
-Depending on your business model and store settings, you may want to fine tune [your order statuses](https://docs.btcpayserver.org/WooCommerce/#41-global-settings).
+### 2.4. Coinsnap settings ###
+
+In the Settings section there is the Website Settings section. Here you will find the details for the Coinsnap Website ID and the Coinsnap API Key.
+
+### 3. Connect Coinsnap account with WooCommerce plugin ###
+
+### 3.1. WooCommerce Coinsnap Settings ###
+
+Within WooCommerce there is the Coinsnap Settings section. In the Coinsnap Settings section, the information from the Coinsnap backend for the Coinsnap Website ID and the Coinsnap API Key can be stored accordingly.
+
+Don’t forget to click “Save changes” at the bottom of the page to save the settings.
+Coinsnap Website ID und den Coinsnap API Key.
+
+### 3.2. WooCommerce Payment Settings ###
+
+In the WooCommerce settings in the tab Payment you get an overview of all payment methods stored in WooCommerce. At the very bottom is Coinsnap.
+
+Here Coinsnap must be activated as a payment method and further settings can be made via the Finish set up or Manage button.
+
+### 3.3. Payment settings ###
+
+After clicking the Finish set up or Manage button, you will get to the detail settings.
+
+Changes can be made here, which will be displayed to the payer during the payment process.
+
+The Title field contains the entry for the payment methods. Here, for example, the settings for “Bitcoin and Lightning” can be made.
+
+A note can be entered in the Customer Message field for the payer to know what to do next.
+
+### 4. Test payment ###
+
+### 4.1. Test payment in WooCommerce store ###
+
+After all the settings have been made, a test payment should be made.
+
+We make a real order in our WooCommerce webshop and find Bitcoin and Lightning Payments as additional payment methods.
+
+Select this payment method and click Pay with Bitcoin.
+
+### 4.2. Bitcoin payment page ###
+
+The Bitcoin payment page is now displayed, offering the payer the option to pay with Bitcoin or also with Lightning. Both methods are integrated in the displayed QR code.
 
 == Frequently Asked Questions ==
 
-You'll find extensive documentation and answers to many of your questions on [BTCPay for WooCommerce V2 docs](https://docs.btcpayserver.org/WooCommerce) and on [BTCPay for WooCommerce integrations FAQ](https://docs.btcpayserver.org/FAQ/Integrations/#woocommerce-faq).
+Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-plugin/
+
+You can find extensive documentation and answers to many of your questions on BTCPay server here: https://docs.btcpayserver.org
 
 == Screenshots ==
 
-1. The BTCPay Server invoice. Your customers will see this at the checkout. They can pay from their wallet by scanning a QR or copy/pasting it manually into the wallet.
-2. Customizable plugin interface allows store owners to adjust store statuses according to their needs.
-3. Customer will see the pay with Bitcoin button at the checkout.Text can be customized.
-4. Example of successfully paid invoice.
-5. Example of an easy-embeddable HTML donation payment button.
-6. Example of the PoS app you can launch.
+
 
 == Changelog ==
 = 1.0 :: 2023-08-03 =

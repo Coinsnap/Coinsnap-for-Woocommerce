@@ -386,11 +386,11 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 					$signature = $value;
 				}
 			}
-
-                        /*if (!isset($signature) || !$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
+                        
+                        if (!isset($signature) || !$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
 				Logger::debug('Failed to validate signature of webhook request.');
 				wp_die('Webhook request validation failed.');
-			}*/
+			}
 
 			try {
 				$postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
@@ -453,7 +453,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				}
 
 				// Store payment data (exchange rate, address).
-				$this->updateWCOrderPayments($order);
+				//$this->updateWCOrderPayments($order);
 				break;
 			
 			case 'Settled':
@@ -467,7 +467,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				}
 
 				// Store payment data (exchange rate, address).
-				$this->updateWCOrderPayments($order);
+				//$this->updateWCOrderPayments($order);
 
 				break;
 			case 'Processing': // The invoice is paid in full.
@@ -523,12 +523,14 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 						$pmInvoice = $invoice->getData()['checkout']['paymentMethods'];
 						$pmInvoice = str_replace('-', '_', $pmInvoice);
 						sort($pmInvoice);
+                                                
+                                                /*
 						$pm = $this->getPaymentMethods();
 						sort($pm);
-						if ($pm === $pmInvoice) {
-							return true;
-						}
-						// Mark existing invoice as invalid.
+						if ($pm === $pmInvoice) return true;
+                                                */
+						
+                                                // Mark existing invoice as invalid.
 						$order = wc_get_order($orderId);
 						$order->add_order_note(__('BTCPay invoice manually set to invalid because customer went back to checkout and changed payment gateway.', 'coinsnap-for-woocommerce'));
 						$this->markInvoiceInvalid($invoiceId);

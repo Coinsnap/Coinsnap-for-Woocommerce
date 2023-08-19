@@ -27,12 +27,12 @@ class GlobalSettings extends \WC_Settings_Page {
 			// Register and include JS.
 			//wp_register_script('coinsnap_global_settings', COINSNAP_PLUGIN_URL . 'assets/js/apiKeyRedirect.js', ['jquery'], COINSNAP_VERSION);
 			//wp_enqueue_script('coinsnap_global_settings');
-			wp_localize_script('coinsnap_global_settings',
+			/*wp_localize_script('coinsnap_global_settings',
 				'CoinsnapGlobalSettings',
 				[
 					'url' => admin_url( 'admin-ajax.php' ),
 					'apiNonce' => wp_create_nonce( 'coinsnap-api-url-nonce' ),
-				]);
+				]);*/
 		}
 		parent::__construct();
 	}
@@ -127,44 +127,6 @@ class GlobalSettings extends \WC_Settings_Page {
 				'type' => 'sectionend',
 				'id' => 'coinsnap',
 			],
-                    
-                    
-                    /*
-			'url' => [
-				'title' => esc_html_x(
-					'Coinsnap Server URL',
-					'global_settings',
-					'coinsnap-for-woocommerce'
-				),
-				'type' => 'text',
-				'desc' => esc_html_x( 'URL/host to your Coinsnap Server instance. Note: if you use a self hosted node like Umbrel, RaspiBlitz, myNode, etc. you will have to make sure your node is reachable from the internet. You can do that through <a href="https://coinsnap.io" target="_blank">Tor</a>, <a href="https://coinsnap.io" target="_blank">Cloudflare</a> or <a href="https://coinsnap.io" target="_blank">SSH (advanced)</a>.', 'global_settings', 'coinsnap-for-woocommerce' ),
-				'placeholder' => esc_attr_x( 'e.g. https://coinsnap.example.com', 'global_settings', 'coinsnap-for-woocommerce' ),
-				'desc_tip'    => true,
-				'id' => 'coinsnap_url'
-			],
-			'transaction_speed' => [
-				'title'       => esc_html_x( 'Invoice pass to "settled" state after', 'coinsnap-for-woocommerce' ),
-				'type'        => 'select',
-				'desc' => esc_html_x('An invoice becomes settled after the payment has this many confirmations...', 'global_settings', 'coinsnap-for-woocommerce'),
-				'options'     => [
-					'default'    => _x('Keep Coinsnap Server store level configuration', 'global_settings', 'coinsnap-for-woocommerce'),
-					'high'       => _x('0 confirmation on-chain', 'global_settings', 'coinsnap-for-woocommerce'),
-					'medium'     => _x('1 confirmation on-chain', 'global_settings', 'coinsnap-for-woocommerce'),
-					'low-medium' => _x('2 confirmations on-chain', 'global_settings', 'coinsnap-for-woocommerce'),
-					'low'        => _x('6 confirmations on-chain', 'global_settings', 'coinsnap-for-woocommerce'),
-				],
-				'default'     => 'default',
-				'desc_tip'    => true,
-				'id' => 'coinsnap_transaction_speed'
-			],
-			'modal_checkout' => [
-				'title' => __( 'Modal checkout', 'coinsnap-for-woocommerce' ),
-				'type' => 'checkbox',
-				'default' => 'no',
-				'desc' => _x( 'Opens a modal overlay on the checkout page instead of redirecting to Coinsnap Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
-				'id' => 'coinsnap_modal_checkout'
-			],*/
-                    
                     
 		];
 	}
