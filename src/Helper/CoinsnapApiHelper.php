@@ -192,7 +192,7 @@ class CoinsnapApiHelper {
 			$client = new ApiKey($this->url, $this->apiKey);
 			try {
 				$apiKey = $client->getCurrent();
-				$apiAuth = new GreenfieldApiAuthorization( $apiKey->getData() );
+				$apiAuth = new CoinsnapApiAuthorization( $apiKey->getData() );
 				return $apiAuth->hasRefundsPermission();
 			} catch (\Throwable $e) {
 				Logger::debug('Exception while checking current API key: ' . $e->getMessage());

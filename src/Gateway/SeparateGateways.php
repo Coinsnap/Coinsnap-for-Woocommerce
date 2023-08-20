@@ -2,23 +2,22 @@
 
 declare(strict_types=1);
 
-namespace BTCPayServer\WC\Gateway;
+namespace Coinsnap\WC\Gateway;
 
-use BTCPayServer\WC\Helper\GreenfieldApiHelper;
-use BTCPayServer\WC\Helper\Logger;
+use Coinsnap\WC\Helper\CoinsnapApiHelper;
+use Coinsnap\WC\Helper\Logger;
 
-/**
- * Handles and initializes separate gateways.
- */
+//  Handles and initializes separate gateways.
+
 class SeparateGateways {
 
-	const GENERATED_PATH = BTCPAYSERVER_PLUGIN_FILE_PATH . 'generated';
-	const PM_GENERATED_CACHE_KEY = 'btcpay_payment_methods_generated';
+	const GENERATED_PATH = COINSNAP_PLUGIN_FILE_PATH . 'generated';
+	const PM_GENERATED_CACHE_KEY = 'coinsnap_payment_methods_generated';
 
 	public static function generateClasses() {
 		// Load payment methods from BTCPay Server as separate gateways.
 		if (get_option('btcpay_gf_separate_gateways') === 'yes') {
-			if ( $separateGateways = \BTCPayServer\WC\Helper\GreenfieldApiHelper::supportedPaymentMethods() ) {
+			if ( $separateGateways = \Coinsnap\WC\Helper\CoinsnapApiHelper::supportedPaymentMethods() ) {
 				// Check if generated classes match cache.
 				$generatedGateways = get_transient(self::PM_GENERATED_CACHE_KEY);
 				if ($generatedGateways !== $separateGateways || self::generatedFilesExist() === false) {
@@ -28,7 +27,7 @@ class SeparateGateways {
 					// Enable line below if you need to ensure payment classes are not generated on each request.
 					// This was commented because it cluttered the debug log quite a lot as it fires multiple times per
 					// request.
-					// Logger::debug('Using cache, skipping to generate separate gateway classes.');
+					Logger::debug('Using cache, skipping to generate separate gateway classes.');
 				}
 			}
 		}
@@ -43,12 +42,12 @@ class SeparateGateways {
 			$id = 'coinsnap_' . strtolower($symbol);
 
 			// Build the class structure.
-			$classCode = "use BTCPayServer\WC\Gateway\AbstractGateway;
+			$classCode = "use Coinsnap\WC\Gateway\AbstractGateway;
 			                class {$className} extends AbstractGateway {
 			                    public function __construct() {
 				                  \$this->id = '{$id}';
 				                  parent::__construct();
-				                  \$this->method_title = 'BTCPay Gateway: {$symbol}';
+				                  \$this->method_title = 'Coinsnap Gateway: {$symbol}';
 				                  \$this->method_description = 'This is separate payment gateway managed by BTCPay.';
 				                  \$this->tokenType = \$this->getTokenType();
 				                  \$this->primaryPaymentMethod = '{$symbol}';
@@ -130,7 +129,7 @@ class SeparateGateways {
 		}
 
 		// Find generated classes.
-		$files = glob(self::GENERATED_PATH . DIRECTORY_SEPARATOR . GreenfieldApiHelper::PM_CLASS_NAME_PREFIX . '*.php');
+		$files = glob(self::GENERATED_PATH . DIRECTORY_SEPARATOR . CoinsnapApiHelper::PM_CLASS_NAME_PREFIX . '*.php');
 
 		foreach ($files as $file) {
 			if (is_file($file)) {

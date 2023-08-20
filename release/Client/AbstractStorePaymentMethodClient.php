@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace BTCPayServer\Client;
+namespace Coinsnap\Client;
 
 abstract class AbstractStorePaymentMethodClient extends AbstractClient
 {

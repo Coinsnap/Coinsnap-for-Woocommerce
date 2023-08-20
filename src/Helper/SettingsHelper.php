@@ -12,7 +12,7 @@ class SettingsHelper {
 				'title'       => __('Title', 'coinsnap-for-woocommerce'),
 				'type'        => 'text',
 				'description' => __('Controls the name of this payment method as displayed to the customer during checkout.', 'coinsnap-for-woocommerce'),
-				'default'     => __('Coinsnap payment (Bitcoin, Lightning Network, ...)', 'coinsnap-for-woocommerce'),
+				'default'     => __('Bitcoin, Lightning Network', 'coinsnap-for-woocommerce'),
 				'desc_tip'    => true,
 			],
 			'description' => [

@@ -26,7 +26,7 @@ class DefaultGateway extends AbstractGateway {
 	 * @inheritDoc
 	 */
 	public function getTitle(): string {
-		return $this->get_option('title', 'Coinsnap (Bitcoin, Lightning Network)');
+		return $this->get_option('title', 'Bitcoin, Lightning Network');
 	}
 
 	/**

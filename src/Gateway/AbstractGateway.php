@@ -760,7 +760,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Get customer visible gateway title.
 	 */
 	public function getTitle(): string {
-		return $this->get_option('title', 'BTCPay (Bitcoin, Lightning Network, ...)');
+		return $this->get_option('title', 'Bitcoin, Lightning Network');
 	}
 
 	/**

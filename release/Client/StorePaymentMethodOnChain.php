@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace BTCPayServer\Client;
+namespace Coinsnap\Client;
 
 /**
  * Handles stores on chain payment methods.
@@ -14,7 +14,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
     /**
      * @param string $storeId
      *
-     * @return \BTCPayServer\Result\StorePaymentMethodOnChain[]
+     * @return \Coinsnap\Result\StorePaymentMethodOnChain[]
      * @throws \JsonException
      */
     public function getPaymentMethods(string $storeId): array
@@ -28,7 +28,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
             $r = [];
             $data = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
             foreach ($data as $item) {
-                $r[] = new \BTCPayServer\Result\StorePaymentMethodOnChain($item, $item['cryptoCode']);
+                $r[] = new \Coinsnap\Result\StorePaymentMethodOnChain($item, $item['cryptoCode']);
             }
             return $r;
         } else {
@@ -36,7 +36,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
         }
     }
 
-    public function getPaymentMethod(string $storeId, string $cryptoCode): \BTCPayServer\Result\StorePaymentMethodOnChain
+    public function getPaymentMethod(string $storeId, string $cryptoCode): \Coinsnap\Result\StorePaymentMethodOnChain
     {
         $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
@@ -45,7 +45,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
 
         if ($response->getStatus() === 200) {
             $data = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-            return new \BTCPayServer\Result\StorePaymentMethodOnChain($data, $data['cryptoCode']);
+            return new \Coinsnap\Result\StorePaymentMethodOnChain($data, $data['cryptoCode']);
         } else {
             throw $this->getExceptionByStatusCode($method, $url, $response);
         }
@@ -65,11 +65,11 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
      *                          'accountKeyPath' => "abcd82a1/84'/0'/0'"
      *                        ]
      *
-     * @return \BTCPayServer\Result\StorePaymentMethodOnChain
+     * @return \Coinsnap\Result\StorePaymentMethodOnChain
      * @throws \JsonException
      *
      */
-    public function updatePaymentMethod(string $storeId, string $cryptoCode, array $settings): \BTCPayServer\Result\StorePaymentMethodOnChain
+    public function updatePaymentMethod(string $storeId, string $cryptoCode, array $settings): \Coinsnap\Result\StorePaymentMethodOnChain
     {
         $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/payment-methods/' . self::PAYMENT_TYPE_ONCHAIN . '/' . $cryptoCode;
         $headers = $this->getRequestHeaders();
@@ -78,7 +78,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
 
         if ($response->getStatus() === 200) {
             $data = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-            return new \BTCPayServer\Result\StorePaymentMethodOnChain($data, $data['cryptoCode']);
+            return new \Coinsnap\Result\StorePaymentMethodOnChain($data, $data['cryptoCode']);
         } else {
             throw $this->getExceptionByStatusCode($method, $url, $response);
         }
@@ -90,7 +90,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
      * @param string $storeId
      * @param string $cryptoCode
      *
-     * @return \BTCPayServer\Result\Address[]
+     * @return \Coinsnap\Result\Address[]
      * @throws \JsonException
      */
     public function previewPaymentMethodAddresses(string $storeId, string $cryptoCode): array
@@ -103,7 +103,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
         $response = $this->getHttpClient()->request($method, $url, $headers);
 
         if ($response->getStatus() === 200) {
-            $addressList = new \BTCPayServer\Result\AddressList(
+            $addressList = new \Coinsnap\Result\AddressList(
                 json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
             );
             return $addressList->getAddresses();
@@ -124,7 +124,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
      * @param string      $derivationScheme
      * @param string|null $accountKeyPath
      *
-     * @return \BTCPayServer\Result\Address[]
+     * @return \Coinsnap\Result\Address[]
      * @throws \JsonException
      */
     public function previewProposedPaymentMethodAddresses(
@@ -145,7 +145,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
         $response = $this->getHttpClient()->request($method, $url, $headers, $body);
 
         if ($response->getStatus() === 200) {
-            $addressList = new \BTCPayServer\Result\AddressList(
+            $addressList = new \Coinsnap\Result\AddressList(
                 json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
             );
             return $addressList->getAddresses();

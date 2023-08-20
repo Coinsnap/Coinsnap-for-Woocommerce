@@ -111,7 +111,7 @@ class CoinsnapApiWebhook {
 	 */
 	public static function getWebhook(?string $webhookId): ?WebhookResult {
 		$existingWebhook = get_option('coinsnap_webhook');
-		$config = GreenfieldApiHelper::getConfig();
+		$config = CoinsnapApiHelper::getConfig();
 
 		try {
 			$whClient = new Webhook( $config['url'], $config['api_key'] );
