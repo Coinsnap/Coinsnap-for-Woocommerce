@@ -23,7 +23,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		// General gateway setup.
 		$this->icon              = $this->getIcon();
 		$this->has_fields        = false;
-		$this->order_button_text = __( 'Proceed to Coinsnap Payment gateway', 'coinsnap-for-woocommerce' );
+		$this->order_button_text = __( 'Proceed to payment gateway', 'coinsnap-for-woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();
