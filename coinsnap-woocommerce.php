@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:     Coinsnap For Woocommerce 1.0
+ * Plugin Name:     Coinsnap Woocommerce
  * Plugin URI:      https://wordpress.org/plugins/coinsnap-woocommerce/
  * Description:     With Coinsnap payment processing, you can accept Bitcoin and Lightning payments on your website or online store. You do not need your own Lightning Node or other technical requirements.
  * Author:          Coinsnap
