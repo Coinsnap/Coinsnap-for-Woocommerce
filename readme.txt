@@ -1,6 +1,6 @@
 === Coinsnap for WooCommerce 1.0 ===
 Contributors: coinsnap
-Tags: SATS, Satoshi sats, bitcoin, btcpay, BTCPay Server, btcpayserver, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, Litecoin, cryptocurrency
+Tags: Lightning, Lightning Payment, SATS, Satoshi sats, bitcoin, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency, lightning payment processor
 Requires at least: 5.2
 Tested up to: 6.2
 Requires PHP: 7.4
@@ -8,7 +8,7 @@ Stable tag: 1.0
 License: MIT
 License URI: https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/license.txt
 
-Coinsnap is a free and open-source bitcoin payment processor which allows you to receive payments in Bitcoin and Satoshi sats directly, with no fees, transaction cost or a middleman.
+Coinsnap is a Lightning payment provider and offers a payment gateway for processing Bitcoin and Lightning payments. A merchant only needs a Lightning wallet with a lightning address to accept Bitcoin and Lightning payments on their website.
 
 == Description ==
 
