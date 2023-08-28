@@ -145,6 +145,10 @@ The Bitcoin payment page is now displayed, offering the payer the option to pay 
 
 <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/11-QR_code.png" alt="QR code on the Bitcoin payment page" />
 
+== Upgrade Notice ==
+
+Follow updates on plugin's GitHub page:
+https://github.com/Coinsnap/coinsnap-woocommerce/
 
 == Frequently Asked Questions ==
 
