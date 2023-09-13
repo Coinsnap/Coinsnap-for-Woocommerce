@@ -37,7 +37,6 @@ After successful installation, click Activate and then you can start setting up 
 
 If you don’t want to install Coinsnap WooCommerce plugin directly via plugin, you can download Coinsnap WooCommerce plugin from Coinsnap Github page or from WordPress directory and install it via “Upload Plugin” function.
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/01-Add-Coinsnap-Woocommerce-plugin.png)
 <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/01-Add-Coinsnap-Woocommerce-plugin.png" alt="Add Coinsnap Woocommerce plugin" />
 
 Click “Install now” and Coinsnap WooCommerce plugin will be installed in WordPress.
@@ -58,7 +57,6 @@ If you don’t have a Coinsnap account yet, you can do so via the link shown: Co
 
 ### 2.1. Create a Coinsnap Account ####
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/01-Add-Coinsnap-Woocommerce-plugin.png)
 <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/02-coinsnap-account.png" alt="Coinsnap account" />
 
 Now go to the Coinsnap website at: https://app.coinsnap.io/register and open an account by entering your email address and a password of your choice.
