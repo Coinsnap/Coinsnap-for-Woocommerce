@@ -45,8 +45,6 @@ class CoinsnapWCPlugin {
 	$this->includes();
 
 	add_action('woocommerce_thankyou_coinsnap', [$this, 'orderStatusThankYouPage'], 10, 1);
-	//add_action( 'wp_ajax_coinsnap_modal_checkout', [$this, 'processAjaxModalCheckout'] );
-	//add_action( 'wp_ajax_nopriv_coinsnap_modal_checkout', [$this, 'processAjaxModalCheckout'] );
 
 	// Run the updates.
 	\Coinsnap\WC\Helper\UpdateManager::processUpdates();
@@ -63,7 +61,7 @@ class CoinsnapWCPlugin {
             add_action( 'wp_ajax_handle_ajax_api_url', [$this, 'processAjaxApiUrl'] );
 
             $this->dependenciesNotification();
-            //$this->legacyPluginNotification();
+            //$this->legacyPluginNotification(); // Not in v 1.0
             $this->notConfiguredNotification();
 	}
     }
@@ -130,72 +128,6 @@ class CoinsnapWCPlugin {
             Notice::addNotice('error', $curlMessage);
 	}
     }
-    
-/*
-//  Handles the AJAX callback from the GlobalSettings form.
-    
-    public function processAjaxApiUrl() {
-        $nonce = $_POST['apiNonce'];
-	if ( ! wp_verify_nonce( $nonce, 'coinsnap-api-url-nonce' ) ) {
-            wp_die('Unauthorized!', '', ['response' => 401]);
-	}
-
-	if ( current_user_can( 'manage_options' ) ) {
-			$host = filter_var($_POST['host'], FILTER_VALIDATE_URL);
-
-			if ($host === false || (substr( $host, 0, 7 ) !== "http://" && substr( $host, 0, 8 ) !== "https://")) {
-				wp_send_json_error("Error validating Coinsnap Server URL.");
-			}
-
-			$permissions = array_merge(CoinsnapApiAuthorization::REQUIRED_PERMISSIONS, CoinsnapApiAuthorization::OPTIONAL_PERMISSIONS);
-
-			try {
-				// Create the redirect url to Coinsnap instance.
-				$url = \Coinsnap\Client\ApiKey::getAuthorizeUrl(
-					$host,
-					$permissions,
-					'WooCommerce',
-					true,
-					true,
-					home_url('?coinsnap-settings-callback'),
-					null
-				);
-
-				// Store the host to options before we leave the site.
-				update_option('coinsnap_url', $host);
-
-				// Return the redirect url.
-				wp_send_json_success(['url' => $url]);
-			} catch (\Throwable $e) {
-				Logger::debug('Error fetching redirect url from Coinsnap Server.');
-			}
-	}
-
-        wp_send_json_error("Error processing Ajax request.");
-    }
-
-// Handles the AJAX callback from the Payment Request on the checkout page.
-
-    public function processAjaxModalCheckout(){
-        Logger::debug('Entering ' . __METHOD__);
-        $nonce = $_POST['apiNonce'];
-	if ( ! wp_verify_nonce( $nonce, 'coinsnap-nonce' ) ) {
-            wp_die('Unauthorized!', '', ['response' => 401]);
-	}
-
-	if ( get_option('coinsnap_modal_checkout') !== 'yes' ) {
-            wp_die('Modal checkout mode not enabled.', '', ['response' => 400]);
-	}
-
-	wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
-            try {
-                WC()->checkout()->process_checkout();
-            }
-        catch (\Throwable $e) {
-            Logger::debug('Error processing modal checkout ajax callback: ' . $e->getMessage());
-        }
-    }
-*/
 
     public static function orderStatusThankYouPage($order_id){
 	if (!$order = wc_get_order($order_id)) {
