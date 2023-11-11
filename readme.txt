@@ -154,8 +154,6 @@ https://github.com/Coinsnap/coinsnap-woocommerce/
 
 Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-plugin/
 
-You can find extensive documentation and answers to many of your questions on BTCPay server here: https://docs.btcpayserver.org
-
 == Screenshots ==
 
 1.  Add Coinsnap Woocommerce plugin

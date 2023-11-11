@@ -1,16 +1,10 @@
 <?php
 
 declare(strict_types=1);
-
 namespace Coinsnap\Client;
 
-/**
- * Handles stores on chain payment methods.
- *
- * @see https://docs.btcpayserver.org/API/Greenfield/v1/#tag/Store-Payment-Methods-(On-Chain)
- */
-class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
-{
+//  Handles stores on chain payment methods.
+class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient{
     /**
      * @param string $storeId
      *
@@ -155,12 +149,7 @@ class StorePaymentMethodOnChain extends AbstractStorePaymentMethodClient
     }
 
     /**
-     * Disables the OnChain payment method. It also removes your configured
-     * xpub key.
-     *
-     * @param string $storeId
-     * @param string $cryptoCode e.g. BTC
-     *
+     * Disables the OnChain payment method. It also removes your configured xpub key.
      * @return bool
      */
     public function removePaymentMethod(string $storeId, string $cryptoCode): bool

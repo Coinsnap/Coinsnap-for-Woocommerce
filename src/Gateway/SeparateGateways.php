@@ -15,8 +15,8 @@ class SeparateGateways {
 	const PM_GENERATED_CACHE_KEY = 'coinsnap_payment_methods_generated';
 
 	public static function generateClasses() {
-		// Load payment methods from BTCPay Server as separate gateways.
-		if (get_option('btcpay_gf_separate_gateways') === 'yes') {
+		// Load payment methods from Coinsnap Server as separate gateways.
+		if (get_option('coinsnap_separate_gateways') === 'yes') {
 			if ( $separateGateways = \Coinsnap\WC\Helper\CoinsnapApiHelper::supportedPaymentMethods() ) {
 				// Check if generated classes match cache.
 				$generatedGateways = get_transient(self::PM_GENERATED_CACHE_KEY);
@@ -48,7 +48,7 @@ class SeparateGateways {
 				                  \$this->id = '{$id}';
 				                  parent::__construct();
 				                  \$this->method_title = 'Coinsnap Gateway: {$symbol}';
-				                  \$this->method_description = 'This is separate payment gateway managed by BTCPay.';
+				                  \$this->method_description = 'This is separate payment gateway managed by Coinsnap.';
 				                  \$this->tokenType = \$this->getTokenType();
 				                  \$this->primaryPaymentMethod = '{$symbol}';
 			                    }
@@ -65,14 +65,14 @@ class SeparateGateways {
 									parent::init_form_fields();
 									\$this->form_fields += [
 										'token_type' => [
-											'title' => __( 'Token type', 'btcpay-greenfield-for-woocommerce' ),
+											'title' => __( 'Token type', 'coinsnap-for-woocommerce' ),
 											'type' => 'select',
 											'options' => [
 												'payment' => 'Payment',
 												'promotion' => 'Promotion'
 											],
 											'default' => 'payment',
-											'description' => __( 'Tokens of type promotion will not have a FIAT (USD, EUR, ..) exchange rate but counted as 1 per item quantity. See <a target=\"_blank\" href=\"https://docs.btcpayserver.org/FAQ/Integrations/#token-types\">here</a> for more details.', 'btcpay-greenfield-for-woocommerce' ),
+											'description' => __( 'Tokens of type promotion will not have a FIAT (USD, EUR, ..) exchange rate but counted as 1 per item quantity.', 'coinsnap-for-woocommerce' ),
 											'desc_tip' => false,
 										],
 									];

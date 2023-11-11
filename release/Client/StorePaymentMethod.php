@@ -39,7 +39,7 @@ class StorePaymentMethod extends AbstractClient
      * them or change their settings.
      *
      * @param string $storeId
-     * @param string $paymentMethod Payment method e.g. BTC, BTC-LightningNetwork
+     * @param string $paymentMethod Payment method
      * @param array $settings See updatePaymentMethod functions of
      *                        StorePaymentMethodLightningNetwork and
      *                        StorePaymentMethodOnChain classes for what you can
@@ -62,7 +62,7 @@ class StorePaymentMethod extends AbstractClient
      * this will also delete your configured xpub and/or hot wallet.
      *
      * @param string $storeId
-     * @param string $paymentMethod Payment method e.g. BTC, BTC-LightningNetwork
+     * @param string $paymentMethod Payment method
      *
      * @return bool
      */
@@ -75,9 +75,7 @@ class StorePaymentMethod extends AbstractClient
 
     /**
      * Helper function to extract cryptoCode and payment type from the string.
-     *
-     * @param string $paymentMethod Payment method e.g. BTC, BTC-LightningNetwork
-     *
+     * @param string $paymentMethod Payment method
      * @return array
      */
     private function determinePaymentType(string $paymentMethod): array

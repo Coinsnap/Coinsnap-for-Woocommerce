@@ -2,7 +2,7 @@
 
 namespace Coinsnap\WC\Gateway;
 
-//  Default Gateway that provides all available payment methods of BTCPay Server store configuration.
+//  Default Gateway that provides all available payment methods of Coinsnap Server store configuration.
 class DefaultGateway extends AbstractGateway {
     public function __construct() {
         // Set the id first.
@@ -16,7 +16,7 @@ class DefaultGateway extends AbstractGateway {
 		$this->order_button_text  = __('Proceed to payment gateway', 'coinsnap-for-woocommerce');
 		// Admin facing title and description.
 		$this->method_title       = 'Coinsnap (default)';
-		$this->method_description = __('Coinsnap default gateway supporting all available tokens on your BTCPay store.', 'coinsnap-for-woocommerce');
+		$this->method_description = __('Coinsnap default gateway supporting all available tokens on your store.', 'coinsnap-for-woocommerce');
 
 		// Actions.
 		add_action('woocommerce_api_coinsnap', [$this, 'processWebhook']);
@@ -48,7 +48,7 @@ class DefaultGateway extends AbstractGateway {
 				'label'       => __( 'Enforce payment methods "payment". This way tokens of type promotion will be excluded for this gateway.', 'coinsnap-for-woocommerce' ),
 				'default'     => 'yes',
 				'value'       => 'yes',
-				'description' => __( 'This will override the default Coinsnap payment method (defaults to all supported by BTCPay Server) and enforce to tokens of type "payment". This is useful if you have enabled separate payment gateways and want full control on what is available on BTCPay Server payment page.', 'coinsnap-for-woocommerce' ),
+				'description' => __( 'This will override the default Coinsnap payment method (defaults to all supported by Coinsnap Server) and enforce to tokens of type "payment". This is useful if you have enabled separate payment gateways and want full control on what is available on Coinsnap Server payment page.', 'coinsnap-for-woocommerce' ),
 				'desc_tip'    => true,
 			],
 		];
@@ -57,7 +57,7 @@ class DefaultGateway extends AbstractGateway {
 	
 	public function getPaymentMethods(): array {
 
-		$btcPayPaymentGW = [];
+		$coinsnapGateway = [];
 
 		if ($this->get_option('enforce_payment_tokens') === 'yes') {
 			$gateways = WC()->payment_gateways->payment_gateways();
@@ -67,19 +67,19 @@ class DefaultGateway extends AbstractGateway {
 					strpos($id, 'coinsnap') !== FALSE
 					&& (isset($gateway->tokenType) && $gateway->tokenType === 'payment')
 				) {
-					$btcPayPaymentGW[] = $gateway->primaryPaymentMethod;
+					$coinsnapGateway[] = $gateway->primaryPaymentMethod;
 				}
 			}
-			return $btcPayPaymentGW;
+			return $coinsnapGateway;
 		}
 
 		// If payment tokens are not enforced set all.
 		$separateGateways = \Coinsnap\WC\Helper\ApiHelper::supportedPaymentMethods();
 		foreach ($separateGateways as $sgw) {
-			$btcPayPaymentGW[] = $sgw['symbol'];
+			$coinsnapGateway[] = $sgw['symbol'];
 		}
 
-		return $btcPayPaymentGW;
+		return $coinsnapGateway;
 	}
 
 }

@@ -1,7 +1,6 @@
 <?php
 
 declare(strict_types=1);
-
 namespace Coinsnap\WC\Helper;
 
 use Coinsnap\Client\ApiKey;
@@ -82,13 +81,11 @@ class CoinsnapApiHelper {
 		return null;
 	}
 
-	/**
-	 * List supported payment methods by BTCPay Server.
-	 */
+	//  List supported payment methods by Coinsnap Server.
 	public static function supportedPaymentMethods(): array {
 		$paymentMethods = [];
 
-		// Use transients API to cache pm for a few minutes to avoid too many requests to BTCPay Server.
+		// Use transients API to cache pm for a few minutes to avoid too many requests to Coinsnap Server.
 		if ($cachedPaymentMethods = get_transient(self::PM_CACHE_KEY)) {
 			return $cachedPaymentMethods;
 		}
@@ -123,16 +120,12 @@ class CoinsnapApiHelper {
 		return $paymentMethods;
 	}
 
-	/**
-	 * Deletes local cache of supported payment methods.
-	 */
+	//  Deletes local cache of supported payment methods.
 	public static function clearSupportedPaymentMethodsCache(): void {
 		delete_transient( self::PM_CACHE_KEY );
 	}
 
-	/**
-	 * Returns BTCPay Server invoice url.
-	 */
+	//  Returns Coinsnap Server invoice url.
 	public function getInvoiceRedirectUrl($invoiceId): ?string {
 		if ($this->configured) {
 			return $this->url . '/i/' . urlencode($invoiceId);
@@ -140,22 +133,16 @@ class CoinsnapApiHelper {
 		return null;
 	}
 
-	/**
-	 * Check webhook signature to be a valid request.
-	 */
+	//  Check webhook signature to be a valid request.
 	public function validWebhookRequest(string $signature, string $requestData): bool {
-            
             \Coinsnap\WC\Helper\Logger::debug( $signature . ' - ' . $requestData . ' - ' . $this->webhook['secret'], true );
-            
-		if ($this->configured) {
-			return Webhook::isIncomingWebhookRequestValid($requestData, $signature, $this->webhook['secret']);
-		}
-		return false;
+            if ($this->configured) {
+                return Webhook::isIncomingWebhookRequestValid($requestData, $signature, $this->webhook['secret']);
+            }
+            return false;
 	}
 
-	/**
-	 * Checks if the provided API config already exists in options table.
-	 */
+	//  Checks if the provided API config already exists in options table.
 	public static function apiCredentialsExist(string $apiUrl, string $apiKey, string $storeId): bool {
 		if ($config = self::getConfig()) {
 			if (
@@ -170,9 +157,7 @@ class CoinsnapApiHelper {
 		return false;
 	}
 
-	/**
-	 * Checks if a given invoice id has status of fully paid (settled) or paid late.
-	 */
+	//  Checks if a given invoice id has status of fully paid (settled) or paid late.
 	public static function invoiceIsFullyPaid(string $invoiceId): bool {
 		if ($config = self::getConfig()) {
 			$client = new Invoice($config['url'], $config['api_key']);

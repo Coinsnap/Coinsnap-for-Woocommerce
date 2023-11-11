@@ -103,7 +103,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 		// Check for existing invoice and redirect instead.
 		if ( $this->validInvoiceExists( $orderId ) ) {
-			$existingInvoiceId = get_post_meta( $orderId, 'BTCPay_id', true );
+			$existingInvoiceId = get_post_meta( $orderId, 'Coinsnap_id', true );
 			Logger::debug( 'Found existing Coinsnap invoice and redirecting to it. Invoice id: ' . $existingInvoiceId );
 
 			return [
@@ -118,7 +118,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		Logger::debug( 'Creating invoice on Coinsnap Server' );
 		if ( $invoice = $this->createInvoice( $order ) ) {
 
-			// Todo: update order status and BTCPay meta data.
+			// Todo: update order status and Coinsnap meta data.
 
 			Logger::debug( 'Invoice creation successful, redirecting user.' );
 
@@ -143,7 +143,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 		// Check if the api key has support for refunds, abort if not.
 		if (!$this->apiHelper->apiKeyHasRefundPermission()) {
-			$errKeyInfo = 'Your current API key does not support refunds. You will need to create a new one with the required permission. See our upgrade guide https://docs.btcpayserver.org/WooCommerce/#create-a-new-api-key';
+			$errKeyInfo = 'Your current API key does not support refunds. You will need to create a new one with the required permission.';
 			Logger::debug(__METHOD__ . ' : The current api key does not support refunds.' );
 			return new \WP_Error('1', $errKeyInfo);
 		}
@@ -161,9 +161,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 		// Check if order has invoice id.
 		if (!$invoiceId = $order->get_meta('Coinsnap_id')) {
-			$errNoBtcpayId = __METHOD__ . ': no Coinsnap invoice id found, aborting.';
-			Logger::debug($errNoBtcpayId);
-			return new \WP_Error('1', $errNoBtcpayId);
+			$errNoCoinsnapId = __METHOD__ . ': no Coinsnap invoice id found, aborting.';
+			Logger::debug($errNoCoinsnapId);
+			return new \WP_Error('1', $errNoCoinsnapId);
 		}
 
 		// Make sure the refund amount is not greater than the invoice amount.
@@ -216,7 +216,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 				$order->add_order_note($successMsg);
 				// Use add_meta_data to allow for partial refunds.
-				$order->add_meta_data('BTCPay_refund', $refundMsg, false);
+				$order->add_meta_data('Coinsnap_refund', $refundMsg, false);
 				$order->save();
 				return true;
 			} else {
@@ -341,34 +341,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		// Load BTCPay modal JS.
-		wp_enqueue_script( 'coinsnap_modal_js', $this->apiHelper->url . '/modal/btcpay.js', [], COINSNAP_VERSION );
-
-		// Register modal script.
-		wp_register_script(
-			'coinsnap_modal_checkout',
-			COINSNAP_PLUGIN_URL . 'assets/js/modalCheckout.js',
-			[ 'jquery' ],
-			COINSNAP_VERSION,
-			true
-		);
-
-		// Pass object BTCPayWP to be available on the frontend.
-		wp_localize_script( 'coinsnap_modal_checkout', 'BTCPayWP', [
-			'modalEnabled' => get_option('coinsnap_modal_checkout') === 'yes',
-			'debugEnabled' => get_option('coinsnap_debug') === 'yes',
-			'url' => admin_url( 'admin-ajax.php' ),
-			'apiUrl' => $this->apiHelper->url,
-			'apiNonce' => wp_create_nonce( 'btcpay-nonce' ),
-			'isChangePaymentPage' => isset( $_GET['change_payment_method'] ) ? 'yes' : 'no',
-			'isPayForOrderPage' => is_wc_endpoint_url( 'order-pay' ) ? 'yes' : 'no',
-			'isAddPaymentMethodPage' => is_add_payment_method_page() ? 'yes' : 'no',
-			'textInvoiceExpired' =>  _x('The invoice expired. Please try again, choose a different payment method or contact us if you paid but the payment did not confirm in time.', 'js', 'coinsnap-for-woocommerce'),
-			'textModalClosed' =>  _x('Payment aborted by you. Please try again or choose a different payment method.', 'js', 'coinsnap-for-woocommerce'),
-		] );
-
-		// Add the registered modal script to frontend.
-		wp_enqueue_script( 'coinsnap_modal_checkout' );
+		
 	}
 
 	/**
@@ -396,21 +369,21 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				$postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
 
 				if (!isset($postData->invoiceId)) {
-					Logger::debug('No BTCPay invoiceId provided, aborting.');
-					wp_die('No BTCPay invoiceId provided, aborting.');
+					Logger::debug('No Coinsnap invoiceId provided, aborting.');
+					wp_die('No Coinsnap invoiceId provided, aborting.');
 				}
 
-				// Load the order by metadata field BTCPay_id
+				// Load the order by metadata field Coinsnap_id
 				$orders = wc_get_orders([
-					'meta_key' => 'BTCPay_id',
+					'meta_key' => 'Coinsnap_id',
 					'meta_value' => $postData->invoiceId
 				]);
 
 				// Abort if no orders found.
 				if (count($orders) === 0) {
-					Logger::debug('Could not load order by BTCPay invoiceId: ' . $postData->invoiceId);
+					Logger::debug('Could not load order by Coinsnap invoiceId: ' . $postData->invoiceId);
 					// Note: we return status 200 here for wp_die() which seems counter intuative but needs to be done
-					// to not clog up the BTCPay servers webhook processing queue until it is fixed there.
+					// to not clog up the Coinsnap servers webhook processing queue until it is fixed there.
 					wp_die('No order found for this invoiceId.', '', ['response' => 200]);
 				}
 
@@ -499,7 +472,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * Checks if the order has already a BTCPay invoice set and checks if it is still
+	 * Checks if the order has already a Coinsnap invoice set and checks if it is still
 	 * valid to avoid creating multiple invoices for the same order on Coinsnap Server end.
 	 *
 	 * @param int $orderId
@@ -507,9 +480,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * @return mixed Returns false if no valid invoice found or the invoice id.
 	 */
 	protected function validInvoiceExists( int $orderId ): bool {
-		// Check order metadata for BTCPay_id.
-		if ( $invoiceId = get_post_meta( $orderId, 'BTCPay_id', true ) ) {
-			// Validate the order status on BTCPay server.
+		// Check order metadata for Coinsnap_id.
+		if ( $invoiceId = get_post_meta( $orderId, 'Coinsnap_id', true ) ) {
+			// Validate the order status on Coinsnap server.
 			$client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
 			try {
 				Logger::debug( 'Trying to fetch existing invoice from Coinsnap Server.' );
@@ -532,7 +505,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 						
                                                 // Mark existing invoice as invalid.
 						$order = wc_get_order($orderId);
-						$order->add_order_note(__('BTCPay invoice manually set to invalid because customer went back to checkout and changed payment gateway.', 'coinsnap-for-woocommerce'));
+						$order->add_order_note(__('Coinsnap invoice manually set to invalid because customer went back to checkout and changed payment gateway.', 'coinsnap-for-woocommerce'));
 						$this->markInvoiceInvalid($invoiceId);
 						return false;
 					}
@@ -570,36 +543,36 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		// Load payment data from API.
 		try {
 			$client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
-			$allPaymentData = $client->getPaymentMethods($this->apiHelper->storeId, $order->get_meta('BTCPay_id'));
+			$allPaymentData = $client->getPaymentMethods($this->apiHelper->storeId, $order->get_meta('Coinsnap_id'));
 
 			foreach ($allPaymentData as $payment) {
 				// Only continue if the payment method has payments made.
 				if ((float) $payment->getPaymentMethodPaid() > 0.0) {
 					$paymentMethodName = $payment->getPaymentMethod();
 					// Update order meta data with payment methods and transactions.
-					update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_total_paid", $payment->getTotalPaid() ?? '' );
-					update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_total_amount", $payment->getAmount() ?? '' );
-					update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_total_due", $payment->getDue() ?? '' );
-					update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_total_fee", $payment->getNetworkFee() ?? '' );
-					update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_rate", $payment->getRate() ?? '' );
+					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_paid", $payment->getTotalPaid() ?? '' );
+					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_amount", $payment->getAmount() ?? '' );
+					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_due", $payment->getDue() ?? '' );
+					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_fee", $payment->getNetworkFee() ?? '' );
+					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_rate", $payment->getRate() ?? '' );
 					if ((float) $payment->getRate() > 0.0) {
 						$formattedRate = number_format((float) $payment->getRate(), wc_get_price_decimals(), wc_get_price_decimal_separator(), wc_get_price_thousand_separator());
-						update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_rateFormatted", $formattedRate );
+						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_rateFormatted", $formattedRate );
 					}
 
 					// For each actual payment make a separate entry to make sense of it.
 					foreach ($payment->getPayments() as $index => $trx) {
-						update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_{$index}_id", $trx->getTransactionId() ?? '' );
-						update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_{$index}_timestamp", $trx->getReceivedTimestamp() ?? '' );
-						update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_{$index}_destination", $trx->getDestination() ?? '' );
-						update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_{$index}_amount", $trx->getValue() ?? '' );
-						update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_{$index}_status", $trx->getStatus() ?? '' );
-						update_post_meta( $order->get_id(), "BTCPay_{$paymentMethodName}_{$index}_networkFee", $trx->getFee() ?? '' );
+						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_id", $trx->getTransactionId() ?? '' );
+						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_timestamp", $trx->getReceivedTimestamp() ?? '' );
+						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_destination", $trx->getDestination() ?? '' );
+						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_amount", $trx->getValue() ?? '' );
+						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_status", $trx->getStatus() ?? '' );
+						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_networkFee", $trx->getFee() ?? '' );
 					}
 				}
 			}
 		} catch (\Throwable $e) {
-			Logger::debug( 'Error processing payment data for invoice: ' . $order->get_meta('BTCPay_id') . ' and order ID: ' . $order->get_id() );
+			Logger::debug( 'Error processing payment data for invoice: ' . $order->get_meta('Coinsnap_id') . ' and order ID: ' . $order->get_id() );
 			Logger::debug($e->getMessage());
 		}
 	}
@@ -636,21 +609,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		$checkoutOptions->setRedirectURL( $redirectUrl );
 		Logger::debug( 'Setting redirect url to: ' . $redirectUrl );
 
-		// Transaction speed - We don't use it
-                /*
-		$transactionSpeed   = get_option( 'coinsnap_transaction_speed', 'default' );
-		$allowedSpeedValues = [
-			$checkoutOptions::SPEED_HIGH,
-			$checkoutOptions::SPEED_MEDIUM,
-			$checkoutOptions::SPEED_LOWMEDIUM,
-			$checkoutOptions::SPEED_LOW
-		];
-		if ( $transactionSpeed !== 'default' && in_array($transactionSpeed, $allowedSpeedValues)) {
-			$checkoutOptions->setSpeedPolicy( $transactionSpeed );
-		} else {
-			Logger::debug('Did not set transaction speed setting, using Coinsnap Server store config instead. Invalid value given: ' . $transactionSpeed);
-		}
-                */                
+		         
 
 		// Payment methods.
 		if ($paymentMethods = $this->getPaymentMethods()) {
@@ -668,7 +627,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		}
 
 		// Handle Sats-mode.
-		// Because BTCPay does not understand SAT as a currency we need to change to BTC and adjust the amount.
+		// Because Coinsnap does not understand SAT as a currency we need to change to BTC and adjust the amount.
 		if ($currency === 'SAT') {
 			$currency = 'BTC';
 			$amountBTC = bcdiv($amount->__toString(), '100000000', 8);
@@ -736,12 +695,12 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * References WC order metadata with BTCPay invoice data.
+	 * References WC order metadata with Coinsnap invoice data.
 	 */
 	protected function updateOrderMetadata( int $orderId, \Coinsnap\Result\Invoice $invoice ) {
-		// Store relevant BTCPay invoice data.
-		update_post_meta( $orderId, 'BTCPay_redirect', $invoice->getData()['checkoutLink'] );
-		update_post_meta( $orderId, 'BTCPay_id', $invoice->getData()['id'] );
+		// Store relevant Coinsnap invoice data.
+		update_post_meta( $orderId, 'Coinsnap_redirect', $invoice->getData()['checkoutLink'] );
+		update_post_meta( $orderId, 'Coinsnap_id', $invoice->getData()['id'] );
 	}
 
 	/**
@@ -771,14 +730,14 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * Get type of BTCPay payment method/token as configured. Can be payment or promotion.
+	 * Get type of Coinsnap payment method/token as configured. Can be payment or promotion.
 	 */
 	public function getTokenType(): string {
 		return $this->get_option('token_type', 'payment');
 	}
 
 	/**
-	 * Get allowed BTCPay payment methods (needed for limiting invoices to specific payment methods).
+	 * Get allowed Coinsnap payment methods (needed for limiting invoices to specific payment methods).
 	 */
 	abstract public function getPaymentMethods(): array;
 }

@@ -136,7 +136,7 @@ class Webhook extends AbstractClient
         }
 
         if ($secret === '') {
-            throw new \InvalidArgumentException('Argument $secret should be NULL (let BTCPay Server auto-generate a secret) or you should provide a long and safe secret string.');
+            throw new \InvalidArgumentException('Argument $secret should be NULL (let Server auto-generate a secret) or you should provide a long and safe secret string.');
         } 
         elseif ($secret !== null) $data['secret'] = $secret;
 
@@ -155,13 +155,6 @@ class Webhook extends AbstractClient
 
     /**
      * Updates an existing webhook.
-     *
-     * Important: due to a bug in BTCPay Server versions <= 1.6.3.0 you need
-     * to pass the $secret explicitly as it would overwrite your existing secret
-     * otherwise. On newer versions BTCPay Server >= 1.6.4.0, if you do NOT set
-     * a secret it won't change it and everything will continue to work.
-     *
-     * @see https://github.com/btcpayserver/btcpayserver/issues/4010
      *
      * @return \Coinsnap\Result\Webhook
      * @throws \JsonException
