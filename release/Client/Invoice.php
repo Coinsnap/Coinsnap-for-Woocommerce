@@ -59,7 +59,6 @@ class Invoice extends AbstractClient{
                 'redirectUrl' => $redirectUrl,
                 'orderId' => $orderId,
                 'metadata' => (count($metaDataMerged) > 0)? $metaDataMerged : null,
-        //        'checkout' => $checkoutOptions ? $checkoutOptions->toArray() : null,
                 'referralCode' => $referralCode
         );
         
@@ -92,90 +91,4 @@ class Invoice extends AbstractClient{
         }
     }
 
-    public function getAllInvoices(string $storeId): \Coinsnap\Result\InvoiceList
-    {
-        return $this->_getAllInvoicesWithFilter($storeId, null);
-    }
-
-    public function getInvoicesByOrderIds(string $storeId, array $orderIds): \Coinsnap\Result\InvoiceList
-    {
-        return $this->_getAllInvoicesWithFilter($storeId, $orderIds);
-    }
-
-    private function _getAllInvoicesWithFilter(string $storeId,array $filterByOrderIds = null): \Coinsnap\Result\InvoiceList {
-        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices?';
-        if ($filterByOrderIds !== null) {
-            foreach ($filterByOrderIds as $filterByOrderId) {
-                $url .= 'orderId=' . urlencode($filterByOrderId) . '&';
-            }
-        }
-
-        // Clean URL
-        $url = rtrim($url, '&');
-        $url = rtrim($url, '?');
-
-        $headers = $this->getRequestHeaders();
-        $method = 'GET';
-        $response = $this->getHttpClient()->request($method, $url, $headers);
-
-        if ($response->getStatus() === 200) {
-            return new \Coinsnap\Result\InvoiceList(
-                json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
-            );
-        } else {
-            throw $this->getExceptionByStatusCode($method, $url, $response);
-        }
-    }
-
-    /**
-     * @return InvoicePaymentMethod[]
-     */
-    public function getPaymentMethods(string $storeId, string $invoiceId): array
-    {
-        $method = 'GET';
-        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices/'.urlencode($invoiceId).'/payment-methods';
-        $headers = $this->getRequestHeaders();
-        $response = $this->getHttpClient()->request($method, $url, $headers);
-
-        if ($response->getStatus() === 200) {
-            $r = [];
-            $data = json_decode(
-                $response->getBody(),
-                true,
-                512,
-                JSON_THROW_ON_ERROR
-            );
-            foreach ($data as $item) {
-                $item = new \Coinsnap\Result\InvoicePaymentMethod($item);
-                $r[] = $item;
-            }
-            return $r;
-        } else {
-            throw $this->getExceptionByStatusCode($method, $url, $response);
-        }
-    }
-
-    public function markInvoiceStatus(string $storeId, string $invoiceId, string $markAs): \Coinsnap\Result\Invoice
-    {
-        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices/'.urlencode($invoiceId).'/status';
-        $headers = $this->getRequestHeaders();
-        $method = 'POST';
-
-        $body = json_encode(
-            [
-                'status' => $markAs
-            ],
-            JSON_THROW_ON_ERROR
-        );
-
-        $response = $this->getHttpClient()->request($method, $url, $headers, $body);
-
-        if ($response->getStatus() === 200) {
-            return new \Coinsnap\Result\Invoice(
-                json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
-            );
-        } else {
-            throw $this->getExceptionByStatusCode($method, $url, $response);
-        }
-    }
 }
