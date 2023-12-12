@@ -6,7 +6,6 @@ namespace Coinsnap\WC\Gateway;
 
 use Coinsnap\Client\Invoice;
 use Coinsnap\Client\InvoiceCheckoutOptions;
-use Coinsnap\Client\PullPayment;
 use Coinsnap\Util\PreciseNumber;
 use Coinsnap\WC\Helper\CoinsnapApiHelper;
 use Coinsnap\WC\Helper\CoinsnapApiWebhook;
@@ -14,26 +13,27 @@ use Coinsnap\WC\Helper\Logger;
 use Coinsnap\WC\Helper\OrderStates;
 
 abstract class AbstractGateway extends \WC_Payment_Gateway {
-	const ICON_MEDIA_OPTION = 'icon_media_id';
-	public $tokenType;
-	public $primaryPaymentMethod;
-	protected $apiHelper;
+    const ICON_MEDIA_OPTION = 'icon_media_id';
+    public $tokenType;
+    public $primaryPaymentMethod;
+    protected $apiHelper;
 
-	public function __construct() {
-		// General gateway setup.
-		$this->icon              = $this->getIcon();
-		$this->has_fields        = false;
-		$this->order_button_text = __( 'Proceed to payment gateway', 'coinsnap-for-woocommerce' );
+    public function __construct() {
+        
+        // General gateway setup.
+	$this->icon              = $this->getIcon();
+	$this->has_fields        = false;
 
-		// Load the settings.
-		$this->init_form_fields();
-		$this->init_settings();
+	// Load the settings.
+	$this->init_form_fields();
+	$this->init_settings();
 
-		// Define user facing set variables.
-		$this->title        = $this->getTitle();
-		$this->description  = $this->getDescription();
+	// Define user facing set variables.
+	$this->title        = $this->getTitle();
+	$this->description  = $this->getDescription();
+        $this->order_button_text = $this->getButton(); //__( 'Proceed to payment gateway', 'coinsnap-for-woocommerce' );
 
-		$this->apiHelper = new CoinsnapApiHelper();
+	$this->apiHelper = new CoinsnapApiHelper();
 		// Debugging & informational settings.
 		$this->debug_php_version    = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
 		$this->debug_plugin_version = COINSNAP_VERSION;
@@ -43,9 +43,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		add_action('wp_enqueue_scripts', [$this, 'addPublicScripts']);
 		add_action('woocommerce_update_options_payment_gateways_' . $this->getId(), [$this, 'process_admin_options']);
 
-		// Supported features.
-		$this->supports = ['products','refunds'];
-	}
+        // Supported features.
+        $this->supports = ['products'];
+    }
 
 	//  Initialise Gateway Settings Form Fields
 	public function init_form_fields() {
@@ -70,6 +70,13 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				'type'        => 'textarea',
 				'description' => __( 'Message to explain how the customer will be paying for the purchase.', 'coinsnap-for-woocommerce' ),
 				'default'     => $this->getDescription(),
+				'desc_tip'    => true,
+			],
+			'button' => [
+				'title'       => __('Button Text', 'coinsnap-for-woocommerce'),
+				'type'        => 'text',
+				'description' => __('Text on the button', 'coinsnap-for-woocommerce'),
+				'default'     => $this->getButton(),
 				'desc_tip'    => true,
 			],
 			'icon_upload' => [
@@ -131,106 +138,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				'orderCompleteLink' => $order->get_checkout_order_received_url(),
 			];
 		}
-	}
-
-	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		// Check if the Coinsnap Server version used supports refunds.
-		if (!$this->apiHelper->serverSupportsRefunds()) {
-			$errServer = 'Your Coinsnap Server does not support refunds. Make sure to run a Coinsnap Server v1.7.6 or newer.';
-			Logger::debug($errServer);
-			return new \WP_Error('1', $errServer);
-		}
-
-		// Check if the api key has support for refunds, abort if not.
-		if (!$this->apiHelper->apiKeyHasRefundPermission()) {
-			$errKeyInfo = 'Your current API key does not support refunds. You will need to create a new one with the required permission.';
-			Logger::debug(__METHOD__ . ' : The current api key does not support refunds.' );
-			return new \WP_Error('1', $errKeyInfo);
-		}
-
-		// Abort if no amount.
-		if (is_null($amount)) {
-			$errAmount = __METHOD__ . ': refund amount is empty, aborting.';
-			Logger::debug($errAmount);
-			return new \WP_Error('1', $errAmount);
-		}
-
-		$order = wc_get_order($order_id);
-		$refundAmount = PreciseNumber::parseString($amount);
-		$currency = $order->get_currency();
-
-		// Check if order has invoice id.
-		if (!$invoiceId = $order->get_meta('Coinsnap_id')) {
-			$errNoCoinsnapId = __METHOD__ . ': no Coinsnap invoice id found, aborting.';
-			Logger::debug($errNoCoinsnapId);
-			return new \WP_Error('1', $errNoCoinsnapId);
-		}
-
-		// Make sure the refund amount is not greater than the invoice amount.
-		if ($amount > $order->get_remaining_refund_amount()) {
-			$errAmount = __METHOD__ . ': the refund amount can not exceed the order amount, aborting.';
-			Logger::debug($errAmount);
-			return new \WP_Error('1', $errAmount);
-		}
-
-		// Create the payout on Coinsnap Server.
-		// Handle Sats-mode.
-		if ($currency === 'SAT') {
-			$currency = 'BTC';
-			$amountBTC = bcdiv($refundAmount->__toString(), '100000000', 8);
-			$refundAmount = PreciseNumber::parseString($amountBTC);
-		}
-
-		// Get payment methods.
-		$paymentMethods = $this->getPaymentMethods();
-		// Remove LNURL
-		if (in_array('BTC_LNURLPAY', $paymentMethods)) {
-			$paymentMethods = array_diff($paymentMethods, ['BTC_LNURLPAY']);
-		}
-
-		// Create the payout.
-		try {
-			$client = new PullPayment( $this->apiHelper->url, $this->apiHelper->apiKey);
-			// todo: add reason to description with upcoming php lib v3
-			$pullPayment = $client->createPullPayment(
-				$this->apiHelper->storeId,
-				__('Refund for order no.: ', 'coinsnap-for-woocommerce') . $order->get_order_number() . ' reason: ' . $reason,
-				$refundAmount,
-				$currency,
-				null,
-				null,
-				false, // use setting
-				null,
-				null,
-				array_values($paymentMethods)
-			);
-
-			if (!empty($pullPayment)) {
-				$refundMsg = "PullPayment ID: " . $pullPayment->getId() . "\n";
-				$refundMsg .= "Link: " . $pullPayment->getViewLink() . "\n";
-				$refundMsg .= "Amount: " . $amount . " " . $currency . "\n";
-				$refundMsg .= "Reason: " . $reason;
-				$successMsg = 'Successfully created refund: ' . $refundMsg;
-
-				Logger::debug($successMsg);
-
-				$order->add_order_note($successMsg);
-				// Use add_meta_data to allow for partial refunds.
-				$order->add_meta_data('Coinsnap_refund', $refundMsg, false);
-				$order->save();
-				return true;
-			} else {
-				$errEmptyPullPayment = 'Error creating pull payment. Make sure you have the correct api key permissions.';
-				Logger::debug($errEmptyPullPayment, true);
-				return new \WP_Error('1', $errEmptyPullPayment);
-			}
-		} catch (\Throwable $e) {
-			$errException = 'Exception creating pull payment: ' . $e->getMessage();
-			Logger::debug($errException,true);
-			return new \WP_Error('1', $errException);
-		}
-
-		return new \WP_Error('1', 'Error processing the refund, please check logs.');
 	}
 
 	public function process_admin_options() {
@@ -344,9 +251,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		
 	}
 
-	/**
-	 * Process webhooks from Coinsnap.
-	 */
+	// Process webhooks from Coinsnap.
             public function processWebhook() {
 		if ($rawPostData = file_get_contents("php://input")) {
 			//  Validate webhook request.
@@ -727,6 +632,10 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 */
 	public function getDescription(): string {
 		return $this->get_option('description', 'You will be redirected to the Bitcoin Payment Page to complete your purchase');
+	}
+
+	public function getButton(): string {
+		return $this->get_option('button', 'Proceed to payment gateway');
 	}
 
 	/**

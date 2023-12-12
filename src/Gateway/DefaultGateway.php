@@ -13,7 +13,7 @@ class DefaultGateway extends AbstractGateway {
 
 		// todo: maybe make the button text configurable via settings.
 		// General gateway setup.
-		$this->order_button_text  = __('Proceed to payment gateway', 'coinsnap-for-woocommerce');
+		//$this->order_button_text  = __('Proceed to payment gateway', 'coinsnap-for-woocommerce');
 		// Admin facing title and description.
 		$this->method_title       = 'Coinsnap (default)';
 		$this->method_description = __('Coinsnap default gateway supporting all available tokens on your store.', 'coinsnap-for-woocommerce');
