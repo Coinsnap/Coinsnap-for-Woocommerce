@@ -35,7 +35,7 @@ define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );
 define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );
 define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );
 define( 'COINSNAP_SERVER_PATH', 'stores' );
-define( 'COINSNAP_REFERRAL_CODE', '' );
+define( 'COINSNAP_REFERRAL_CODE', 'DEV1e1ea54fedd507e2f447e2963' );
 
 class CoinsnapWCPlugin {
     
