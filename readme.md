@@ -32,12 +32,7 @@ The Coinsnap WooCommerce plugin can be searched and installed in the WordPress p
 
 ![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo1.png)
 
-In your WordPress instance, go to the Plugins > Add New section.
-In the search you enter Coinsnap and get as a result the Coinsnap WooCommerce plugin displayed.
-
-
-Then click Install.
-
+In your WordPress instance, go to the Plugins > Add New section. In the search you enter Coinsnap and get as a result the Coinsnap WooCommerce plugin displayed.
 After successful installation, click Activate and then you can start setting up the plugin.
 
 ### 1.2. Install the Coinsnap WooCommerce plugin from Github page ###
@@ -52,30 +47,3 @@ Then use the “Upload plugin” function to install it. Click on “Install now
 ![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Add-Coinsnap-Woocommerce-plugin.png)
 
 As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
-
-### 2.1. Create a Coinsnap Account ####
-
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/01-Add-Coinsnap-Woocommerce-plugin.png)
-<img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/02-coinsnap-account.png" alt="Coinsnap account" />
-
-Now go to the Coinsnap website at: https://app.coinsnap.io/register and open an account by entering your email address and a password of your choice.
-
-If you are using a Lightning Wallet with Lightning Login, then you can also open a Coinsnap account with it.
-
-<img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/03-Coinsnap-register.png" alt="Coinsnap register" />
-
-
-### 2.2. Confirm email address ####
-
-You will receive an email to the given email address with a confirmation link, which you have to confirm. If you do not find the email, please check your spam folder.
-
-<img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/04-Email-Adresse-bestaetigen.png" alt="Email address confirmation" />
-
-
-Then please log in to the Coinsnap backend with the appropriate credentials.
-
-### 2.3. Set up website at Coinsnap ###
-
-After you sign up, you will be asked to provide two pieces of information.
-
-In the Website Name field, enter the name of your online store that you want customers to see when they check out.
