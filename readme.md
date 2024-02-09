@@ -115,7 +115,7 @@ You will be redirected to the Bitcoin payment page to complete the purchase.
 
 <p float="left">
   <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png" width="350" height="500" />
-  <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9-1.png" width="350" height="500" /> 
+  <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9-1.png" width="380" height="500" /> 
 </p>
 
 The Bitcoin payment page is now displayed and offers the payer the option of paying with Bitcoin or Lightning. Both methods are integrated in the displayed QR code. After successful payment, the invoice can be viewed in detail.
