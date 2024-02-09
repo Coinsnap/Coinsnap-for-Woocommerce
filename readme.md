@@ -49,11 +49,9 @@ Find the green button labeled Code. When you click on it, the menu opens and Dow
 
 Then use the “Upload plugin” function to install it. Click on “Install now” and the Coinsnap for WooCommerce plugin will be added to your WordPress website. It can then be connected to the Coinsnap payment gateway.
 
-As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
-
 ![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Add-Coinsnap-Woocommerce-plugin.png)
 
-Click “Install now” and Coinsnap WooCommerce plugin will be installed in WordPress.
+As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
 
 ### 2.1. Create a Coinsnap Account ####
 
