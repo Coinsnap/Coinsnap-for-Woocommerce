@@ -59,7 +59,7 @@ After clicking on the link provided or going to the Coinsnap settings tab, a for
 
 ![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Bitcoin+Lightning.png)
 
-These details are provided via your Coinsnap account in the store settings section.
+These details are provided via your Coinsnap account in the store settings section. If you do not yet have a Coinsnap account, you can register under the following link: [Coinsnap registration](https://app.coinsnap.io/register).
 
 ### 2.1.1. Coinsnap Store Settings needed for configuration ###
 
@@ -69,4 +69,16 @@ Go to the Settings menu item in the Coinsnap backend. There you will find the Co
 
 Click on the “Save changes” button at the bottom of the page to apply and save the settings.
 
-If you do not yet have a Coinsnap account, you can register under the following link: [Coinsnap registration](https://app.coinsnap.io/register).
+== WooCommerce payment settings ==
+
+### 3.1. WooCommerce payment settings ###
+
+Navigate to the Payment tab under the WooCommerce settings to see a list of all available payment methods. Coinsnap is shown at the end of the list.
+
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo4-1.png)
+
+##### (1) Activate Coinsnap #####
+You must activate Coinsnap as a payment option.
+
+##### (2) Additional configurations #####
+To do this, click on the “End setup” or “Manage” button.
