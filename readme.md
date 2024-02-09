@@ -58,4 +58,4 @@ After you have installed and activated the Coinsnap for WooCommerce plugin, you 
 After clicking on the link provided or going to the Coinsnap settings tab, a form will appear asking you for your Coinsnap Store ID and your Coinsnap API key.
 
 These details are provided via your Coinsnap account in the store settings section.
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Bitcoin+Lightning Server Payments Settings.png)
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Bitcoin+Lightning.png)
