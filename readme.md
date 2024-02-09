@@ -71,7 +71,7 @@ Click on the “Save changes” button at the bottom of the page to apply and sa
 
 == WooCommerce payment settings ==
 
-### 3.1. WooCommerce payment settings ###
+### 3. WooCommerce payment settings ###
 
 Navigate to the Payment tab under the WooCommerce settings to see a list of all available payment methods. Coinsnap is shown at the end of the list.
 
@@ -101,3 +101,16 @@ By selecting the “Upload or select icon” button, you have the option of addi
 
 ##### (4) Enforce payment coins #####
 Enforce payment tokens refers to a system setting that ensures that only certain types of tokens are accepted for a specific payment method or gateway. This ensures that promotional tokens (which may represent discounts, special offers or other non-traditional forms of payment) are not mistakenly processed as regular payment tokens within this gateway.
+
+== Test the payment in the WooCommerce store ==
+
+### 4. Test the payment in the WooCommerce store ###
+
+After all settings have been made, a test transaction should be carried out.
+
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo7.png)
+
+Place an order in your WooCommerce online store and search for Bitcoin and Lightning Payment among the available payment options. Choose this method and click on Pay with Bitcoin.
+You will then be redirected to the Bitcoin payment page to complete the purchase.
+
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png)
