@@ -113,4 +113,4 @@ After all settings have been made, a test transaction should be carried out.
 Place an order in your WooCommerce online store and search for Bitcoin and Lightning Payment among the available payment options. Choose this method and click on Pay with Bitcoin.
 You will be redirected to the Bitcoin payment page to complete the purchase.
 
-<img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png" width="100" height="100"> 
+<img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png" width="300" height="450"> 
