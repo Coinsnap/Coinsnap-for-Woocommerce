@@ -82,3 +82,21 @@ You must activate Coinsnap as a payment option.
 
 ##### (2) Additional configurations #####
 To do this, click on the “End setup” or “Manage” button.
+
+Adjustments can be made here, which are displayed to the customer during the payment process.
+
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo5-2-1.png)
+
+##### (1) Title field #####
+In the Title field, for example, you can specify that you accept “Bitcoin and Lightning”.
+
+##### (2) Notes field #####
+A note can also be entered in the Customer message field to inform the payer of the next steps.
+
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo5-2-1-1.png)
+
+##### (3) Gateway symbol #####
+By selecting the “Upload or select icon” button, you have the option of adding a personalized icon or image that symbolizes a payment gateway or payment method for your online store. This image serves as a visual indicator for a specific payment option or gateway that is displayed to the customer at the time of checkout.
+
+##### (4) Enforce payment coins #####
+Enforce payment tokens refers to a system setting that ensures that only certain types of tokens are accepted for a specific payment method or gateway. This ensures that promotional tokens (which may represent discounts, special offers or other non-traditional forms of payment) are not mistakenly processed as regular payment tokens within this gateway.
