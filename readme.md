@@ -47,3 +47,15 @@ Then use the “Upload plugin” function to install it. Click on “Install now
 ![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Add-Coinsnap-Woocommerce-plugin.png)
 
 As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
+
+== Connect Coinsnap account with WooCommerce plugin ==
+
+### 2.1. WooCommerce Coinsnap Settings ###
+
+After you have installed and activated the Coinsnap for WooCommerce plugin, you need to make the Coinsnap settings. You can access this area via WooCommerce and Settings. On the far right you will find Coinsnap Settings.
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo2-1.png)
+
+After clicking on the link provided or going to the Coinsnap settings tab, a form will appear asking you for your Coinsnap Store ID and your Coinsnap API key.
+
+These details are provided via your Coinsnap account in the store settings section.
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Bitcoin+Lightning Server Payments Settings.png)
