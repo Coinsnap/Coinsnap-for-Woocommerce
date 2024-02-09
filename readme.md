@@ -114,8 +114,6 @@ Place an order in your WooCommerce online store and search for Bitcoin and Light
 You will be redirected to the Bitcoin payment page to complete the purchase.
 
 <p float="left">
-  <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png" width="300" height="450" />
+  <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png" width="350" height="500" />
   <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9-1.png" width="300" height="450" /> 
 </p>
-
-<img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png" width="300" height="450"> 
