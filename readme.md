@@ -30,6 +30,8 @@ Incoming Bitcoin payments are directly forwarded and credited to your Lightning 
 
 The Coinsnap WooCommerce plugin can be searched and installed in the WordPress plugin directory.
 
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo1.png)
+
 In your WordPress instance, go to the Plugins > Add New section.
 In the search you enter Coinsnap and get as a result the Coinsnap WooCommerce plugin displayed.
 
