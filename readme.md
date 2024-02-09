@@ -83,6 +83,7 @@ You must activate Coinsnap as a payment option.
 ##### (2) Additional configurations #####
 To do this, click on the “End setup” or “Manage” button.
 
+--------------------------------------------------------------------------------------------------
 Adjustments can be made here, which are displayed to the customer during the payment process.
 
 ![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo5-2-1.png)
