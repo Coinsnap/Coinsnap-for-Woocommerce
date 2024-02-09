@@ -65,7 +65,7 @@ These details are provided via your Coinsnap account in the store settings secti
 
 ![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Store_settings.png)
 
-These details are provided via your Coinsnap account in the store settings section.
+Go to the Settings menu item in the Coinsnap backend. There you will find the Coinsnap Store ID and the Coinsnap API Key in the Store Settings section.
 
 Click on the “Save changes” button at the bottom of the page to apply and save the settings.
 
