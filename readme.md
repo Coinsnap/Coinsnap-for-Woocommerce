@@ -26,7 +26,7 @@ Incoming Bitcoin payments are directly forwarded and credited to your Lightning 
 
 == Installation ==
 
-### 1. Install the Coinsnap WooCommerce plugin from the WordPress directory. ###
+### 1.1 Install the Coinsnap WooCommerce plugin from the WordPress directory ###
 
 The Coinsnap WooCommerce plugin can be searched and installed in the WordPress plugin directory.
 
@@ -40,12 +40,18 @@ Then click Install.
 
 After successful installation, click Activate and then you can start setting up the plugin.
 
-### 1.1. Add plugin ###
+### 1.2. Install the Coinsnap WooCommerce plugin from Github page ###
 
-If you don’t want to install Coinsnap WooCommerce plugin directly via plugin, you can download Coinsnap WooCommerce plugin from Coinsnap Github page or from WordPress directory and install it via “Upload Plugin” function.
+If you don’t want to install Coinsnap WooCommerce plugin directly via plugin, you can download Coinsnap WooCommerce plugin from Coinsnap Github page here.
+Find the green button labeled Code. When you click on it, the menu opens and Download ZIP appears. Here you can download the latest version of the Coinsnap plugin to your computer.
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/01-Add-Coinsnap-Woocommerce-plugin.png)
-<img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/images/01-Add-Coinsnap-Woocommerce-plugin.png" alt="Add Coinsnap Woocommerce plugin" />
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/github-coinsnap.jpg)
+
+Then use the “Upload plugin” function to install it. Click on “Install now” and the Coinsnap for WooCommerce plugin will be added to your WordPress website. It can then be connected to the Coinsnap payment gateway.
+
+As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
+
+![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Add-Coinsnap-Woocommerce-plugin.png)
 
 Click “Install now” and Coinsnap WooCommerce plugin will be installed in WordPress.
 
