@@ -101,7 +101,8 @@ class SeparateGateways {
 		$directory = dirname( $filePath );
 		if ( ! is_dir( $directory ) ) {
 			Logger::debug('Directory "/generated" does not exist, creating it: ' . $directory);
-			if ( ! mkdir( $directory,0750 )) {
+                        $WP_Filesystem_ftpsockets = new WP_Filesystem_ftpsockets();
+			if ( ! $WP_Filesystem_ftpsockets->mkdir( $directory,0750 )) {
 				Logger::debug('Error creating directory, aborting.');
 				return false;
 			}
@@ -109,7 +110,8 @@ class SeparateGateways {
 
 		// Prepare file contents with php tags.
 		$fileContents = '<?php' . PHP_EOL . $fileContents . PHP_EOL;
-		if (file_put_contents($filePath, $fileContents) !== false) {
+                $WP_Filesystem_SSH2 = new WP_Filesystem_SSH2();
+		if ($WP_Filesystem_SSH2->put_contents($filePath, $fileContents) !== false) {
 			return true;
 		}
 
@@ -133,7 +135,7 @@ class SeparateGateways {
 
 		foreach ($files as $file) {
 			if (is_file($file)) {
-				if (!unlink($file)) {
+				if (!wp_delete_file($file)) {
 					Logger::debug('Could not delete file: ' . $file);
 					$hasErrors = true;
 				}
@@ -141,7 +143,8 @@ class SeparateGateways {
 		}
 
 		if ($hasErrors === false) {
-			rmdir(self::GENERATED_PATH);
+                    $WP_Filesystem_Direct = new WP_Filesystem_Direct();	
+                    $WP_Filesystem_Direct->rmdir(self::GENERATED_PATH);
 			Logger::debug('Successfully deleted generated classes files.');
 			return true;
 		}

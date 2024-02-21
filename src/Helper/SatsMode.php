@@ -19,15 +19,16 @@ class SatsMode {
 
 	public function addCurrency($currencies) {
 		foreach ( $this->currencies as $code => $curr ) {
-			$currencies[$code] = __($curr[0], 'coinsnap-for-woocommerce');
+                    $curr_code = $curr[0];
+                    $currencies[$code] = $curr[0]; // __($curr_code, 'coinsnap-for-woocommerce');
 		}
 		return $currencies;
 	}
 
 	public function addSymbol($symbol, $currency) {
-		if ($currency === 'SAT')
+		if ($currency === 'SAT'){
 			$symbol = 'Sats';
-
+                }
 		return $symbol;
 	}
 

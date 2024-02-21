@@ -43,7 +43,10 @@ class GlobalSettings extends \WC_Settings_Page {
 					'coinsnap-for-woocommerce'
 				),
 				'type' => 'title',
-				'desc' => sprintf( _x( 'This plugin version is %s and your PHP version is %s. <br/><br/>Coinsnap API requires authentication with an API key. Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.<br/><br/>Thank you for using Coinsnap!', 'global_settings', 'coinsnap-for-woocommerce' ), COINSNAP_VERSION, PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ),
+				'desc' => sprintf(
+                                    /* translators: 1: Plugin version 2: PHP Version */
+                                    _x( 'This plugin version is %1$s and your PHP version is %2$s. <br/><br/>Coinsnap API requires authentication with an API key. Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.<br/><br/>Thank you for using Coinsnap!', 'global_settings', 'coinsnap-for-woocommerce' ), 
+                                        COINSNAP_VERSION, PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ),
 				'id' => 'coinsnap'
 			],
                         'store_id' => [
@@ -104,7 +107,9 @@ class GlobalSettings extends \WC_Settings_Page {
 				'title' => __( 'Debug Log', 'coinsnap-for-woocommerce' ),
 				'type' => 'checkbox',
 				'default' => 'no',
-				'desc' => sprintf( _x( 'Enable logging (<small><a href="%s">View Logs</a></small>)', 'global_settings', 'coinsnap-for-woocommerce' ), Logger::getLogFileUrl()),
+				'desc' => sprintf( 
+                                        /* translators: 1: Logs link */
+                                        _x( 'Enable logging (<small><a href="%1$s">View Logs</a></small>)', 'global_settings', 'coinsnap-for-woocommerce' ), Logger::getLogFileUrl()),
 				'id' => 'coinsnap_debug'
 			],
 			'sectionend' => [
@@ -124,8 +129,8 @@ class GlobalSettings extends \WC_Settings_Page {
 		if ( $this->hasNeededApiCredentials() ) {
 			// Check if api key works for this store.
 			$apiUrl  = COINSNAP_SERVER_URL;
-			$apiKey  = sanitize_text_field( $_POST['coinsnap_api_key'] );
-			$storeId = sanitize_text_field( $_POST['coinsnap_store_id'] );
+			$apiKey  = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';
+			$storeId = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_store_id'] ))? sanitize_text_field( $_POST['coinsnap_store_id'] ) : '';
 
 			Logger::debug('API URL: ' . WC()->api_request_url( 'coinsnap' ));
                                     
@@ -144,7 +149,8 @@ class GlobalSettings extends \WC_Settings_Page {
                                 else {
 				// Register a new webhook.
                                     $webhook = CoinsnapApiWebhook::registerWebhook( $apiUrl, $apiKey, $storeId );
-                                    $messageWebhook = __( print_r($webhook,true), 'coinsnap-for-woocommerce' );
+                                    $messageWebhookString = implode(',',$webhook);
+                                    $messageWebhook = $messageWebhookString;
                                     Logger::debug($messageWebhook);
                                 
                                 //  if webhook is created
@@ -164,8 +170,9 @@ class GlobalSettings extends \WC_Settings_Page {
                         
                         catch ( \Throwable $e ) {
 				$messageException = sprintf(
-					__( 'Error fetching data for this API key from server. Please check if the key is valid. Error: %s', 'coinsnap-for-woocommerce' ),
-					$e->getMessage()
+                                    /* translators: 1: Error message */
+                                    __( 'Error fetching data for this API key from server. Please check if the key is valid. Error: %1$s', 'coinsnap-for-woocommerce' ),
+                                    $e->getMessage()
 				);
 				Notice::addNotice('error', $messageException );
 				Logger::debug($messageException, true);
@@ -185,7 +192,10 @@ class GlobalSettings extends \WC_Settings_Page {
 	}
 
     private function hasNeededApiCredentials(): bool {
-        if(!empty($_POST['coinsnap_api_key']) && !empty($_POST['coinsnap_store_id'])) {
+        $apiKey  = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';
+	$storeId = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_store_id'] ))? sanitize_text_field( $_POST['coinsnap_store_id'] ) : '';
+        
+        if(!empty($apiKey) && !empty($storeId)) {
             return true;
 	}
 	return false;

@@ -20,7 +20,7 @@ class Logger {
 	}
 
 	public static function getLogFileUrl(): string {
-		$log_file = COINSNAP_PLUGIN_ID . '-' . date('Y-m-d') . '-' . sanitize_file_name( wp_hash( COINSNAP_PLUGIN_ID ) ) . '-log';
+		$log_file = COINSNAP_PLUGIN_ID . '-' . gmdate('Y-m-d') . '-' . sanitize_file_name( wp_hash( COINSNAP_PLUGIN_ID ) ) . '-log';
 		return esc_url(admin_url('admin.php?page=wc-status&tab=logs&log_file=' . $log_file));
 	}
 

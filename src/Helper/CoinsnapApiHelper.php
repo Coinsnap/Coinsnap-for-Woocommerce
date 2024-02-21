@@ -172,21 +172,6 @@ class CoinsnapApiHelper {
 		return false;
 	}
 
-	public function apiKeyHasRefundPermission(): bool {
-		if ($this->configured) {
-			$client = new ApiKey($this->url, $this->apiKey);
-			try {
-				$apiKey = $client->getCurrent();
-				$apiAuth = new CoinsnapApiAuthorization( $apiKey->getData() );
-				return $apiAuth->hasRefundsPermission();
-			} catch (\Throwable $e) {
-				Logger::debug('Exception while checking current API key: ' . $e->getMessage());
-			}
-		}
-
-		return false;
-	}
-
 	public function serverSupportsRefunds(): bool {
 		if ($this->configured) {
 			$client = new Server($this->url, $this->apiKey);

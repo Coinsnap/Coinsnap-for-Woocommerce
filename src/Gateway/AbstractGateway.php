@@ -89,7 +89,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
     public function process_payment( $orderId ) {
         if ( ! $this->apiHelper->configured ) {
             Logger::debug( 'Coinsnap API connection not configured, aborting. Please go to Coinsnap Server settings and set it up.' );
-            throw new \Exception( __( "Can't process order. Please contact us if the problem persists.", 'coinsnap-for-woocommerce' ) );
+            $message = __( "Can't process order. Please contact us if the problem persists.", 'coinsnap-for-woocommerce' );
+            throw new \Exception( esc_html($message) );
 	}
 
 	// Load the order and check it.
@@ -97,11 +98,11 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		if ( $order->get_id() === 0 ) {
 			$message = 'Could not load order id ' . $orderId . ', aborting.';
 			Logger::debug( $message, true );
-			throw new \Exception( $message );
+			throw new \Exception( esc_html($message) );
 	}
 
 	// Check if the order is a modal payment.
-	if (isset($_POST['action'])) {
+	if (wp_verify_nonce($_POST['_wpnonce']) || isset($_POST['action'])) {
             $action = wc_clean( wp_unslash( $_POST['action'] ) );
 			if ( $action === 'coinsnap_modal_checkout' ) {
 				Logger::debug( 'process_payment called via modal checkout.' );
@@ -143,7 +144,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	public function process_admin_options() {
 		// Store media id.
 		$iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
-		if ($mediaId = sanitize_key($_POST[$iconFieldName])) {
+		if (wp_verify_nonce($_POST['_wpnonce']) || sanitize_key($_POST[$iconFieldName])) {
 			if ($mediaId !== $this->get_option(self::ICON_MEDIA_OPTION)) {
 				$this->update_option(self::ICON_MEDIA_OPTION, $mediaId);
 			}
@@ -170,18 +171,18 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		ob_start();
 		?>
 		<tr valign="top">
-			<th scope="row" class="titledesc"><?php echo __('Gateway Icon:', 'coinsnap-for-woocommerce'); ?></th>
+			<th scope="row" class="titledesc"><?php echo esc_html(__('Gateway Icon:', 'coinsnap-for-woocommerce')); ?></th>
 			<td class="forminp" id="coinsnap_icon">
 				<div id="coinsnap_icon_container">
 					<input class="coinsnap-icon-button" type="button"
 						   name="woocommerce_coinsnap_icon_upload_button"
-						   value="<?php echo __('Upload or select icon', 'coinsnap-for-woocommerce'); ?>"
+						   value="<?php echo esc_html(__('Upload or select icon', 'coinsnap-for-woocommerce')); ?>"
 						   style="<?php echo $mediaId ? 'display:none;' : ''; ?>"
 					/>
 					<img class="coinsnap-icon-image" src="<?php echo esc_url($mediaSrc); ?>" style="<?php echo esc_attr($mediaId) ? '' : 'display:none;'; ?>" />
 					<input class="coinsnap-icon-remove" type="button"
 						   name="woocommerce_coinsnap_icon_button_remove"
-						   value="<?php echo __('Remove image', 'coinsnap-for-woocommerce'); ?>"
+						   value="<?php echo esc_html(__('Remove image', 'coinsnap-for-woocommerce')); ?>"
 						   style="<?php echo $mediaId ? '' : 'display:none;'; ?>"
 					/>
 					<input class="input-text regular-input coinsnap-icon-value" type="hidden"
@@ -224,7 +225,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				'coinsnap_abstract_gateway',
 				COINSNAP_PLUGIN_URL . 'assets/js/gatewayIconMedia.js',
 				['jquery'],
-				COINSNAP_VERSION
+				COINSNAP_VERSION,
+                                array('in_footer' => true)
 			);
 			wp_enqueue_script('coinsnap_abstract_gateway');
 			wp_localize_script(
@@ -596,7 +598,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			]
 		];
 
-		return json_encode( $posData, JSON_THROW_ON_ERROR );
+		return wp_json_encode( $posData, JSON_THROW_ON_ERROR );
 	}
 
 	/**

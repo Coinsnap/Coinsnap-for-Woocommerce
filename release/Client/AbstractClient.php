@@ -8,7 +8,7 @@ use Coinsnap\Exception\BadRequestException;
 use Coinsnap\Exception\ForbiddenException;
 use Coinsnap\Exception\RequestException;
 use Coinsnap\Http\ClientInterface;
-use Coinsnap\Http\CurlClient;
+use Coinsnap\Http\WPRemoteClient;
 use Coinsnap\Http\Response;
 
 class AbstractClient{
@@ -26,9 +26,9 @@ class AbstractClient{
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->apiKey = $apiKey;
 
-        // Use the $client parameter to use a custom cURL client, for example if you need to disable CURLOPT_SSL_VERIFYHOST and CURLOPT_SSL_VERIFYPEER
+        // Use the $client parameter to use a custom wpRemote client, for example if you need to disable CURLOPT_SSL_VERIFYHOST and CURLOPT_SSL_VERIFYPEER
         if ($client === null) {
-            $client = new CurlClient();
+            $client = new wpRemoteClient();
         }
         $this->httpClient = $client;
     }
@@ -62,11 +62,12 @@ class AbstractClient{
         ];
     }
 
-    protected function getExceptionByStatusCode(
-        string $method,
-        string $url,
-        Response $response
-    ): RequestException {
+    protected function getExceptionByStatusCode(string $method, string $url, Response $response): RequestException {
+        
+        $method = esc_html($method);
+        $url = esc_url($url);
+        $response = esc_html($response);
+        
         $exceptions = [
             ForbiddenException::STATUS => ForbiddenException::class,
             BadRequestException::STATUS => BadRequestException::class,

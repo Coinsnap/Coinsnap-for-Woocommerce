@@ -18,7 +18,7 @@ class User extends AbstractClient
                 json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
             );
         } else {
-            throw $this->getExceptionByStatusCode($method, $url, $response);
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_html($response));
         }
     }
 
@@ -32,7 +32,7 @@ class User extends AbstractClient
         if ($response->getStatus() === 200) {
             return true;
         } else {
-            throw $this->getExceptionByStatusCode($method, $url, $response);
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_html($response));
         }
     }
 
@@ -46,7 +46,7 @@ class User extends AbstractClient
         $headers = $this->getRequestHeaders();
         $method = 'POST';
 
-        $body = json_encode(
+        $body = wp_json_encode(
             [
                 'email' => $email,
                 'password' => $password,
@@ -62,7 +62,7 @@ class User extends AbstractClient
                 json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
             );
         } else {
-            throw $this->getExceptionByStatusCode($method, $url, $response);
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_html($response));
         }
     }
 
@@ -76,7 +76,7 @@ class User extends AbstractClient
         if ($response->getStatus() === 200) {
             return true;
         } else {
-            throw $this->getExceptionByStatusCode($method, $url, $response);
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_html($response));
         }
     }
 }

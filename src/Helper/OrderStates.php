@@ -61,7 +61,7 @@ class OrderStates {
                     }?>
                     </table>
                     <p class="description">
-			<?php echo _x( 'By keeping default behavior for the "Settled" status you make sure that WooCommerce handles orders of virtual and downloadable products only properly and set those orders to "complete" instead of "processing" like for orders containing physical products.', 'global_settings', 'coinsnap-for-woocommerce' ); ?>
+			<?php echo esc_html(_x( 'By keeping default behavior for the "Settled" status you make sure that WooCommerce handles orders of virtual and downloadable products only properly and set those orders to "complete" instead of "processing" like for orders containing physical products.', 'global_settings', 'coinsnap-for-woocommerce' )); ?>
                     </p></td>
             </tr><?php
     }

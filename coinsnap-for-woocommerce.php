@@ -8,7 +8,7 @@
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
  * Version:         1.0
- * Requires PHP:    7.4
+ * Requires PHP:    8.0
  * Tested up to:    6.2
  * Requires at least: 5.2
  * WC requires at least: 6.0
@@ -17,7 +17,6 @@
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
  * Network:         true
- * Update URI:      https://coinsnap.io/en/coinsnap-woocommerce-plugin/update/
  */
 
 use Coinsnap\WC\Admin\Notice;
@@ -93,7 +92,7 @@ class CoinsnapWCPlugin {
     }
     
     public static function enqueueScripts(): void {
-        wp_register_style('coinsnap_payment', plugins_url('assets/css/coinsnap-style.css',__FILE__ ));
+        wp_register_style('coinsnap_payment', plugins_url('assets/css/coinsnap-style.css',__FILE__),array(),COINSNAP_VERSION);
         wp_enqueue_style('coinsnap_payment');
     }
 
@@ -101,6 +100,7 @@ class CoinsnapWCPlugin {
     public function notConfiguredNotification(): void {
         if (!CoinsnapApiHelper::getConfig()){
             $message = sprintf(
+                /* translators: 1: Link to settings page opening tag 2: Link to settings page closing tag */
                 esc_html__('Plugin not configured yet, please %1$sconfigure the plugin here%2$s','coinsnap-for-woocommerce'),
 		'<a href="' . esc_url(admin_url('admin.php?page=wc-settings&tab=coinsnap_settings')) . '">','</a>'
             );
@@ -112,7 +112,9 @@ class CoinsnapWCPlugin {
     public function dependenciesNotification() {
         // Check PHP version.
 	if ( version_compare( PHP_VERSION, SERVER_PHP_VERSION, '<' ) ) {
-            $versionMessage = sprintf( __( 'Your PHP version is %s but Coinsnap Payment plugin requires version '.SERVER_PHP_VERSION.'+.', 'coinsnap-for-woocommerce' ), PHP_VERSION );
+            $versionMessage = sprintf( 
+                    /* translators: 1: PHP version */
+                    __( 'Your PHP version is %1$s but Coinsnap Payment plugin requires version 7.4+.', 'coinsnap-for-woocommerce' ), PHP_VERSION );
             Notice::addNotice('error', $versionMessage);
 	}
 
@@ -153,13 +155,14 @@ class CoinsnapWCPlugin {
                     $statusDesc = _x('Payment failed', 'coinsnap-for-woocommerce');
                     break;
 		default:
-                    $statusDesc = _x(ucfirst($status), 'coinsnap-for-woocommerce');
+                    $statusText = ucfirst($status);
+                    $statusDesc = $statusText; //_x($statusText, 'coinsnap-for-woocommerce');
                     break;
             }
 
             echo "<section class='woocommerce-order-payment-status'>
-		    <h2 class='woocommerce-order-payment-status-title'>{$title}</h2>
-		    <p><strong>{$statusDesc}</strong></p>
+		    <h2 class='woocommerce-order-payment-status-title'>{".esc_html($title)."}</h2>
+		    <p><strong>{".esc_html($statusDesc)."}</strong></p>
 		</section>";
     }
 
@@ -226,12 +229,12 @@ add_action( 'template_redirect', function() {
 
 	// Seems data does get submitted with url-encoded payload, so parse $_POST here.
 	if (!empty($_POST)) {
-		$data['apiKey'] = sanitize_html_class($_POST['apiKey'] ?? null);
-		if (is_array($_POST['permissions'])) {
-			foreach ($_POST['permissions'] as $key => $value) {
-				$data['permissions'][$key] = sanitize_text_field($_POST['permissions'][$key] ?? null);
-			}
+            $data['apiKey'] = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_html_class($_POST['apiKey']))? sanitize_html_class($_POST['apiKey']) : null;
+            if (is_array($_POST['permissions'])) {
+                foreach ($_POST['permissions'] as $key => $value) {
+                    $data['permissions'][$key] = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field($_POST['permissions'][$key]))? sanitize_text_field($_POST['permissions'][$key]) : null;
 		}
+            }
 	}
 
 	if (isset($data['apiKey']) && isset($data['permissions'])) {
