@@ -53,17 +53,17 @@ As soon as the Coinsnap for WooCommerce plugin is installed and activated, a mes
 ### 2.1. WooCommerce Coinsnap Settings ###
 
 After you have installed and activated the Coinsnap for WooCommerce plugin, you need to make the Coinsnap settings. You can access this area via WooCommerce and Settings. On the far right you will find Coinsnap Settings.
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo2-1.png)
+![](https://coinsnap.io/wp-content/uploads/2023/09/Photo2-1.png)
 
 After clicking on the link provided or going to the Coinsnap settings tab, a form will appear asking you for your Coinsnap Store ID and your Coinsnap API key.
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Bitcoin+Lightning.png)
+![](https://coinsnap.io/wp-content/uploads/2023/09/Screenshot-2023-09-09-at-10.16.23.png)
 
 These details are provided via your Coinsnap account in the store settings section. If you do not yet have a Coinsnap account, you can register under the following link: [Coinsnap registration](https://app.coinsnap.io/register).
 
 ### 2.1.1. Coinsnap Store Settings needed for configuration ###
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Store_settings.png)
+![](https://coinsnap.io/wp-content/uploads/2023/09/Screenshot-2023-09-12-at-08.40.13-1-2.png)
 
 Go to the Settings menu item in the Coinsnap backend. There you will find the Coinsnap Store ID and the Coinsnap API Key in the Store Settings section.
 
@@ -75,7 +75,7 @@ Click on the “Save changes” button at the bottom of the page to apply and sa
 
 Navigate to the Payment tab under the WooCommerce settings to see a list of all available payment methods. Coinsnap is shown at the end of the list.
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo4-1.png)
+![](https://coinsnap.io/wp-content/uploads/2023/09/Photo4-1.png)
 
 ##### (1) Activate Coinsnap #####
 You must activate Coinsnap as a payment option.
@@ -86,7 +86,7 @@ To do this, click on the “End setup” or “Manage” button.
 --------------------------------------------------------------------------------------------------
 Adjustments can be made here, which are displayed to the customer during the payment process.
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo5-2-1.png)
+![](https://coinsnap.io/wp-content/uploads/2023/11/Photo5-2-1.png)
 
 ##### (1) Title field #####
 In the Title field, for example, you can specify that you accept “Bitcoin and Lightning”.
@@ -94,7 +94,7 @@ In the Title field, for example, you can specify that you accept “Bitcoin and 
 ##### (2) Notes field #####
 A note can also be entered in the Customer message field to inform the payer of the next steps.
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo5-2-1-1.png)
+![](https://coinsnap.io/wp-content/uploads/2023/11/Photo5-2-1-1.png)
 
 ##### (3) Gateway symbol #####
 By selecting the “Upload or select icon” button, you have the option of adding a personalized icon or image that symbolizes a payment gateway or payment method for your online store. This image serves as a visual indicator for a specific payment option or gateway that is displayed to the customer at the time of checkout.
@@ -108,14 +108,14 @@ Enforce payment tokens refers to a system setting that ensures that only certain
 
 After all settings have been made, a test transaction should be carried out.
 
-![](https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo7.png)
+![](https://coinsnap.io/wp-content/uploads/2023/09/Photo7.png)
 
 Place an order in your WooCommerce online store and search for Bitcoin and Lightning Payment among the available payment options. Choose this method and click on Pay with Bitcoin.
 You will be redirected to the Bitcoin payment page to complete the purchase.
 
 <p float="left">
-  <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9.59.png" width="350" height="500" />
-  <img src="https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/assets/imagesDesc/Photo9-1.png" width="380" height="500" /> 
+  <img src="https://coinsnap.io/wp-content/uploads/2023/09/Photo9.59.png" width="350" height="500" />
+  <img src="https://coinsnap.io/wp-content/uploads/2023/09/Photo9-1.png" width="380" height="500" /> 
 </p>
 
 The Bitcoin payment page is now displayed and offers the payer the option of paying with Bitcoin or Lightning. Both methods are integrated in the displayed QR code. After successful payment, the invoice can be viewed in detail.
