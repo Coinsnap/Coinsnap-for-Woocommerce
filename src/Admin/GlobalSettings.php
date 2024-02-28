@@ -132,7 +132,7 @@ class GlobalSettings extends \WC_Settings_Page {
 			$apiKey  = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';
 			$storeId = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_store_id'] ))? sanitize_text_field( $_POST['coinsnap_store_id'] ) : '';
 
-			Logger::debug('API URL: ' . WC()->api_request_url( 'coinsnap' ));
+			
                                     
 			try {
 				
@@ -149,9 +149,8 @@ class GlobalSettings extends \WC_Settings_Page {
                                 else {
 				// Register a new webhook.
                                     $webhook = CoinsnapApiWebhook::registerWebhook( $apiUrl, $apiKey, $storeId );
-                                    $messageWebhookString = implode(',',$webhook);
-                                    $messageWebhook = $messageWebhookString;
-                                    Logger::debug($messageWebhook);
+                                    Logger::debug('webhook '.print_r($webhook,true));
+                                    
                                 
                                 //  if webhook is created
                                     if ( $webhook ) {
@@ -165,7 +164,7 @@ class GlobalSettings extends \WC_Settings_Page {
 					Logger::debug($messageWebhookError, true);
                                     }
 				}
-				}
+                            }
 			} 
                         
                         catch ( \Throwable $e ) {

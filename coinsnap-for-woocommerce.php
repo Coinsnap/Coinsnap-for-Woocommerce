@@ -7,12 +7,12 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.0
- * Requires PHP:    8.0
- * Tested up to:    6.2
+ * Version:         1.1.0
+ * Requires PHP:    7.4
+ * Tested up to:    6.4.3
  * Requires at least: 5.2
  * WC requires at least: 6.0
- * WC tested up to: 7.5
+ * WC tested up to: 8.6.1
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -27,7 +27,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 define( 'SERVER_PHP_VERSION', '7.4' );
-define( 'COINSNAP_VERSION', '1.0' );
+define( 'COINSNAP_VERSION', '1.1.0' );
 define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );
 define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );
@@ -160,10 +160,24 @@ class CoinsnapWCPlugin {
                     break;
             }
 
+            $title = esc_html($title);
+            $statusDesc = esc_html($statusDesc);
             echo "<section class='woocommerce-order-payment-status'>
-		    <h2 class='woocommerce-order-payment-status-title'>{".esc_html($title)."}</h2>
-		    <p><strong>{".esc_html($statusDesc)."}</strong></p>
+		    <h2 class='woocommerce-order-payment-status-title'>{".$title."}</h2>
+		    <p><strong>{".$statusDesc."}</strong></p>
 		</section>";
+    }
+    
+    // Register WooCommerce Blocks support.
+    public static function blocksSupport() {
+        if ( class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' )){
+            add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function( \Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry){
+                    $payment_method_registry->register(new \Coinsnap\WC\Blocks\DefaultGatewayBlocks());
+		}
+            );
+        }
     }
 
 //  Gets the main plugin loader instance and ensures only one instance can be loaded.
@@ -255,8 +269,6 @@ add_action( 'template_redirect', function() {
 	wp_redirect($coinsnapSettingsUrl);
 });
 
-
-
 // Installation routine.
 register_activation_hook( __FILE__, function() {
 	update_option('coinsnap_permalinks_flushed', 0);
@@ -266,5 +278,15 @@ register_activation_hook( __FILE__, function() {
 // Initialize payment gateways and plugin.
 add_filter( 'woocommerce_payment_gateways', [ 'CoinsnapWCPlugin', 'initPaymentGateways' ] );
 add_action( 'plugins_loaded', 'init_coinsnap_payment', 0 );
+
+// Mark support for HPOS / COT.
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+	}
+} );
+
 add_action( 'wp_enqueue_scripts', [ 'CoinsnapWCPlugin', 'enqueueScripts' ]  );
+add_action( 'woocommerce_blocks_loaded', [ 'CoinsnapWCPlugin', 'blocksSupport' ] );
 

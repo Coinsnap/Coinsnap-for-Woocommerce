@@ -97,6 +97,7 @@ class CoinsnapApiHelper {
 					$pmResult = $client->getPaymentMethods($storeId);
 					/** @var AbstractStorePaymentMethodResult $pm */
 					foreach ($pmResult as $pm) {
+                                            print_r($pm);
 						if ($pm->isEnabled() && $pmName = $pm->getData()['paymentMethod'] )  {
 							// Convert - to _ and escape value for later use in gateway class generator.
 							$symbol = sanitize_html_class(str_replace('-', '_', $pmName));
@@ -144,17 +145,12 @@ class CoinsnapApiHelper {
 
 	//  Checks if the provided API config already exists in options table.
 	public static function apiCredentialsExist(string $apiUrl, string $apiKey, string $storeId): bool {
-		if ($config = self::getConfig()) {
-			if (
-				$config['url'] === $apiUrl &&
-				$config['api_key'] === $apiKey &&
-				$config['store_id'] === $storeId
-			) {
-				return true;
-			}
+            if ($config = self::getConfig()) {
+                if ($config['url'] === $apiUrl && $config['api_key'] === $apiKey && $config['store_id'] === $storeId){
+                    return true;
 		}
-
-		return false;
+            }
+            return false;
 	}
 
 	//  Checks if a given invoice id has status of fully paid (settled) or paid late.
@@ -171,19 +167,4 @@ class CoinsnapApiHelper {
 
 		return false;
 	}
-
-	public function serverSupportsRefunds(): bool {
-		if ($this->configured) {
-			$client = new Server($this->url, $this->apiKey);
-			try {
-				$serverInfo = $client->getInfo();
-				return !version_compare($serverInfo->getVersion(), '1.7.6', '<');
-			} catch (\Throwable $e) {
-				Logger::debug('Exception while checking current API key: ' . $e->getMessage());
-			}
-		}
-
-		return false;
-	}
-
 }

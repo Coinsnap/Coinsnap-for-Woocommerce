@@ -66,7 +66,7 @@ class AbstractClient{
         
         $method = esc_html($method);
         $url = esc_url($url);
-        $response = esc_html($response);
+        //$response = esc_html($response);
         
         $exceptions = [
             ForbiddenException::STATUS => ForbiddenException::class,

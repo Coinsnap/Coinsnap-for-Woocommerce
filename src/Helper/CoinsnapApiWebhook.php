@@ -61,11 +61,13 @@ class CoinsnapApiWebhook {
 				]
 			);
 
-			return array(
+			return $webhook;
+                                /*
+                                array(
                             'id' => $webhook->getData()['id'],
                             'secret' => $webhook->getData()['secret'],
                             'url' => $webhook->getData()['url']
-                        );
+                        );*/
                         
 		} catch (\Throwable $e) {
 			Logger::debug('Error creating a new webhook on Coinsnap instance: ' . $e->getMessage());
