@@ -168,7 +168,7 @@ Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-p
 = 1.0 :: 2023-08-03 =
 * First public release for testing.
 
-= 1.0.5 :: 2023
+= 1.0.5 :: 2023-12-12 =
 * Payment button text setting is added.
 
 = 1.1.0 :: 2024-02-28 =
