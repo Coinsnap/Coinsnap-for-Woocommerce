@@ -152,9 +152,7 @@ class Webhook extends AbstractClient
     }
 
     /**
-     * @deprecated 2.0.0 Please use `getStoreWebhooks()` instead.
-     * @see getStoreWebhooks()
-     *
+     * Get all webhooks for a specific store
      * @param string $storeId
      * @return \Coinsnap\Result\Webhook[]
      */
