@@ -8,14 +8,7 @@ use Coinsnap\Client\Webhook;
 use Coinsnap\Result\Webhook as WebhookResult;
 
 class CoinsnapApiWebhook {
-    public const WEBHOOK_EVENTS = ['New','Expired','Settled','Processing'
-        //'InvoiceReceivedPayment',
-	//'InvoicePaymentSettled',
-	//'InvoiceProcessing',
-	//'InvoiceExpired',
-	//'InvoiceSettled',
-	//'InvoiceInvalid'
-    ];
+    public const WEBHOOK_EVENTS = ['New','Expired','Settled','Processing'];
 
 //  Get locally stored webhook data and check if it exists on the store.
     public static function webhookExists(string $apiUrl, string $apiKey, string $storeId): bool {
@@ -62,12 +55,6 @@ class CoinsnapApiWebhook {
 			);
 
 			return $webhook;
-                                /*
-                                array(
-                            'id' => $webhook->getData()['id'],
-                            'secret' => $webhook->getData()['secret'],
-                            'url' => $webhook->getData()['url']
-                        );*/
                         
 		} catch (\Throwable $e) {
 			Logger::debug('Error creating a new webhook on Coinsnap instance: ' . $e->getMessage());

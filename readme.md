@@ -13,7 +13,9 @@ Stable tag: 1.1.0
 License: MIT
 License URI: https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/license.txt
 
+
 Coinsnap is a Lightning payment provider and offers a payment gateway for processing Bitcoin and Lightning payments. A merchant only needs a Lightning wallet with a lightning address to accept Bitcoin and Lightning payments on their website.
+
 
 == Description ==
 
