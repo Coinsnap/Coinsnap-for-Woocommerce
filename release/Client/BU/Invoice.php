@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Coinsnap\Client;
@@ -17,8 +18,8 @@ class Invoice extends AbstractClient{
         ?string $redirectUrl = null,
         ?string $referralCode = null,
         ?array $metaData = null,
-        ?InvoiceCheckoutOptions $checkoutOptions = null): \Coinsnap\Result\Invoice {
-        
+        ?InvoiceCheckoutOptions $checkoutOptions = null): \Coinsnap\Result\Invoice 
+    {
         $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices';
         $headers = $this->getRequestHeaders();
         $method = 'POST';
@@ -38,7 +39,8 @@ class Invoice extends AbstractClient{
                 'referralCode' => $referralCode
         );
         
-        $body = wp_json_encode($body_array,JSON_THROW_ON_ERROR);
+        
+        $body = json_encode($body_array,JSON_THROW_ON_ERROR);
 
         $response = $this->getHttpClient()->request($method, $url, $headers, $body);
 
@@ -47,7 +49,9 @@ class Invoice extends AbstractClient{
                 json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
             );
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
+            print_r($response);
+            exit;
+            //throw $this->getExceptionByStatusCode($method, $url, $response);
         }
     }
 
@@ -61,8 +65,7 @@ class Invoice extends AbstractClient{
         if ($response->getStatus() === 200) {
             return new \Coinsnap\Result\Invoice(json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR));
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
+            throw $this->getExceptionByStatusCode($method, $url, $response);
         }
     }
-
 }
