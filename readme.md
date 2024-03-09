@@ -1,6 +1,7 @@
+# Coinsnap for WooCommerce Payment Plugin #
 ![Image of Coinsnap for WooCommerce](https://coinsnap.io/wp-content/uploads/2023/11/Coinsnap-for-Woocommerce-2.png)
+## Accept Bitcoin and Lightning Payments with WooCommerce ##
 
-# Coinsnap for WooCommerce Payment Plugin
 
 
 === Coinsnap for WooCommerce 1.1.0 ===
