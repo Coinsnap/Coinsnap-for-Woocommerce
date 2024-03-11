@@ -18,7 +18,7 @@ class Store extends AbstractClient{
             if(json_last_error() === JSON_ERROR_NONE) return new \Coinsnap\Result\Store($json_decode);
             else return new \Coinsnap\Result\Store(array('result' => false, 'error' => 'Coinsnap server is not available'));
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_js($response));
         }
     }
 
@@ -41,7 +41,7 @@ class Store extends AbstractClient{
             }
             return $r;
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_js($response));
         }
     }
 }
