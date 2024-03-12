@@ -47,7 +47,7 @@ class Invoice extends AbstractClient{
                 json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR)
             );
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_js($response));
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
         }
     }
 
@@ -61,7 +61,7 @@ class Invoice extends AbstractClient{
         if ($response->getStatus() === 200) {
             return new \Coinsnap\Result\Invoice(json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR));
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_js($response));
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
         }
     }
 

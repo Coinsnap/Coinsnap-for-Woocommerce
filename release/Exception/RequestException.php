@@ -10,7 +10,7 @@ class RequestException extends CoinsnapException
 {
     public function __construct(string $method, string $url, ResponseInterface $response)
     {
-        $message = 'Error during ' . $method . ' to ' . $url . '. Got response (' . $response->getStatus() . '): ' . $response->getBody();
+        $message = 'Error during ' . $method . ' to ' . $url . '. Got response (' . esc_html($response->getStatus()) . '): ' . esc_html($response->getBody());
         parent::__construct($message, $response->getStatus());
     }
 }

@@ -10,11 +10,11 @@ class Server extends AbstractClient {
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
-
+        
         if ($response->getStatus() === 200) {
             return new ServerInfo(json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR));
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_js($response));
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
         }
     }
     
@@ -28,7 +28,7 @@ class Server extends AbstractClient {
         if ($response->getStatus() === 200) {
             return true;
         } else {
-            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), esc_js($response));
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), $response);
         }
     }
 }
