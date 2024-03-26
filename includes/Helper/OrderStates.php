@@ -51,7 +51,7 @@ class OrderStates {
                                     }
                                     
                                     $selected_add = ($selectedOption === esc_attr($wcState))? ' selected' : '';
-                                    echo '<option value="' . esc_attr($wcState) . '"'. $selected_add . '>' . esc_html($wcName) . '</option>' . PHP_EOL;
+                                    echo '<option value="' . esc_attr($wcState) . '"'. esc_html($selected_add) . '>' . esc_html($wcName) . '</option>' . PHP_EOL;
                                 }?>
 				</select></td></tr><?php
                     }?>
