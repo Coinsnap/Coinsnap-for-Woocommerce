@@ -1,18 +1,16 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Coinsnap\Client;
 
-class Webhook extends AbstractClient
-{
+class Webhook extends AbstractClient {
     /**
      * @param string $storeId
      * @return \Coinsnap\Result\WebhookList
      */
     public function getStoreWebhooks(string $storeId): \Coinsnap\Result\WebhookList
     {
-        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks';
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks';
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -28,7 +26,7 @@ class Webhook extends AbstractClient
 
     public function getWebhook(string $storeId, string $webhookId): \Coinsnap\Result\Webhook
     {
-        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks/' . urlencode($webhookId);
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks/' . urlencode($webhookId);
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -66,7 +64,7 @@ class Webhook extends AbstractClient
         } 
         elseif ($secret !== null) $data['secret'] = $secret;
 
-        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks';
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks';
         $headers = $this->getRequestHeaders();
         $method = 'POST';
         $response = $this->getHttpClient()->request($method, $url, $headers, wp_json_encode($data, JSON_THROW_ON_ERROR));
@@ -115,7 +113,7 @@ class Webhook extends AbstractClient
             ];
         }
 
-        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks/' . urlencode($webhookId);
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks/' . urlencode($webhookId);
         $headers = $this->getRequestHeaders();
         $method = 'PUT';
         $response = $this->getHttpClient()->request($method, $url, $headers, wp_json_encode($data, JSON_THROW_ON_ERROR));
@@ -141,7 +139,7 @@ class Webhook extends AbstractClient
 
     public function deleteWebhook(string $storeId, string $webhookId): void
     {
-        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks/' . urlencode($webhookId);
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks/' . urlencode($webhookId);
         $headers = $this->getRequestHeaders();
         $method = 'DELETE';
         $response = $this->getHttpClient()->request($method, $url, $headers);
@@ -158,7 +156,7 @@ class Webhook extends AbstractClient
      */
     public function getWebhooks(string $storeId): array
     {
-        $url = $this->getApiUrl() . ''.COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks';
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/' . urlencode($storeId) . '/webhooks';
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);

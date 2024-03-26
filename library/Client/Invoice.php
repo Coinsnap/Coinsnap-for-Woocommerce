@@ -19,7 +19,7 @@ class Invoice extends AbstractClient{
         ?array $metaData = null,
         ?InvoiceCheckoutOptions $checkoutOptions = null): \Coinsnap\Result\Invoice {
         
-        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices';
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices';
         $headers = $this->getRequestHeaders();
         $method = 'POST';
 
@@ -53,7 +53,7 @@ class Invoice extends AbstractClient{
 
     public function getInvoice(string $storeId,string $invoiceId): \Coinsnap\Result\Invoice {
         
-        $url = $this->getApiUrl().''.COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices/'.urlencode($invoiceId);
+        $url = $this->getApiUrl() . COINSNAP_SERVER_PATH.'/'.urlencode($storeId).'/invoices/'.urlencode($invoiceId);
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 namespace Coinsnap\WC\Helper;
 
-use Coinsnap\Client\ApiKey;
 use Coinsnap\Client\Invoice;
 use Coinsnap\Client\Server;
 use Coinsnap\Client\Store;
@@ -24,7 +23,7 @@ class CoinsnapApiHelper {
 
     public function __construct() {
         if ( $config = self::getConfig() ) {
-            $this->url = COINSNAP_SERVER_URL;
+            $this->url = $config['url'];
             $this->apiKey = $config['api_key'];
             $this->storeId = $config['store_id'];
             $this->webhook = $config['webhook'];
@@ -67,7 +66,7 @@ class CoinsnapApiHelper {
         return array('result' => false, 'error' => 'Plugin is not configured');
     }
 
-	public static function getServerInfo(): ?ServerInfo {
+    public static function getServerInfo(): ?ServerInfo {
 		if ($config = self::getConfig()) {
 			try {
 				$client = new Server( $config['url'], $config['api_key'] );
@@ -81,8 +80,8 @@ class CoinsnapApiHelper {
 		return null;
 	}
 
-	//  List supported payment methods by Coinsnap Server.
-	public static function supportedPaymentMethods(): array {
+    //  List supported payment methods by Coinsnap Server.
+    public static function supportedPaymentMethods(): array {
 		$paymentMethods = [];
 
 		// Use transients API to cache pm for a few minutes to avoid too many requests to Coinsnap Server.

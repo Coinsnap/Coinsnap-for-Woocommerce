@@ -102,7 +102,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	// Check if the order is a modal payment.
-	if (wp_verify_nonce($_POST['_wpnonce']) || isset($_POST['action'])) {
+        $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
+	if (wp_verify_nonce($nonce,-1) || isset($_POST['action'])) {
             $action = wc_clean( wp_unslash( $_POST['action'] ) );
 			if ( $action === 'coinsnap_modal_checkout' ) {
 				Logger::debug( 'process_payment called via modal checkout.' );
@@ -144,7 +145,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	public function process_admin_options() {
 		// Store media id.
 		$iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
-		if (wp_verify_nonce($_POST['_wpnonce']) || sanitize_key($_POST[$iconFieldName])) {
+                $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
+		if (wp_verify_nonce($nonce,-1) || sanitize_key($_POST[$iconFieldName])) {
 			if ($mediaId !== $this->get_option(self::ICON_MEDIA_OPTION)) {
 				$this->update_option(self::ICON_MEDIA_OPTION, $mediaId);
 			}

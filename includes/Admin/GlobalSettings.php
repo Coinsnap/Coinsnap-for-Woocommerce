@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Coinsnap\WC\Admin;
 
-use Coinsnap\Client\ApiKey;
 use Coinsnap\Client\StorePaymentMethod;
 use Coinsnap\WC\Gateway\SeparateGateways;
 use Coinsnap\WC\Helper\CoinsnapApiAuthorization;
@@ -22,7 +21,7 @@ class GlobalSettings extends \WC_Settings_Page {
 		// Register custom field type order_states with OrderStatesField class.
 		add_action('woocommerce_admin_field_coinsnap_order_states', [(new OrderStates()), 'renderOrderStatesHtml']);
                 parent::__construct();
-	}
+	}        
 
 	public function output(): void{
 		$settings = $this->get_settings_for_default_section();
@@ -120,17 +119,18 @@ class GlobalSettings extends \WC_Settings_Page {
 		];
 	}
 
-	/**
-	 * On saving the settings form make sure to check if the API key works and register a webhook if needed.
-	 */
-	public function save() {
+    /**
+    * On saving the settings form make sure to check if the API key works and register a webhook if needed.
+    */
+    public function save() {
 		// If we have url, storeID and apiKey we want to check if the api key works and register a webhook.
 		Logger::debug('Saving GlobalSettings.');
 		if ( $this->hasNeededApiCredentials() ) {
 			// Check if api key works for this store.
 			$apiUrl  = COINSNAP_SERVER_URL;
-			$apiKey  = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';
-			$storeId = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_store_id'] ))? sanitize_text_field( $_POST['coinsnap_store_id'] ) : '';
+                        $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
+			$apiKey  = (wp_verify_nonce($nonce,-1) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';
+			$storeId = (wp_verify_nonce($nonce,-1) || sanitize_text_field( $_POST['coinsnap_store_id'] ))? sanitize_text_field( $_POST['coinsnap_store_id'] ) : '';
 
 			
                                     
@@ -188,7 +188,7 @@ class GlobalSettings extends \WC_Settings_Page {
 		//  Purge separate payment methods cache.
 		//  SeparateGateways::cleanUpGeneratedFilesAndCache();
 		CoinsnapApiHelper::clearSupportedPaymentMethodsCache();
-	}
+    }
 
     private function hasNeededApiCredentials(): bool {
         $apiKey  = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';

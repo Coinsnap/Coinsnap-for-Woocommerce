@@ -7,9 +7,9 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.1.0
+ * Version:         1.1.1
  * Requires PHP:    7.4
- * Tested up to:    6.4.3
+ * Tested up to:    6.4
  * Requires at least: 5.2
  * WC requires at least: 6.0
  * WC tested up to: 8.6.1
@@ -26,13 +26,14 @@ use Coinsnap\WC\Helper\CoinsnapApiHelper;
 use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
-define( 'SERVER_PHP_VERSION', '7.4' );
-define( 'COINSNAP_VERSION', '1.1.0' );
+define( 'COINSNAP_PHP_VERSION', '7.4' );
+define( 'COINSNAP_VERSION', '1.1.1' );
 define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );
 define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );
 define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );
 define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );
+define( 'COINSNAP_API_PATH', '/api/v1/');
 define( 'COINSNAP_SERVER_PATH', 'stores' );
 define( 'COINSNAP_REFERRAL_CODE', 'DEV1e1ea54fedd507e2f447e2963' );
 
@@ -60,14 +61,14 @@ class CoinsnapWCPlugin {
             add_action( 'wp_ajax_handle_ajax_api_url', [$this, 'processAjaxApiUrl'] );
 
             $this->dependenciesNotification();
-            //$this->legacyPluginNotification(); // Not in v 1.0
+            //$this->legacyPluginNotification(); // Not in v 1.1.1
             $this->notConfiguredNotification();
 	}
     }
 
     public function includes(): void {
 	
-        $autoloader = COINSNAP_PLUGIN_FILE_PATH . 'loader/autoload.php';
+        $autoloader = COINSNAP_PLUGIN_FILE_PATH . 'library/loader.php';
 	if (file_exists($autoloader)) {
             // @noinspection PhpIncludeInspection 
             require_once $autoloader;
@@ -111,10 +112,10 @@ class CoinsnapWCPlugin {
 //  Checks if PHP version is too low or WooCommerce is not installed or CURL is not available and displays notice on admin dashboard
     public function dependenciesNotification() {
         // Check PHP version.
-	if ( version_compare( PHP_VERSION, SERVER_PHP_VERSION, '<' ) ) {
+	if ( version_compare( PHP_VERSION, COINSNAP_PHP_VERSION, '<' ) ) {
             $versionMessage = sprintf( 
-                    /* translators: 1: PHP version */
-                    __( 'Your PHP version is %1$s but Coinsnap Payment plugin requires version 7.4+.', 'coinsnap-for-woocommerce' ), PHP_VERSION );
+                /* translators: 1: PHP version */
+                __( 'Your PHP version is %1$s but Coinsnap Payment plugin requires version 7.4+.', 'coinsnap-for-woocommerce' ), PHP_VERSION );
             Notice::addNotice('error', $versionMessage);
 	}
 
@@ -186,7 +187,7 @@ class CoinsnapWCPlugin {
 }
 
 //  Start everything up.
-function init_coinsnap_payment() {
+function coinsnap_payment_init() {
     \CoinsnapWCPlugin::instance();
 }
 
@@ -241,10 +242,11 @@ add_action( 'template_redirect', function() {
 
 	// Seems data does get submitted with url-encoded payload, so parse $_POST here.
 	if (!empty($_POST)) {
-            $data['apiKey'] = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_html_class($_POST['apiKey']))? sanitize_html_class($_POST['apiKey']) : null;
+            $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
+            $data['apiKey'] = (wp_verify_nonce($nonce,-1) || sanitize_text_field($_POST['apiKey']))? sanitize_text_field($_POST['apiKey']) : null;
             if (is_array($_POST['permissions'])) {
                 foreach ($_POST['permissions'] as $key => $value) {
-                    $data['permissions'][$key] = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field($_POST['permissions'][$key]))? sanitize_text_field($_POST['permissions'][$key]) : null;
+                    $data['permissions'][$key] = (wp_verify_nonce($nonce,-1) || sanitize_text_field($_POST['permissions'][$key]))? sanitize_text_field($_POST['permissions'][$key]) : null;
 		}
             }
 	}
@@ -275,7 +277,7 @@ register_activation_hook( __FILE__, function() {
 
 // Initialize payment gateways and plugin.
 add_filter( 'woocommerce_payment_gateways', [ 'CoinsnapWCPlugin', 'initPaymentGateways' ] );
-add_action( 'plugins_loaded', 'init_coinsnap_payment', 0 );
+add_action( 'plugins_loaded', 'coinsnap_payment_init', 0 );
 
 // Mark support for HPOS / COT.
 add_action( 'before_woocommerce_init', function() {

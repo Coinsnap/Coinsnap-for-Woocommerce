@@ -49,13 +49,9 @@ class OrderStates {
                                     if (true === empty($selectedOption)) {
                                         $selectedOption = $defaultStates[$coinsnapState];
                                     }
-
-                                    if ($selectedOption === $wcState) {
-                                        echo '<option value="' . esc_attr($wcState) . '" selected>' . esc_html($wcName) . '</option>' . PHP_EOL;
-                                    }
-                                    else {
-                                        echo '<option value="' . esc_attr($wcState) . '">' . esc_html($wcName) . '</option>' . PHP_EOL;
-                                    }
+                                    
+                                    $selected_add = ($selectedOption === esc_attr($wcState))? ' selected' : '';
+                                    echo '<option value="' . esc_attr($wcState) . '"'. $selected_add . '>' . esc_html($wcName) . '</option>' . PHP_EOL;
                                 }?>
 				</select></td></tr><?php
                     }?>
