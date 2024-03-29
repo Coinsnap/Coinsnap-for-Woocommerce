@@ -2,28 +2,67 @@
 
 # Coinsnap for WooCommerce Payment Plugin
 
-
-=== Coinsnap for WooCommerce 1.1.0 ===
+=== Coinsnap for WooCommerce 1.1.1 ===
 Contributors: coinsnap
 Tags: Lightning, Lightning Payment, SATS, Satoshi sats, bitcoin, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency, lightning payment processor
 Requires at least: 5.2
-Tested up to: 6.4.3
+Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.1.0
-License: MIT
-License URI: https://github.com/Coinsnap/coinsnap-woocommerce/blob/master/license.txt
+Stable tag: 1.1.1
+License: GPLv2
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-
-Coinsnap is a Lightning payment provider and offers a payment gateway for processing Bitcoin and Lightning payments. A merchant only needs a Lightning wallet with a lightning address to accept Bitcoin and Lightning payments on their website.
-
+Coinsnap payment plug-in is intended for online stores based on WooCommerce to accept Bitcoin and Lightning payments via Coinsnap payment gateway https://app.coinsnap.io/.
 
 == Description ==
 
-If you run an online store based on WooCommerce or a WordPress plugin that accesses WooCommerce for payment processing, then you can easily integrate payment processing via Bitcoin and Lightning with the Coinsnap WooCommerce plugin.
+[Coinsnap](https://coinsnap.io/en/) is a Lightning payment provider that allows to process Bitcoin and Lightning payments over Lightning network. A merchant only needs a Lightning wallet with a Lightning address to accept Bitcoin and Lightning payments on their website.
 
-Just install the Coinsnap WooCommerce plugin, connect it to your Coinsnap account and your customers will be able to pay you with Bitcoin and Lightning.
 
-Incoming Bitcoin payments are directly forwarded and credited to your Lightning Wallet.
+= Bitcoin and Lightning payments in your WooCommerce store with Coinsnap =
+
+With Coinsnap payment processing, you can accept Bitcoin and Lightning payments on your website or online store. You don’t need your own Lightning Node or other technical requirements.
+
+Bitcoin and Lightning payments from your customers will be credited directly to your own Lightning address.
+
+With Coinsnap Payment Plugin you can integrate Bitcoin and Lightning payments into your website or online store without any technical effort.
+
+Simply register in [Coinsnap](https://app.coinsnap.io/), enter your own Lightning address and your customers can pay you with Bitcoin and Lightning.
+
+
+= Features: =
+
+* **Only 1 % fees!**:
+    * No basic fee, no transaction fee, only 1% on the invoice amount with referrer code.
+    * Without referrer code the fee is 1.25%.
+    * Get a referrer code from our partners and customers and save 0.25% fee.
+* **All you need is a Lightning Wallet with a Lightning address. [Here you can find an overview of the matching Lightning Wallets](https://coinsnap.io/en/lightning-wallet-with-lightning-address/)**
+* **Accept Bitcoin and Lightning payments in your online store without running your own technical infrastructure. You do not need your own server, nor do you need to run your own Lightning Node.**
+* **Quick and easy registration**: you enter your email address and your Lightning address.
+* **Absolutely protected privacy**:
+    * We do not collect personal data.
+    * For the registration you only need an e-mail address, which we will also use to inform you when we have received a payment.
+    * No other personal information is required as long as you request a withdrawal to a Lightning address or Bitcoin address.
+* **No KYC needed**:
+    * Direct, P2P payments (instantly to your Lightning wallet)
+    * No intermediaries and paperwork
+    * Transaction information is only shared between you and your customer
+* **A Bitcoin payment via Lightning offers significant advantages**:
+    * Lightning payments are executed immediately.
+    * Lightning payments are credited directly to the recipient.
+    * Lightning payments are inexpensive.
+    * Lightning payments are guaranteed. No chargeback risk for the merchant.
+    * Lightning payments can be used worldwide.
+    * Lightning payments are perfect for micropayments.
+* **Multilingual interface and support**: We speak your language
+
+
+= Documentation: =
+
+* [Coinsnap API (1.0) documentation](https://docs.coinsnap.io/)
+* [Frequently Asked Questions](https://coinsnap.io/en/faq/) 
+* [Terms and Conditions](https://coinsnap.io/en/general-terms-and-conditions/)
+* [Privacy Policy](https://coinsnap.io/en/privacy/)
 
 
 == Installation ==
