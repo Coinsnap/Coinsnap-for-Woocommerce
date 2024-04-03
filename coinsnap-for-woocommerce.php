@@ -137,27 +137,27 @@ class CoinsnapWCPlugin {
             return;
 	}
 
-	$title = _x('Payment Status', 'coinsnap-for-woocommerce');
+	$title = __('Payment Status','coinsnap-for-woocommerce');
 
         $orderData = $order->get_data();
         $status = $orderData['status'];
 
             switch ($status){
                 case 'on-hold':
-                    $statusDesc = _x('Waiting for payment settlement', 'coinsnap-for-woocommerce');
+                    $statusDesc = __('Waiting for payment settlement', 'coinsnap-for-woocommerce');
                     break;
                 case 'processing':
-                    $statusDesc = _x('Payment processing', 'coinsnap-for-woocommerce');
+                    $statusDesc = __('Payment processing', 'coinsnap-for-woocommerce');
                     break;
 		case 'completed':
-                    $statusDesc = _x('Payment settled', 'coinsnap-for-woocommerce');
+                    $statusDesc = __('Payment settled', 'coinsnap-for-woocommerce');
                     break;
 		case 'failed':
-                    $statusDesc = _x('Payment failed', 'coinsnap-for-woocommerce');
+                    $statusDesc = __('Payment failed', 'coinsnap-for-woocommerce');
                     break;
 		default:
                     $statusText = ucfirst($status);
-                    $statusDesc = $statusText; //_x($statusText, 'coinsnap-for-woocommerce');
+                    $statusDesc = $statusText; //__($statusText, 'coinsnap-for-woocommerce');
                     break;
             }
 
