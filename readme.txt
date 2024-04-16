@@ -1,6 +1,6 @@
 === Coinsnap Bitcoin + Lightning payment plug-in for WooCommerce ===
 Contributors: coinsnap
-Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
+Tags: Lightning, Bitcoin, Lightning Payment, Bitcoin Payment, SATS, Satoshi sats, Bitcoin, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency, lightning payment processor
 Requires at least: 5.2
 Tested up to: 6.5
 Requires PHP: 7.4
