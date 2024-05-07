@@ -162,8 +162,8 @@ class CoinsnapWCPlugin {
             }
 
             echo "<section class='woocommerce-order-payment-status'>
-		    <h2 class='woocommerce-order-payment-status-title'>{".esc_html($title)."}</h2>
-		    <p><strong>{".esc_html($statusDesc)."}</strong></p>
+		    <h2 class='woocommerce-order-payment-status-title'>{$title}</h2>
+		    <p><strong>{$statusDesc}</strong></p>
 		</section>";
     }
     
