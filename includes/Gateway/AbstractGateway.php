@@ -270,7 +270,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			}
                         
                         if (!isset($signature) || !$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
-				Logger::debug('Failed to validate signature of webhook request.');
+				$postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
+                                Logger::debug('Failed to validate signature of webhook request (Invoice ID: '.$postData->invoiceId);
 				wp_die('Webhook request validation failed.');
 			}
 
@@ -459,25 +460,28 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				if ((float) $payment->getPaymentMethodPaid() > 0.0) {
 					$paymentMethodName = $payment->getPaymentMethod();
 					// Update order meta data with payment methods and transactions.
-					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_paid", $payment->getTotalPaid() ?? '' );
-					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_amount", $payment->getAmount() ?? '' );
-					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_due", $payment->getDue() ?? '' );
-					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_total_fee", $payment->getNetworkFee() ?? '' );
-					update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_rate", $payment->getRate() ?? '' );
+					$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_total_paid", $payment->getTotalPaid() ?? '' );
+					$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_total_amount", $payment->getAmount() ?? '' );
+					$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_total_due", $payment->getDue() ?? '' );
+					$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_total_fee", $payment->getNetworkFee() ?? '' );
+					$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_rate", $payment->getRate() ?? '' );
 					if ((float) $payment->getRate() > 0.0) {
 						$formattedRate = number_format((float) $payment->getRate(), wc_get_price_decimals(), wc_get_price_decimal_separator(), wc_get_price_thousand_separator());
-						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_rateFormatted", $formattedRate );
+						$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_rateFormatted", $formattedRate );
 					}
 
 					// For each actual payment make a separate entry to make sense of it.
 					foreach ($payment->getPayments() as $index => $trx) {
-						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_id", $trx->getTransactionId() ?? '' );
-						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_timestamp", $trx->getReceivedTimestamp() ?? '' );
-						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_destination", $trx->getDestination() ?? '' );
-						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_amount", $trx->getValue() ?? '' );
-						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_status", $trx->getStatus() ?? '' );
-						update_post_meta( $order->get_id(), "Coinsnap_{$paymentMethodName}_{$index}_networkFee", $trx->getFee() ?? '' );
+						$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_{$index}_id", $trx->getTransactionId() ?? '' );
+						$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_{$index}_timestamp", $trx->getReceivedTimestamp() ?? '' );
+						$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_{$index}_destination", $trx->getDestination() ?? '' );
+						$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_{$index}_amount", $trx->getValue() ?? '' );
+						$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_{$index}_status", $trx->getStatus() ?? '' );
+						$order->update_meta_data(  "Coinsnap_{$paymentMethodName}_{$index}_networkFee", $trx->getFee() ?? '' );
 					}
+                                        
+                                        // Save the order.
+					$order->save();
 				}
 			}
 		} catch (\Throwable $e) {
@@ -517,8 +521,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		$redirectUrl     = $this->get_return_url( $order );
 		$checkoutOptions->setRedirectURL( $redirectUrl );
 		Logger::debug( 'Setting redirect url to: ' . $redirectUrl );
-
-		         
 
 		// Payment methods.
 		if ($paymentMethods = $this->getPaymentMethods()) {
@@ -608,8 +610,11 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 */
 	protected function updateOrderMetadata( int $orderId, \Coinsnap\Result\Invoice $invoice ) {
 		// Store relevant Coinsnap invoice data.
-		update_post_meta( $orderId, 'Coinsnap_redirect', $invoice->getData()['checkoutLink'] );
-		update_post_meta( $orderId, 'Coinsnap_id', $invoice->getData()['id'] );
+                $order = wc_get_order($orderId);
+		$order->update_meta_data( 'Coinsnap_redirect', $invoice->getData()['checkoutLink'] );
+		$order->update_meta_data( 'Coinsnap_id', $invoice->getData()['id'] );
+                Logger::debug( 'Store relevant Coinsnap invoice data for order ' . $orderId . ': Coinsnap_id: ' . $invoice->getData()['id'] );
+                $order->save();
 	}
 
 	/**
