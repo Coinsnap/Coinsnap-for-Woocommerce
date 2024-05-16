@@ -55,7 +55,6 @@ Simply register on [Coinsnap](https://app.coinsnap.io/register), enter your own 
     * Transaction information is only shared between you and your customer
 
 *	**Sophisticated merchant’s admin dashboard in Coinsnap:**
-
    *	See all your transactions at a glance
    *	Follow-up on individual payments
    *	See issues with payments
