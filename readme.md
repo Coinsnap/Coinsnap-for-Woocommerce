@@ -105,7 +105,7 @@ Then use the “Upload plugin” function to install it. Click on “Install now
 
 As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
 
-# Connect Coinsnap account with WooCommerce plugin #
+# 2. Connect Coinsnap account with WooCommerce plugin #
 
 ### 2.1. WooCommerce Coinsnap Settings ###
 
