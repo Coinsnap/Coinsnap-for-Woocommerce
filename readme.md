@@ -15,6 +15,11 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Coinsnap payment plug-in is intended for online stores based on WooCommerce to accept Bitcoin and Lightning payments via Coinsnap payment gateway https://coinsnap.io/.
 
+WooCommerce Coinsnap Demo Store: https://woocommerce.coinsnap.org/
+Blog Article: https://coinsnap.io/en/coinsnap-for-woocommerce-plugin/
+WordPress: https://wordpress.org/plugins/coinsnap-for-woocommerce/
+GitHub: https://github.com/Coinsnap/Coinsnap-for-Woocommerce
+
 # Description #
 
 [Coinsnap](https://coinsnap.io/en/) for WooCommerce allows you to process Bitcoin Lightning payments over the Lightning network in your WooCommerce online shop. 
@@ -125,8 +130,6 @@ Go to the Settings menu item in the Coinsnap backend. There you will find the Co
 
 Click on the “Save changes” button at the bottom of the page to apply and save the settings.
 
-== WooCommerce payment settings ==
-
 ### 3. WooCommerce payment settings ###
 
 Navigate to the Payment tab under the WooCommerce settings to see a list of all available payment methods. Coinsnap is shown at the end of the list.
@@ -157,8 +160,6 @@ By selecting the “Upload or select icon” button, you have the option of addi
 
 ##### (4) Enforce payment coins #####
 Enforce payment tokens refers to a system setting that ensures that only certain types of tokens are accepted for a specific payment method or gateway. This ensures that promotional tokens (which may represent discounts, special offers or other non-traditional forms of payment) are not mistakenly processed as regular payment tokens within this gateway.
-
-== Test the payment in the WooCommerce store ==
 
 ### 4. Test the payment in the WooCommerce store ###
 
