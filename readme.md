@@ -9,11 +9,11 @@ Tags: Lightning, Lightning Payment, SATS, Satoshi sats, bitcoin, Wordpress, WooC
 Requires at least: 5.2
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Coinsnap payment plug-in is intended for online stores based on WooCommerce to accept Bitcoin and Lightning payments via Coinsnap payment gateway https://coinsnap.io/.
+Coinsnap payment plug-in is intended for online stores based on WooCommerce to accept Bitcoin and Lightning payments via Coinsnap payment gateway https://app.coinsnap.io/.
 
 * WooCommerce Coinsnap Demo Store: https://woocommerce.coinsnap.org/
 * Blog Article: https://coinsnap.io/en/coinsnap-for-woocommerce-plugin/
