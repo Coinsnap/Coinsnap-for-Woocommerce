@@ -124,7 +124,7 @@ These details are provided via your Coinsnap account in the store settings secti
 
 ### 2.1.1. Coinsnap Store Settings needed for configuration ###
 
-![](https://coinsnap.io/wp-content/uploads/2023/09/Screenshot-2023-09-12-at-08.40.13-1-2.png)
+![](https://coinsnap.io/wp-content/uploads/2023/11/Screenshot-2024-05-27-at-08.16.52.png)
 
 Go to the Settings menu item in the Coinsnap backend. There you will find the Coinsnap Store ID and the Coinsnap API Key in the Store Settings section.
 
