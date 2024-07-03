@@ -496,16 +496,15 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	public function createInvoice( \WC_Order $order ): ?\Coinsnap\Result\Invoice {
 		// In case some plugins customizing the order number we need to pass that along, defaults to internal ID.
 		$orderNumber = $order->get_order_number();
-		Logger::debug( 'Got order number: ' . $orderNumber . ' and order ID: ' . $order->get_id() );
+                $orderID = $order->get_id();
+		Logger::debug( 'Got order number: ' . $orderNumber . ' and order ID: ' . $orderID );
 
 		$metadata = [];
                 
-
 		// Send customer data only if option is set.
 		if ( get_option( 'coinsnap_send_customer_data' ) === 'yes' ) {
 			$metadata = $this->prepareCustomerMetadata( $order );
 		}
-                
                 
                 $buyerEmail = $this->prepareCustomerMetadata( $order )['buyerEmail'];
                 $buyerName = $this->prepareCustomerMetadata( $order )['buyerName'];
@@ -513,46 +512,58 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		// Set included tax amount.
 		$metadata['taxIncluded'] = $order->get_cart_tax();
 
-		// POS metadata.
-		$metadata['posData'] = $this->preparePosMetadata( $order );
+		if(isset($orderNumber) && !empty($orderNumber)) $metadata['orderNumber'] = $orderNumber;
+                
+                $redirectUrl     = $this->get_return_url( $order );
+                $currency = $order->get_currency();
+		$amount = PreciseNumber::parseString( $order->get_total() );		
 
 		// Checkout options.
 		$checkoutOptions = new InvoiceCheckoutOptions();
-		$redirectUrl     = $this->get_return_url( $order );
 		$checkoutOptions->setRedirectURL( $redirectUrl );
 		Logger::debug( 'Setting redirect url to: ' . $redirectUrl );
-
+/*
+		
 		// Payment methods.
 		if ($paymentMethods = $this->getPaymentMethods()) {
 			$checkoutOptions->setPaymentMethods($paymentMethods);
+                        Logger::debug( 'Payment methods: ' . print_R($paymentMethods,true) );
 		}
+                
+                
+                
+                
 
 		// Handle payment methods of type "promotion".
 		// Promotion type set 1 token per each quantity.
-		if ($this->getTokenType() === 'promotion') {
+                if ($this->getTokenType() === 'promotion') {
 			$currency = $this->primaryPaymentMethod ?? null;
 			$amount = PreciseNumber::parseInt( $this->getOrderTotalItemsQuantity($order));
 		} else { // Defaults.
 			$currency = $order->get_currency();
 			$amount = PreciseNumber::parseString( $order->get_total() ); // unlike method signature suggests, it returns string.
 		}
-
+                */
+                
 		// Handle Sats-mode.
 		// Because Coinsnap does not understand SAT as a currency we need to change to BTC and adjust the amount.
 		if ($currency === 'SAT') {
 			$currency = 'BTC';
 			$amountBTC = bcdiv($amount->__toString(), '100000000', 8);
 			$amount = PreciseNumber::parseString($amountBTC);
+                        Logger::debug( 'SATS as a currency is handled' );
 		}
 
 		// Create the invoice on Coinsnap Server.
 		$client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
+                Logger::debug( 'Client for invoice is created' );
+                
 		try {
 			$invoice = $client->createInvoice(
 				$this->apiHelper->storeId,  //$storeId
 				$currency,                  //$currency
 				$amount,                    //$amount
-				$orderNumber,               //$orderId
+				$orderID,               //$orderId
                                 $buyerEmail,                //$buyerEmail
                                 $buyerName,                 //$customerName
                                 $redirectUrl,               //$redirectUrl
@@ -567,7 +578,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 		} catch ( \Throwable $e ) {
 			Logger::debug( $e->getMessage(), true );
-			// todo: should we throw exception here to make sure there is an visible error on the page and not silently failing?
 		}
 
 		return null;
