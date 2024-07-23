@@ -9,10 +9,10 @@
  * Domain Path:     /languages
  * Version:         1.1.3
  * Requires PHP:    7.4
- * Tested up to:    6.5.5
+ * Tested up to:    6.6
  * Requires at least: 5.2
  * WC requires at least: 6.0
- * WC tested up to: 9.0.2
+ * WC tested up to: 9.1.2
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
