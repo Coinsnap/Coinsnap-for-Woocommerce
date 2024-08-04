@@ -9,7 +9,7 @@
  * Domain Path:     /languages
  * Version:         1.1.3
  * Requires PHP:    7.4
- * Tested up to:    6.6
+ * Tested up to:    6.6.1
  * Requires at least: 5.2
  * WC requires at least: 6.0
  * WC tested up to: 9.1.2
