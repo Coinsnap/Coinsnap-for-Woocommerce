@@ -7,12 +7,12 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.1.3
+ * Version:         1.1.4
  * Requires PHP:    7.4
- * Tested up to:    6.6.1
+ * Tested up to:    6.6.2
  * Requires at least: 5.2
  * WC requires at least: 6.0
- * WC tested up to: 9.1.2
+ * WC tested up to: 9.3.3
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -137,9 +137,7 @@ class CoinsnapWCPlugin {
             return;
 	}
 
-	$title = __('Payment Status','coinsnap-for-woocommerce');
-
-        $orderData = $order->get_data();
+	$orderData = $order->get_data();
         $status = $orderData['status'];
 
             switch ($status){
@@ -156,14 +154,15 @@ class CoinsnapWCPlugin {
                     $statusDesc = __('Payment failed', 'coinsnap-for-woocommerce');
                     break;
 		default:
-                    $statusText = ucfirst($status);
-                    $statusDesc = $statusText; //__($statusText, 'coinsnap-for-woocommerce');
+                    $statusDesc = ucfirst($status);
                     break;
             }
 
+            //$title = esc_html__('Payment Status','coinsnap-for-woocommerce');
+
             echo "<section class='woocommerce-order-payment-status'>
-		    <h2 class='woocommerce-order-payment-status-title'>{$title}</h2>
-		    <p><strong>{$statusDesc}</strong></p>
+		    <h2 class='woocommerce-order-payment-status-title'>".esc_html__('Payment Status','coinsnap-for-woocommerce')."</h2>
+		    <p><strong>".esc_html($statusDesc)."</strong></p>
 		</section>";
     }
     
@@ -241,12 +240,14 @@ add_action( 'template_redirect', function() {
 	$data = json_decode( $rawData, true );
 
 	// Seems data does get submitted with url-encoded payload, so parse $_POST here.
-	if (!empty($_POST)) {
-            $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
-            $data['apiKey'] = (wp_verify_nonce($nonce,-1) || sanitize_text_field($_POST['apiKey']))? sanitize_text_field($_POST['apiKey']) : null;
-            if (is_array($_POST['permissions'])) {
-                foreach ($_POST['permissions'] as $key => $value) {
-                    $data['permissions'][$key] = (wp_verify_nonce($nonce,-1) || sanitize_text_field($_POST['permissions'][$key]))? sanitize_text_field($_POST['permissions'][$key]) : null;
+        $nonce = sanitize_text_field(wp_unslash (filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING)));
+	if (wp_verify_nonce($nonce,-1) || is_array($_POST)) {
+            
+            $data['apiKey'] = (null !== filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_STRING ))? sanitize_text_field(filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_STRING )) : null;
+            if (wp_verify_nonce($nonce,-1) || (isset($_POST['permissions']) && is_array($_POST['permissions']))) {
+                $permissions = array_map('sanitize_key',$_POST['permissions']);
+                foreach ($permissions as $key => $value) {
+                    $data['permissions'][$key] = (sanitize_text_field($value))? sanitize_text_field($value) : null;
 		}
             }
 	}

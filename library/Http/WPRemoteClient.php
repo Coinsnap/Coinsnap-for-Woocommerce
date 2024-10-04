@@ -9,16 +9,16 @@ use Coinsnap\WC\Helper\Logger;
 /**
  * HTTP Client using cURL to communicate.
  */
-class wpRemoteClient implements ClientInterface {
+class WPRemoteClient implements ClientInterface {
     
-    protected $wpRemoteOptions = [];
+    protected $WPRemoteOptions = [];
 
     /**
      * Adding any additional options set.
      * @return void
      */
-    protected function initWpRemote(){
-        if (count($this->wpRemoteOptions) > 0) {
+    protected function initWPRemote(){
+        if (count($this->WPRemoteOptions) > 0) {
             
         }
     }
@@ -27,22 +27,22 @@ class wpRemoteClient implements ClientInterface {
      * We this method if we need to set any special parameters (related to SSL for example)
      * @return void
      */
-    public function setWpRemoteOptions(array $options){
-        $this->wpRemoteOptions = $options;
+    public function setWPRemoteOptions(array $options){
+        $this->WPRemoteOptions = $options;
     }
 
     public function request(string $method,string $url,array $headers = [],string $body = ''): ResponseInterface {
         
-        $ch = $this->initWpRemote();
+        $ch = $this->initWPRemote();
         
-        $wpRemoteArgs = array(
+        $WPRemoteArgs = array(
             'body' => $body,
             'method' => $method,
             'timeout' => 5,
             'headers' => $headers,
         );
         
-        $response = wp_remote_request( $url, $wpRemoteArgs );
+        $response = wp_remote_request( $url, $WPRemoteArgs );
         
         if(is_wp_error( $response ) ) {
             $errorMessage = $response->get_error_message();
@@ -57,7 +57,7 @@ class wpRemoteClient implements ClientInterface {
             $responseBody = '';
             $responseHeaders = wp_remote_retrieve_headers($response)->getAll();
             $responseBody = $response['body'];
-            //Logger::debug(print_r($responseHeaders,true));
+            Logger::debug(print_r($responseHeaders,true));
             return new Response($status, $responseBody, $responseHeaders);
         }
     }

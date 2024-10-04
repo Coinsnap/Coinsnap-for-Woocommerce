@@ -102,9 +102,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	// Check if the order is a modal payment.
-        $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
-	if (wp_verify_nonce($nonce,-1) || isset($_POST['action'])) {
-            $action = wc_clean( wp_unslash( $_POST['action'] ) );
+        if (null !== filter_input(INPUT_POST,'action',FILTER_SANITIZE_STRING )) {
+            $action = filter_input(INPUT_POST,'action',FILTER_SANITIZE_STRING );
 			if ( $action === 'coinsnap_modal_checkout' ) {
 				Logger::debug( 'process_payment called via modal checkout.' );
             }
@@ -145,8 +144,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	public function process_admin_options() {
 		// Store media id.
 		$iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
-                $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
-		if (wp_verify_nonce($nonce,-1) || sanitize_key($_POST[$iconFieldName])) {
+                if ($mediaId = sanitize_key(filter_input(INPUT_POST,$iconFieldName,FILTER_SANITIZE_STRING ))) {
 			if ($mediaId !== $this->get_option(self::ICON_MEDIA_OPTION)) {
 				$this->update_option(self::ICON_MEDIA_OPTION, $mediaId);
 			}
@@ -496,7 +494,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	public function createInvoice( \WC_Order $order ): ?\Coinsnap\Result\Invoice {
 		// In case some plugins customizing the order number we need to pass that along, defaults to internal ID.
 		$orderNumber = $order->get_order_number();
-                $orderID = $order->get_id();
+                $orderID = ''.$order->get_id();
 		Logger::debug( 'Got order number: ' . $orderNumber . ' and order ID: ' . $orderID );
 
 		$metadata = [];
@@ -563,7 +561,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				$this->apiHelper->storeId,  //$storeId
 				$currency,                  //$currency
 				$amount,                    //$amount
-				$orderID,               //$orderId
+				(string)$orderID,               //$orderId
                                 $buyerEmail,                //$buyerEmail
                                 $buyerName,                 //$customerName
                                 $redirectUrl,               //$redirectUrl

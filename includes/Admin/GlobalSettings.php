@@ -128,14 +128,11 @@ class GlobalSettings extends \WC_Settings_Page {
 		if ( $this->hasNeededApiCredentials() ) {
 			// Check if api key works for this store.
 			$apiUrl  = COINSNAP_SERVER_URL;
-                        $nonce = sanitize_text_field(wp_unslash ($_POST['_wpnonce']));
-			$apiKey  = (wp_verify_nonce($nonce,-1) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';
-			$storeId = (wp_verify_nonce($nonce,-1) || sanitize_text_field( $_POST['coinsnap_store_id'] ))? sanitize_text_field( $_POST['coinsnap_store_id'] ) : '';
-
-			
+                        $nonce = sanitize_text_field(wp_unslash (filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING)));
+			$apiKey  = (wp_verify_nonce($nonce,-1) || filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_STRING ))? filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_STRING ) : '';
+			$storeId = (wp_verify_nonce($nonce,-1) || filter_input(INPUT_POST,'coinsnap_store_id',FILTER_SANITIZE_STRING ))? filter_input(INPUT_POST,'coinsnap_store_id',FILTER_SANITIZE_STRING ) : '';
                                     
 			try {
-				
                                 
                             // Continue creating the webhook if the API key permissions are OK.
                             if ( $apiAuth = CoinsnapApiHelper::checkApiConnection() ){
@@ -191,8 +188,8 @@ class GlobalSettings extends \WC_Settings_Page {
     }
 
     private function hasNeededApiCredentials(): bool {
-        $apiKey  = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_api_key'] ))? sanitize_text_field( $_POST['coinsnap_api_key'] ) : '';
-	$storeId = (wp_verify_nonce($_POST['_wpnonce']) || sanitize_text_field( $_POST['coinsnap_store_id'] ))? sanitize_text_field( $_POST['coinsnap_store_id'] ) : '';
+        $apiKey  = (filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_STRING ))? filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_STRING ) : '';
+	$storeId = (filter_input(INPUT_POST,'coinsnap_store_id',FILTER_SANITIZE_STRING ))? filter_input(INPUT_POST,'coinsnap_store_id',FILTER_SANITIZE_STRING ) : '';
         
         if(!empty($apiKey) && !empty($storeId)) {
             return true;

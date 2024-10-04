@@ -22,9 +22,9 @@ class AbstractClient{
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->apiKey = $apiKey;
 
-        // Use the $client parameter to use a custom wpRemote client, for example if you need to disable CURLOPT_SSL_VERIFYHOST and CURLOPT_SSL_VERIFYPEER
+        // Use the $client parameter to use a custom WPRemote client, for example if you need to disable CURLOPT_SSL_VERIFYHOST and CURLOPT_SSL_VERIFYPEER
         if ($client === null) {
-            $client = new wpRemoteClient();
+            $client = new WPRemoteClient();
         }
         $this->httpClient = $client;
     }
