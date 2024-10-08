@@ -494,7 +494,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	public function createInvoice( \WC_Order $order ): ?\Coinsnap\Result\Invoice {
 		// In case some plugins customizing the order number we need to pass that along, defaults to internal ID.
 		$orderNumber = $order->get_order_number();
-                $orderID = ''.$order->get_id();
+                $orderID = $order->get_id();
 		Logger::debug( 'Got order number: ' . $orderNumber . ' and order ID: ' . $orderID );
 
 		$metadata = [];
@@ -561,7 +561,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				$this->apiHelper->storeId,  //$storeId
 				$currency,                  //$currency
 				$amount,                    //$amount
-				(string)$orderID,               //$orderId
+				(int)$orderID,              //$orderId
                                 $buyerEmail,                //$buyerEmail
                                 $buyerName,                 //$customerName
                                 $redirectUrl,               //$redirectUrl
