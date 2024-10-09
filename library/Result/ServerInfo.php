@@ -1,7 +1,10 @@
 <?php
-
 declare(strict_types=1);
 namespace Coinsnap\Result;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class ServerInfo extends AbstractResult {
     public function getVersion(): string {

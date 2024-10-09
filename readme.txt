@@ -223,4 +223,4 @@ Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-p
 * Wordpress library update.
 * Data output security update.
 * Compatibility with WooCommerce 9.3.x. is tested
-* Fix: order ID variable type is ?int.
+* Fix: order ID variable type is ?string.

@@ -1,24 +1,26 @@
 <?php
 declare(strict_types=1);
-
 namespace Coinsnap\Http;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 use Coinsnap\Exception\ConnectException;
-use Coinsnap\WC\Helper\Logger;
 
 /**
  * HTTP Client using cURL to communicate.
  */
 class WPRemoteClient implements ClientInterface {
     
-    protected $WPRemoteOptions = [];
+    protected $wpRemoteOptions = [];
 
     /**
      * Adding any additional options set.
      * @return void
      */
-    protected function initWPRemote(){
-        if (count($this->WPRemoteOptions) > 0) {
+    protected function initWpRemote(){
+        if (count($this->wpRemoteOptions) > 0) {
             
         }
     }
@@ -27,22 +29,22 @@ class WPRemoteClient implements ClientInterface {
      * We this method if we need to set any special parameters (related to SSL for example)
      * @return void
      */
-    public function setWPRemoteOptions(array $options){
-        $this->WPRemoteOptions = $options;
+    public function setWpRemoteOptions(array $options){
+        $this->wpRemoteOptions = $options;
     }
 
     public function request(string $method,string $url,array $headers = [],string $body = ''): ResponseInterface {
         
-        $ch = $this->initWPRemote();
+        $ch = $this->initWpRemote();
         
-        $WPRemoteArgs = array(
+        $wpRemoteArgs = array(
             'body' => $body,
             'method' => $method,
             'timeout' => 5,
             'headers' => $headers,
         );
         
-        $response = wp_remote_request( $url, $WPRemoteArgs );
+        $response = wp_remote_request( $url, $wpRemoteArgs );
         
         if(is_wp_error( $response ) ) {
             $errorMessage = $response->get_error_message();
@@ -57,7 +59,6 @@ class WPRemoteClient implements ClientInterface {
             $responseBody = '';
             $responseHeaders = wp_remote_retrieve_headers($response)->getAll();
             $responseBody = $response['body'];
-            Logger::debug(print_r($responseHeaders,true));
             return new Response($status, $responseBody, $responseHeaders);
         }
     }

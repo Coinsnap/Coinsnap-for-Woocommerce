@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Result;
 
-class InvoiceList extends AbstractListResult
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class InvoiceList extends AbstractListResult {
     /**
      * @return \Coinsnap\Result\Invoice[]
      */

@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Http;
 
-interface ResponseInterface
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+interface ResponseInterface {
     /**
      * HTTP status code.
      */

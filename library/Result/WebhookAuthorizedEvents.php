@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Result;
 
-class WebhookAuthorizedEvents extends AbstractResult
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class WebhookAuthorizedEvents extends AbstractResult {
     public function hasEverything(): bool
     {
         $data = $this->getData();

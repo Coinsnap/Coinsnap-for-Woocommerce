@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
-
 namespace Coinsnap\Exception;
 
-use Coinsnap\Exception\CoinsnapException;
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class ConnectException extends CoinsnapException {
-    public function __construct(string $errorMessage, int $errorCode){
-        parent::__construct($errorMessage, $errorCode);
+    public function __construct(string $curlErrorMessage, int $curlErrorCode){
+        parent::__construct($curlErrorMessage, $curlErrorCode);
     }
 }

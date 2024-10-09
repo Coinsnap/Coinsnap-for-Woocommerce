@@ -1,14 +1,15 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Http;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 use Coinsnap\Exception\ConnectException;
 use Coinsnap\Exception\RequestException;
 
-interface ClientInterface
-{
+interface ClientInterface {
     /**
      * Sends the HTTP request to API server.
      *

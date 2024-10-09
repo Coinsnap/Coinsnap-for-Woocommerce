@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Result;
 
-class Store extends AbstractResult
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Store extends AbstractResult {
     public function getName(): string
     {
         $data = $this->getData();

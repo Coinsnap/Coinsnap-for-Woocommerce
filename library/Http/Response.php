@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Http;
 
-class Response implements ResponseInterface
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Response implements ResponseInterface {
     /** @var int */
     private $status;
 

@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Client;
 
-class InvoiceCheckoutOptions
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class InvoiceCheckoutOptions {
     public const SPEED_HIGH = 'HighSpeed';
     public const SPEED_MEDIUM = 'MediumSpeed';
     public const SPEED_LOW = 'LowSpeed';

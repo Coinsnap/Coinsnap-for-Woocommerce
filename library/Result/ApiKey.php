@@ -6,5 +6,5 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class InvoiceCheckoutHTML extends AbstractResult {
+class ApiKey extends AbstractResult {
 }

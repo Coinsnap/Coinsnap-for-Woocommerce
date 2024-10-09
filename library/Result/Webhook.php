@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Result;
 
-class Webhook extends AbstractResult
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Webhook extends AbstractResult {
     public function getId(): string
     {
         $data = $this->getData();

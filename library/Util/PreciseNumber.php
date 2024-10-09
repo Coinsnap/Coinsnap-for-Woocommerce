@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Util;
 
-class PreciseNumber
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class PreciseNumber {
     /** @var string */
     private $value;
 

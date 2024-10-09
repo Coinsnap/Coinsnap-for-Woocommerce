@@ -1,7 +1,13 @@
 <?php
 declare(strict_types=1);
 namespace Coinsnap\Result;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 use Coinsnap\Util\PreciseNumber;
+
 class Invoice extends AbstractResult{
     public const STATUS_NEW = 'New';
     public const STATUS_INVALID = 'Invalid';

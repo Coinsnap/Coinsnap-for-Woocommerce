@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Result;
 
-class WebhookCreated extends Webhook
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class WebhookCreated extends Webhook {
     public function getSecret(): string
     {
         $data = $this->getData();

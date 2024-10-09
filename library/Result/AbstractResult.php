@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\Result;
 
-abstract class AbstractResult implements \ArrayAccess
-{
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+abstract class AbstractResult implements \ArrayAccess {
     /** @var array */
     private $data;
 
