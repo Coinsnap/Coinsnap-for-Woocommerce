@@ -102,8 +102,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	// Check if the order is a modal payment.
-        if (null !== filter_input(INPUT_POST,'action',FILTER_SANITIZE_STRING )) {
-            $action = filter_input(INPUT_POST,'action',FILTER_SANITIZE_STRING );
+        if (null !== filter_input(INPUT_POST,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) {
+            $action = filter_input(INPUT_POST,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 			if ( $action === 'coinsnap_modal_checkout' ) {
 				Logger::debug( 'process_payment called via modal checkout.' );
             }
@@ -144,7 +144,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	public function process_admin_options() {
 		// Store media id.
 		$iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
-                if ($mediaId = sanitize_key(filter_input(INPUT_POST,$iconFieldName,FILTER_SANITIZE_STRING ))) {
+                if ($mediaId = sanitize_key(filter_input(INPUT_POST,$iconFieldName,FILTER_SANITIZE_FULL_SPECIAL_CHARS ))) {
 			if ($mediaId !== $this->get_option(self::ICON_MEDIA_OPTION)) {
 				$this->update_option(self::ICON_MEDIA_OPTION, $mediaId);
 			}
@@ -206,6 +206,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 */
 	public function getIcon(): string {
 		$icon = null;
+                //Logger::debug( 'mediaId: '.print_r($this->get_option(self::ICON_MEDIA_OPTION),true) );
 		if ($mediaId = $this->get_option(self::ICON_MEDIA_OPTION)) {
 			if ($customIcon = wp_get_attachment_image_src($mediaId)[0]) {
 				$icon = $customIcon;
@@ -648,7 +649,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Get customer facing gateway description.
 	 */
 	public function getDescription(): string {
-		return $this->get_option('description', 'You will be redirected to the Bitcoin Payment Page to complete your purchase');
+		return $this->get_option('description', 'You will be redirected to the Bitcoin-Lightning Payment Page to complete your purchase');
 	}
 
 	public function getButton(): string {

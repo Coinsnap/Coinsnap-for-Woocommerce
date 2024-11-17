@@ -48,7 +48,8 @@ class CoinsnapApiHelper {
     public static function checkApiConnection(): bool {
         if ($config = self::getConfig()) {
             $client = new Store($config['url'], $config['api_key']);
-            if (!empty($store = $client->getStore($config['store_id']))) {
+            $store = $client->getStore($config['store_id']);
+            if ($store['code'] === 200) {
                 return true;
             }
         }
@@ -59,9 +60,13 @@ class CoinsnapApiHelper {
         if ($config = self::getConfig()) {
             $client = new Store($config['url'], $config['api_key']);
             $store = $client->getStore($config['store_id']);
-            
-            if (!isset($store['error'])) return (array)$store;
-            else return array('result' => false, 'error' => 'Coinsnap server is not available');
+            Logger::debug(print_r($store, true), true);
+            if ($store['code'] === 200){ 
+                return (array)$store;
+            }
+            else {
+                return array('result' => false, 'error' => 'Coinsnap server is not available');
+            }
         }
         return array('result' => false, 'error' => 'Plugin is not configured');
     }

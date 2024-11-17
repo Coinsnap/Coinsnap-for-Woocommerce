@@ -1,15 +1,14 @@
 <?php
 /**
  * Plugin Name:     Coinsnap for WooCommerce
- * Plugin URI:      https://wordpress.org/plugins/coinsnap-for-woocommerce/
  * Description:     With Coinsnap payment processing, you can accept Bitcoin and Lightning payments on your website or online store. You do not need your own Lightning Node or other technical requirements.
  * Author:          Coinsnap
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.1.5
+ * Version:         1.1.6
  * Requires PHP:    7.4
- * Tested up to:    6.6.2
+ * Tested up to:    6.7
  * Requires at least: 5.2
  * WC requires at least: 6.0
  * WC tested up to: 9.3.3
@@ -26,16 +25,16 @@ use Coinsnap\WC\Helper\CoinsnapApiHelper;
 use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
-define( 'COINSNAP_PHP_VERSION', '7.4' );
-define( 'COINSNAP_VERSION', '1.1.5' );
-define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );
-define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );
-define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );
-define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );
-define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );
-define( 'COINSNAP_API_PATH', '/api/v1/');
-define( 'COINSNAP_SERVER_PATH', 'stores' );
-define( 'COINSNAP_REFERRAL_CODE', 'DEV1e1ea54fedd507e2f447e2963' );
+if(!defined('COINSNAP_PHP_VERSION')){define( 'COINSNAP_PHP_VERSION', '7.4' );}
+if(!defined('COINSNAP_VERSION')){define( 'COINSNAP_VERSION', '1.1.6' );}
+if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
+if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
+if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
+if(!defined('COINSNAP_PLUGIN_ID')){define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );}
+if(!defined('COINSNAP_SERVER_URL')){define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );}
+if(!defined('COINSNAP_API_PATH')){define( 'COINSNAP_API_PATH', '/api/v1/');}
+if(!defined('COINSNAP_SERVER_PATH')){define( 'COINSNAP_SERVER_PATH', 'stores' );}
+if(!defined('COINSNAP_REFERRAL_CODE')){define( 'COINSNAP_REFERRAL_CODE', 'DEV1e1ea54fedd507e2f447e2963' );}
 
 class CoinsnapWCPlugin {
     

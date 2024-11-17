@@ -19,7 +19,7 @@ class SettingsHelper {
 				'title'       => __('Customer Message', 'coinsnap-for-woocommerce'),
 				'type'        => 'textarea',
 				'description' => __('Message to explain how the customer will be paying for the purchase.', 'coinsnap-for-woocommerce'),
-				'default'     => 'You will be redirected to the Bitcoin Payment Page to complete your purchase.',
+				'default'     => 'You will be redirected to the Bitcoin-Lightning Payment Page to complete your purchase.',
 				'desc_tip'    => true,
 			],
 		];

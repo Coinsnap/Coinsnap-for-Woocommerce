@@ -1,21 +1,21 @@
-=== Coinsnap Bitcoin + Lightning payment plug-in for WooCommerce ===
+=== Coinsnap for WooCommerce ===
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Requires at least: 5.2
-Tested up to: 6.6.2
+Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Coinsnap payment plug-in is intended for online stores based on WooCommerce to accept Bitcoin and Lightning payments via Coinsnap payment gateway.
 
+== Description ==
+
 * WooCommerce Coinsnap Demo Store: https://woocommerce.coinsnap.org/
 * Blog Article: https://coinsnap.io/en/coinsnap-for-woocommerce-plugin/
 * WordPress: https://wordpress.org/plugins/coinsnap-for-woocommerce/
 * GitHub: https://github.com/Coinsnap/Coinsnap-for-Woocommerce
-
-== Description ==
 
 [Coinsnap](https://coinsnap.io/en/) for WooCommerce allows you to process Bitcoin Lightning payments over the Lightning network in your WooCommerce online shop. 
 With the Coinsnap Bitcoin-Lightning payment plugin for WooCommerce you only need a Lightning wallet with a Lightning address to accept Bitcoin Lightning payments in your WooCommerce online store.
@@ -167,7 +167,7 @@ After all settings have been made, a test transaction should be carried out.
 ![](https://ps.w.org/coinsnap-for-woocommerce/assets/screenshot-10.png)
 
 Place an order in your WooCommerce online store and search for Bitcoin and Lightning Payment among the available payment options. Choose this method and click on Pay with Bitcoin.
-You will be redirected to the Bitcoin payment page to complete the purchase.
+You will be redirected to the Bitcoin-Lightning payment page to complete the purchase.
 
 ![](https://ps.w.org/coinsnap-for-woocommerce/assets/screenshot-11.png)
 ![](https://ps.w.org/coinsnap-for-woocommerce/assets/screenshot-12.png)
@@ -228,3 +228,9 @@ Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-p
 = 1.1.5 :: 2024-10-11 =
 * Wordpress library update.
 * Fixed error on checkout.
+
+= 1.1.6 :: 2024-11-06 =
+* Coinsnap connection errors exception update.
+* Update of Coinsnap gateway icon upload functionality.
+* Update of payment method name by default (Bitcoin-Lightning)
+

@@ -33,7 +33,7 @@ class DefaultGateway extends AbstractGateway {
 	 * @inheritDoc
 	 */
 	public function getDescription(): string {
-		return $this->get_option('description', 'You will be redirected to the Bitcoin Payment Page to complete your purchase.');
+		return $this->get_option('description', 'You will be redirected to the Bitcoin-Lightning Payment Page to complete your purchase.');
 	}
 
 	/**

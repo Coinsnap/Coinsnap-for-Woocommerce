@@ -73,7 +73,7 @@ class GlobalSettings extends \WC_Settings_Page {
 				'title'       => esc_html_x('Default Customer Message', 'global_settings', 'coinsnap-for-woocommerce' ),
 				'type'        => 'textarea',
 				'desc'        => esc_html_x('Message to explain how the customer will be paying for the purchase. Can be overwritten on a per gateway basis.', 'global_settings', 'coinsnap-for-woocommerce' ),
-				'default'     => esc_html_x('You will be redirected to the Bitcoin Payment Page to complete your purchase', 'global_settings', 'coinsnap-for-woocommerce'),
+				'default'     => esc_html_x('You will be redirected to the Bitcoin-Lightning Payment Page to complete your purchase', 'global_settings', 'coinsnap-for-woocommerce'),
 				'desc_tip'    => true,
 				'id' => 'coinsnap_default_description'
 			],
@@ -108,7 +108,7 @@ class GlobalSettings extends \WC_Settings_Page {
 				'default' => 'no',
 				'desc' => sprintf( 
                                         /* translators: 1: Logs link */
-                                        _x( 'Enable logging (<small><a href="%1$s">View Logs</a></small>)', 'global_settings', 'coinsnap-for-woocommerce' ), Logger::getLogFileUrl()),
+                                        _x( 'Enable logging (<small><a href="%1$s" target="_blank">View Logs</a></small>)', 'global_settings', 'coinsnap-for-woocommerce' ), Logger::getLogFileUrl()),
 				'id' => 'coinsnap_debug'
 			],
 			'sectionend' => [
@@ -161,6 +161,11 @@ class GlobalSettings extends \WC_Settings_Page {
 					Logger::debug($messageWebhookError, true);
                                     }
 				}
+                            }
+                            else {
+                                $messageConnectionError = __( 'Coinsnap connection error.', 'coinsnap-for-woocommerce' );
+					Notice::addNotice('error', $messageConnectionError );
+					Logger::debug($messageConnectionError, true);
                             }
 			} 
                         
