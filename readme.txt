@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Requires at least: 5.2
-Tested up to: 6.7
+Tested up to: 6.7.1
 Requires PHP: 7.4
 Stable tag: 1.1.6
 License: GPLv2
