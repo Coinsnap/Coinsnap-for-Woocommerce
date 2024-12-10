@@ -234,3 +234,6 @@ Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-p
 * Update of Coinsnap gateway icon upload functionality.
 * Update of payment method name by default (Bitcoin-Lightning)
 
+= 1.1.7 :: 2024-12-10 =
+* Fixed bug in ConnectException handler.
+
