@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class ConnectException extends CoinsnapException {
+class ConnectException extends CSException {
     public function __construct(string $curlErrorMessage, int $curlErrorCode){
         parent::__construct($curlErrorMessage, $curlErrorCode);
     }

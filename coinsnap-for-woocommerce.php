@@ -8,14 +8,10 @@
  * Domain Path:     /languages
  * Version:         1.1.6
  * Requires PHP:    7.4
-<<<<<<< Updated upstream
  * Tested up to:    6.7.1
-=======
- * Tested up to:    6.7
->>>>>>> Stashed changes
  * Requires at least: 5.2
  * WC requires at least: 6.0
- * WC tested up to: 9.4.2
+ * WC tested up to: 9.4.3
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -29,7 +25,7 @@ use Coinsnap\WC\Helper\CoinsnapApiHelper;
 use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
-if(!defined('COINSNAP_PHP_VERSION')){define( 'COINSNAP_PHP_VERSION', '7.4' );}
+if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
 if(!defined('COINSNAP_VERSION')){define( 'COINSNAP_VERSION', '1.1.6' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
@@ -115,7 +111,7 @@ class CoinsnapWCPlugin {
 //  Checks if PHP version is too low or WooCommerce is not installed or CURL is not available and displays notice on admin dashboard
     public function dependenciesNotification() {
         // Check PHP version.
-	if ( version_compare( PHP_VERSION, COINSNAP_PHP_VERSION, '<' ) ) {
+	if ( version_compare( PHP_VERSION, COINSNAP_WC_PHP_VERSION, '<' ) ) {
             $versionMessage = sprintf( 
                 /* translators: 1: PHP version */
                 __( 'Your PHP version is %1$s but Coinsnap Payment plugin requires version 7.4+.', 'coinsnap-for-woocommerce' ), PHP_VERSION );
