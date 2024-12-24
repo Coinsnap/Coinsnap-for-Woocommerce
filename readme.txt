@@ -4,7 +4,7 @@ Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Requires at least: 5.2
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -237,3 +237,5 @@ Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-p
 = 1.1.7 :: 2024-12-10 =
 * Fixed bug in ConnectException handler.
 
+= 1.1.8 :: 2024-12-24 =
+* Fixed mismatch variables types bug in ConnectException function call.
