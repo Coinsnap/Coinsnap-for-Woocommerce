@@ -16,7 +16,7 @@ class UpdateManager {
 	// Check stored version to see if update is needed, will only run once.
 	$runningVersion = get_option( COINSNAP_VERSION_KEY, '1.0' );
 
-	if ( version_compare( $runningVersion, COINSNAP_VERSION, '<' ) ) {
+	if ( version_compare( $runningVersion, COINSNAP_WC_VERSION, '<' ) ) {
 
             // Run update scripts if there are any.
             foreach ( self::$updates as $updateVersion => $filename ) {
@@ -30,7 +30,7 @@ class UpdateManager {
                     Notice::addNotice('success', 'Coinsnap: successfully ran updates to version ' . $runningVersion, true);
 		}
             }
-            update_option( COINSNAP_VERSION_KEY, COINSNAP_VERSION );
+            update_option( COINSNAP_VERSION_KEY, COINSNAP_WC_VERSION );
         }
     }
 }

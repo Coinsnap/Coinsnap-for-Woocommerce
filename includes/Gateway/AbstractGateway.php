@@ -36,7 +36,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	$this->apiHelper = new CoinsnapApiHelper();
 		// Debugging & informational settings.
 		$this->debug_php_version    = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
-		$this->debug_plugin_version = COINSNAP_VERSION;
+		$this->debug_plugin_version = COINSNAP_WC_VERSION;
 
 		// Actions.
 		add_action('admin_enqueue_scripts', [$this, 'addAdminScripts']);
@@ -226,7 +226,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				'coinsnap_abstract_gateway',
 				COINSNAP_PLUGIN_URL . 'assets/js/gatewayIconMedia.js',
 				['jquery'],
-				COINSNAP_VERSION,
+				COINSNAP_WC_VERSION,
                                 array('in_footer' => true)
 			);
 			wp_enqueue_script('coinsnap_abstract_gateway');
@@ -566,7 +566,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                                 $buyerEmail,                //$buyerEmail
                                 $buyerName,                 //$customerName
                                 $redirectUrl,               //$redirectUrl
-                                COINSNAP_REFERRAL_CODE,     //$referralCode
+                                COINSNAP_WC_REFERRAL_CODE,     //$referralCode
 				$metadata,
 				$checkoutOptions
 			);
@@ -607,7 +607,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				'Order ID'       => $order->get_id(),
 				'Order Number'   => $order->get_order_number(),
 				'Order URL'      => $order->get_edit_order_url(),
-				'Plugin Version' => constant( 'COINSNAP_VERSION' )
+				'Plugin Version' => constant( 'COINSNAP_WC_VERSION' )
 			]
 		];
 

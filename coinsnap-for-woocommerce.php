@@ -11,7 +11,7 @@
  * Tested up to:    6.7.1
  * Requires at least: 5.2
  * WC requires at least: 6.0
- * WC tested up to: 9.5.1
+ * WC tested up to: 9.5.2
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -26,15 +26,15 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_VERSION')){define( 'COINSNAP_VERSION', '1.1.8' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.8' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
-if(!defined('COINSNAP_PLUGIN_ID')){define( 'COINSNAP_PLUGIN_ID', 'coinsnap-for-woocommerce' );}
+if(!defined('COINSNAP_WC_PLUGIN_ID')){define( 'COINSNAP_WC_PLUGIN_ID', 'coinsnap-for-woocommerce' );}
 if(!defined('COINSNAP_SERVER_URL')){define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );}
 if(!defined('COINSNAP_API_PATH')){define( 'COINSNAP_API_PATH', '/api/v1/');}
 if(!defined('COINSNAP_SERVER_PATH')){define( 'COINSNAP_SERVER_PATH', 'stores' );}
-if(!defined('COINSNAP_REFERRAL_CODE')){define( 'COINSNAP_REFERRAL_CODE', 'DEV1e1ea54fedd507e2f447e2963' );}
+if(!defined('COINSNAP_WC_REFERRAL_CODE')){define( 'COINSNAP_WC_REFERRAL_CODE', 'DEV1e1ea54fedd507e2f447e2963' );}
 
 class CoinsnapWCPlugin {
     
@@ -92,7 +92,7 @@ class CoinsnapWCPlugin {
     }
     
     public static function enqueueScripts(): void {
-        wp_register_style('coinsnap_payment', plugins_url('assets/css/coinsnap-style.css',__FILE__),array(),COINSNAP_VERSION);
+        wp_register_style('coinsnap_payment', plugins_url('assets/css/coinsnap-style.css',__FILE__),array(),COINSNAP_WC_VERSION);
         wp_enqueue_style('coinsnap_payment');
     }
 
@@ -272,7 +272,7 @@ add_action( 'template_redirect', function() {
 // Installation routine.
 register_activation_hook( __FILE__, function() {
 	update_option('coinsnap_permalinks_flushed', 0);
-	update_option( COINSNAP_VERSION_KEY, COINSNAP_VERSION );
+	update_option( COINSNAP_VERSION_KEY, COINSNAP_WC_VERSION );
 });
 
 // Initialize payment gateways and plugin.
