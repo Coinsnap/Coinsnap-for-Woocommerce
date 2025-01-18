@@ -6,7 +6,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.1.8
+ * Version:         1.1.9
  * Requires PHP:    7.4
  * Tested up to:    6.7.1
  * Requires at least: 5.2
@@ -26,7 +26,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.8' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.9' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
