@@ -49,7 +49,7 @@ class WPRemoteClient implements ClientInterface {
         if(is_wp_error( $response ) ) {
             $errorMessage = $response->get_error_message();
             $errorCode = $response->get_error_code();
-            throw new ConnectException(esc_html($errorMessage), esc_html($errorCode));
+            throw new ConnectException(esc_html($errorMessage), (int)esc_html($errorCode));
         }
         
         elseif(is_array($response)) {

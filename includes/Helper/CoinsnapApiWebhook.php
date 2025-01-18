@@ -53,7 +53,7 @@ class CoinsnapApiWebhook {
 					'url' => $webhook->getData()['url']
 				]
 			);
-
+                        Logger::debug('New webhook is created');
 			return $webhook;
                         
 		} catch (\Throwable $e) {

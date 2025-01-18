@@ -250,67 +250,85 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		if ($this->apiHelper->configured === false) {
 			return;
 		}
-
-		
 	}
 
 	// Process webhooks from Coinsnap.
-            public function processWebhook() {
-		if ($rawPostData = file_get_contents("php://input")) {
-			//  Validate webhook request.
-			//  X-Coinsnap-Sig type: string
-                        //  HMAC signature of the body using the webhook's secret
-			$headers = getallheaders();                        
-                        
-			foreach ($headers as $key => $value) {
-				if (strtolower($key) === 'x-coinsnap-sig') {
-					$signature = $value;
-				}
-			}
-                        
-                        if (!isset($signature) || !$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
-				$postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
-                                Logger::debug('Failed to validate signature of webhook request (Invoice ID: '.$postData->invoiceId);
-				wp_die('Webhook request validation failed.');
-			}
+        public function processWebhook() {
+            try {
+                // First check if we have any input
+                $rawPostData = file_get_contents("php://input");
+                if (!$rawPostData) {
+                    wp_die('No raw post data received', '', ['response' => 400]);
+                }
 
-			try {
-				$postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
+                // Get headers and check for signature
+                $headers = getallheaders();
+                $signature = null;
 
-				if (!isset($postData->invoiceId)) {
-					Logger::debug('No Coinsnap invoiceId provided, aborting.');
-					wp_die('No Coinsnap invoiceId provided, aborting.');
-				}
+                foreach ($headers as $key => $value) {
+                    if (strtolower($key) === 'x-coinsnap-sig') {
+                        $signature = $value;
+                    }
+                }
 
-				// Load the order by metadata field Coinsnap_id
-				$orders = wc_get_orders([
-					'meta_key' => 'Coinsnap_id',
-					'meta_value' => $postData->invoiceId
-				]);
+                // Handle missing or invalid signature
+                if (!isset($signature)) {
+                    Logger::debug('Missing X-Coinsnap-Sig header');
+                    wp_die('Authentication required', '', ['response' => 401]);
+                }
 
-				// Abort if no orders found.
-				if (count($orders) === 0) {
-					Logger::debug('Could not load order by Coinsnap invoiceId: ' . $postData->invoiceId);
-					// Note: we return status 200 here for wp_die() which seems counter intuative but needs to be done
-					// to not clog up the Coinsnap servers webhook processing queue until it is fixed there.
-					wp_die('No order found for this invoiceId.', '', ['response' => 200]);
-				}
+                // Validate the signature
+                if (!$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
+                    Logger::debug('Invalid webhook signature received');
+                    wp_die('Invalid authentication signature', '', ['response' => 401]);
+                }
 
-				// Abort on multiple orders found.
-				if (count($orders) > 1) {
-					Logger::debug('Found multiple orders for invoiceId: ' . $postData->invoiceId);
-					Logger::debug(print_r($orders, true));
-					wp_die('Multiple orders found for this invoiceId, aborting.');
-				}
+                // Parse the JSON payload
+                $postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
 
-				$this->processOrderStatus($orders[0], $postData);
+                if (!isset($postData->invoiceId)) {
+                    Logger::debug('No Coinsnap invoiceId provided, aborting.');
+                    wp_die('No Coinsnap invoiceId provided', '', ['response' => 400]);
+                }
 
-			} catch (\Throwable $e) {
-				Logger::debug('Error decoding webook payload: ' . $e->getMessage());
-				Logger::debug($rawPostData);
-			}
-		}
-	}
+                // Load the order by metadata field Coinsnap_id
+                $orders = wc_get_orders([
+                    'meta_key' => 'Coinsnap_id',
+                    'meta_value' => $postData->invoiceId
+                ]);
+
+                // Handle no orders found
+                if (count($orders) === 0) {
+                    Logger::debug('Could not load order by Coinsnap invoiceId: ' . $postData->invoiceId);
+                    wp_die('No order found for this invoiceId.', '', ['response' => 200]);
+                }
+
+                // Handle multiple orders found
+                if (count($orders) > 1) {
+                    Logger::debug('Found multiple orders for invoiceId: ' . $postData->invoiceId);
+                    Logger::debug(print_r($orders, true));
+                    wp_die('Multiple orders found for this invoiceId', '', ['response' => 409]);
+                }
+
+                // Process the order status
+                $this->processOrderStatus($orders[0], $postData);
+
+                // Return success
+                http_response_code(200);
+                exit('OK');
+
+            }
+            catch (JsonException $e) {
+                Logger::debug('Error decoding webhook payload: ' . $e->getMessage());
+                Logger::debug($rawPostData);
+                wp_die('Invalid JSON payload', '', ['response' => 400]);
+            }
+            catch (\Throwable $e) {
+                Logger::debug('Unexpected error processing webhook: ' . $e->getMessage());
+                Logger::debug($rawPostData);
+                wp_die('Internal server error', '', ['response' => 500]);
+            }
+        }
 
 	protected function processOrderStatus(\WC_Order $order, \stdClass $webhookData) {
 		if (!in_array($webhookData->type, CoinsnapApiWebhook::WEBHOOK_EVENTS)) {

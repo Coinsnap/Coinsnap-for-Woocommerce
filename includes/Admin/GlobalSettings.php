@@ -45,7 +45,7 @@ class GlobalSettings extends \WC_Settings_Page {
 				'desc' => sprintf(
                                     /* translators: 1: Plugin version 2: PHP Version */
                                     _x( 'This plugin version is %1$s and your PHP version is %2$s. <br/><br/>Coinsnap API requires authentication with an API key. Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.<br/><br/>Thank you for using Coinsnap!', 'global_settings', 'coinsnap-for-woocommerce' ), 
-                                        COINSNAP_VERSION, PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ),
+                                        COINSNAP_WC_VERSION, PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ),
 				'id' => 'coinsnap'
 			],
                         'store_id' => [
@@ -145,18 +145,18 @@ class GlobalSettings extends \WC_Settings_Page {
 				}
                                 else {
 				// Register a new webhook.
-                                    $webhook = CoinsnapApiWebhook::registerWebhook( $apiUrl, $apiKey, $storeId );
+                                    $webhook = CoinsnapApiWebhook::registerWebhook($apiUrl, $apiKey, $storeId);
                                     Logger::debug('webhook '.print_r($webhook,true));
                                     
                                 
                                 //  if webhook is created
                                     if ( $webhook ) {
-                                        $messageWebhookSuccess = __( 'Successfully registered a new webhook on Coinsnap Server.', 'coinsnap-for-woocommerce' );
+                                        $messageWebhookSuccess = __( 'Successfully registered a new webhook on Coinsnap Server.','coinsnap-for-woocommerce' );
                                         Notice::addNotice('success', $messageWebhookSuccess, true );
                                         Logger::debug( $messageWebhookSuccess );
                                     }
                                     else {
-					$messageWebhookError = __( 'Could not register a new webhook on the store.', 'coinsnap-for-woocommerce' );
+					$messageWebhookError = __( 'Could not register a new webhook on the store.','coinsnap-for-woocommerce' );
 					Notice::addNotice('error', $messageWebhookError );
 					Logger::debug($messageWebhookError, true);
                                     }

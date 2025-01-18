@@ -239,3 +239,7 @@ Plugin's page on Coinsnap website: https://coinsnap.io/en/coinsnap-woocommerce-p
 
 = 1.1.8 :: 2024-12-24 =
 * Fixed mismatch variables types bug in ConnectException function call.
+
+= 1.1.9 :: 2025-01-18 =
+* Fixed webhook creation bug in processWebhook function call.
+* Update of webhook payload response statuses.

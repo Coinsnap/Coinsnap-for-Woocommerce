@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
 }
 
 class ConnectException extends CSException {
-    public function __construct(string $curlErrorMessage, int $curlErrorCode){
-        parent::__construct($curlErrorMessage, $curlErrorCode);
+    public function __construct(string $connectErrorMessage, int $connectErrorCode){
+        parent::__construct($connectErrorMessage, $connectErrorCode);
     }
 }
