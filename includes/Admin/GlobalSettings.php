@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Coinsnap\WC\Admin;
 
 use Coinsnap\Client\StorePaymentMethod;
-use Coinsnap\WC\Gateway\SeparateGateways;
 use Coinsnap\WC\Helper\CoinsnapApiAuthorization;
 use Coinsnap\WC\Helper\CoinsnapApiHelper;
 use Coinsnap\WC\Helper\CoinsnapApiWebhook;
@@ -36,15 +35,11 @@ class GlobalSettings extends \WC_Settings_Page {
 		Logger::debug('Entering Global Settings form.');
 		return [
 			'title' => [
-				'title' => esc_html_x(
-					'Bitcoin & Lightning Server Payments Settings',
-					'global_settings',
-					'coinsnap-for-woocommerce'
-				),
+				'title' => esc_html_x('Bitcoin & Lightning Server Settings','global_settings','coinsnap-for-woocommerce'),
 				'type' => 'title',
 				'desc' => sprintf(
                                     /* translators: 1: Plugin version 2: PHP Version */
-                                    _x( 'This plugin version is %1$s and your PHP version is %2$s. <br/><br/>Coinsnap API requires authentication with an API key. Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.<br/><br/>Thank you for using Coinsnap!', 'global_settings', 'coinsnap-for-woocommerce' ), 
+                                    _x( '<div id="coinsnapConnectionStatus"></div><p>This plugin version is %1$s and your PHP version is %2$s. <br/><br/>Coinsnap API requires authentication with an API key. Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.<br/><br/>Thank you for using Coinsnap!</p>', 'global_settings', 'coinsnap-for-woocommerce' ), 
                                         COINSNAP_WC_VERSION, PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ),
 				'id' => 'coinsnap'
 			],
@@ -87,13 +82,6 @@ class GlobalSettings extends \WC_Settings_Page {
 				'default' => 'no',
 				'desc' => _x( 'If you want customer email, address, etc. sent to Coinsnap enable this option. By default for privacy and GDPR reasons this is disabled.', 'global_settings', 'coinsnap-for-woocommerce' ),
 				'id' => 'coinsnap_send_customer_data'
-			],
-			'separate_gateways' => [
-				'title' => __( 'Separate Payment Gateways', 'coinsnap-for-woocommerce' ),
-				'type' => 'checkbox',
-				'default' => 'no',
-				'desc' => _x( 'Make all payment methods available as their own payment gateway. It will open new possibilities for every payment methods. ', 'global_settings', 'coinsnap-for-woocommerce' ),
-				'id' => 'coinsnap_separate_gateways'
 			],
 			'sats_mode' => [
 				'title' => __( 'Sats-Mode', 'coinsnap-for-woocommerce' ),
@@ -186,9 +174,6 @@ class GlobalSettings extends \WC_Settings_Page {
 		}
 
 		parent::save();
-
-		//  Purge separate payment methods cache.
-		//  SeparateGateways::cleanUpGeneratedFilesAndCache();
 		CoinsnapApiHelper::clearSupportedPaymentMethodsCache();
     }
 

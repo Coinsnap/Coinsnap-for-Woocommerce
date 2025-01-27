@@ -1,0 +1,34 @@
+.message.success {
+    border-left-color: #00a32a;
+}
+
+#coinsnapConnectionStatus{
+    font-size:1.3em;
+        font-weight: 600;
+        margin-bottom:2em;
+}
+
+#coinsnapConnectionStatus span:before {
+    content:"";
+    border-radius: 50%;
+    display:inline-block;
+    vertical-align: baseline;
+    width:10px; height:10px;
+    margin:0 5px 0 0;
+}
+
+#coinsnapConnectionStatus span.error {
+    color: #d63638;
+}
+
+#coinsnapConnectionStatus span.error:before {
+    background:#d63638;
+}
+
+#coinsnapConnectionStatus span.success {
+    color: #00a32a;
+}
+
+#coinsnapConnectionStatus span.success:before {
+    background:#00a32a;
+}
