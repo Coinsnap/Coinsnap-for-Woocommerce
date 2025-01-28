@@ -113,7 +113,7 @@ class CoinsnapWCPlugin {
 
                 $response['result'] = (bool)$webhook;
                 $response['message'] = $webhook 
-                    ? __('Coinsnap server is connected, webhook is created', 'coinsnap-for-woocommerce')
+                    ? __('Coinsnap server is connected', 'coinsnap-for-woocommerce')
                     : __('Coinsnap connection error', 'coinsnap-for-woocommerce');
 
             }
@@ -122,10 +122,7 @@ class CoinsnapWCPlugin {
             }
 
             $this->sendJsonResponse($response);
-        }
-        else {
-            wp_die('URL is out of date');
-        }        
+        }      
     }
 
     private function sendJsonResponse(array $response): void {
