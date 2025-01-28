@@ -60,7 +60,7 @@ class CoinsnapApiHelper {
         if ($config = self::getConfig()) {
             $client = new Store($config['url'], $config['api_key']);
             $store = $client->getStore($config['store_id']);
-            Logger::debug(print_r($store, true), true);
+            Logger::debug(wp_json_encode($store), true);
             if ($store['code'] === 200){ 
                 return (array)$store;
             }
@@ -101,7 +101,6 @@ class CoinsnapApiHelper {
 					$pmResult = $client->getPaymentMethods($storeId);
 					/** @var AbstractStorePaymentMethodResult $pm */
 					foreach ($pmResult as $pm) {
-                                            print_r($pm);
 						if ($pm->isEnabled() && $pmName = $pm->getData()['paymentMethod'] )  {
 							// Convert - to _ and escape value for later use in gateway class generator.
 							$symbol = sanitize_html_class(str_replace('-', '_', $pmName));

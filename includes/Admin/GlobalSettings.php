@@ -134,7 +134,7 @@ class GlobalSettings extends \WC_Settings_Page {
                                 else {
 				// Register a new webhook.
                                     $webhook = CoinsnapApiWebhook::registerWebhook($apiUrl, $apiKey, $storeId);
-                                    Logger::debug('webhook '.print_r($webhook,true));
+                                    Logger::debug('webhook '.wp_json_encode($webhook));
                                     
                                 
                                 //  if webhook is created
