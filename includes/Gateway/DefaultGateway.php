@@ -13,7 +13,7 @@ class DefaultGateway extends AbstractGateway {
 
 		// todo: maybe make the button text configurable via settings.
 		// General gateway setup.
-		//$this->order_button_text  = __('Proceed to payment gateway', 'coinsnap-for-woocommerce');
+		//$this->order_button_text  = __('Pay with Bitcoin', 'coinsnap-for-woocommerce');
 		// Admin facing title and description.
 		$this->method_title       = 'Coinsnap (default)';
 		$this->method_description = __('Coinsnap default gateway supporting all available tokens on your store.', 'coinsnap-for-woocommerce');
@@ -26,7 +26,7 @@ class DefaultGateway extends AbstractGateway {
 	 * @inheritDoc
 	 */
 	public function getTitle(): string {
-		return $this->get_option('title', 'Bitcoin, Lightning Network');
+		return $this->get_option('title', 'Bitcoin + Lightning');
 	}
 
 	/**
@@ -40,7 +40,7 @@ class DefaultGateway extends AbstractGateway {
 	 * @inheritDoc
 	 */
 	public function init_form_fields(): void {
-		parent::init_form_fields();
+		parent::init_form_fields();/*
 		$this->form_fields += [
 			'enforce_payment_tokens' => [
 				'title'       => __( 'Enforce payment tokens', 'coinsnap-for-woocommerce' ),
@@ -51,7 +51,7 @@ class DefaultGateway extends AbstractGateway {
 				'description' => __( 'This will override the default Coinsnap payment method (defaults to all supported by Coinsnap Server) and enforce to tokens of type "payment". This is useful if you have enabled separate payment gateways and want full control on what is available on Coinsnap Server payment page.', 'coinsnap-for-woocommerce' ),
 				'desc_tip'    => true,
 			],
-		];
+		];*/
 	}
 
 	
@@ -72,13 +72,13 @@ class DefaultGateway extends AbstractGateway {
 			}
 			return $coinsnapGateway;
 		}
-
+/*
 		// If payment tokens are not enforced set all.
 		$separateGateways = \Coinsnap\WC\Helper\ApiHelper::supportedPaymentMethods();
 		foreach ($separateGateways as $sgw) {
 			$coinsnapGateway[] = $sgw['symbol'];
 		}
-
+*/
 		return $coinsnapGateway;
 	}
 

@@ -1,17 +1,17 @@
 <?php
 /**
- * Plugin Name:     Coinsnap for WooCommerce
+ * Plugin Name:     Bitcoin payment for WooCommerce
  * Description:     With Coinsnap payment processing, you can accept Bitcoin and Lightning payments on your website or online store. You do not need your own Lightning Node or other technical requirements.
  * Author:          Coinsnap
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.1.9
+ * Version:         1.1.10
  * Requires PHP:    7.4
- * Tested up to:    6.7.1
+ * Tested up to:    6.7
  * Requires at least: 5.2
  * WC requires at least: 6.0
- * WC tested up to: 9.5.2
+ * WC tested up to: 9.6.0
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -22,11 +22,12 @@ use Coinsnap\WC\Admin\Notice;
 use Coinsnap\WC\Gateway\DefaultGateway;
 use Coinsnap\WC\Helper\SatsMode;
 use Coinsnap\WC\Helper\CoinsnapApiHelper;
+use Coinsnap\WC\Helper\CoinsnapApiWebhook;
 use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.9' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.10' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -49,6 +50,10 @@ class CoinsnapWCPlugin {
 	\Coinsnap\WC\Helper\UpdateManager::processUpdates();
 
 	if (is_admin()) {
+            
+            add_action( 'admin_enqueue_scripts', [ $this, 'connectionCheckScript' ] );
+            add_action( 'wp_ajax_coinsnap_connection_handler', [$this, 'coinsnapConnectionHandler'] );
+            
             // Register our custom global settings page.
             add_filter(
                 'woocommerce_get_settings_pages',
@@ -60,10 +65,71 @@ class CoinsnapWCPlugin {
             add_action( 'wp_ajax_handle_ajax_api_url', [$this, 'processAjaxApiUrl'] );
 
             $this->dependenciesNotification();
-            //$this->legacyPluginNotification(); // Not in v 1.1.1
+            //$this->legacyPluginNotification(); // Not in v 1.1
             $this->notConfiguredNotification();
 	}
     }
+    
+    public function connectionCheckScript(){
+        wp_register_style('coinsnap-backend-style', plugins_url('assets/css/coinsnap-backend-style.css',__FILE__),array(),COINSNAP_WC_VERSION);
+        wp_enqueue_style('coinsnap-backend-style');
+        wp_enqueue_script('coinsnap-connection-check',plugin_dir_url( __FILE__ ) . 'assets/js/connectionCheck.js',[ 'jquery' ],COINSNAP_WC_VERSION,true);
+        wp_add_inline_script( 'coinsnap-connection-check', 'var wc_secret = "'.wp_create_nonce().'";', 'before' );
+    }
+    
+    public function coinsnapConnectionHandler(){
+        
+        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        
+        if( wp_verify_nonce($_nonce) ){
+            $response = [
+                'result' => false,
+                'message' => __('Coinsnap connection error', 'coinsnap-for-woocommerce')
+            ];
+
+            try {
+                if (!CoinsnapApiHelper::checkApiConnection()) {
+                    $this->sendJsonResponse($response);
+                }
+
+                $apiHelper = new CoinsnapApiHelper();
+                $webhookExists = CoinsnapApiWebhook::webhookExists(
+                    $apiHelper->url,
+                    $apiHelper->apiKey,
+                    $apiHelper->storeId
+                );
+
+                if ($webhookExists) {
+                    $response['result'] = true;
+                    $response['message'] = __('Coinsnap server is connected', 'coinsnap-for-woocommerce');
+                    $this->sendJsonResponse($response);
+                }
+
+                $webhook = CoinsnapApiWebhook::registerWebhook(
+                    $apiHelper->url,
+                    $apiHelper->apiKey,
+                    $apiHelper->storeId
+                );
+
+                $response['result'] = (bool)$webhook;
+                $response['message'] = $webhook 
+                    ? __('Coinsnap server is connected', 'coinsnap-for-woocommerce')
+                    : __('Coinsnap connection error', 'coinsnap-for-woocommerce');
+
+            }
+            catch (Exception $e) {
+                $response['message'] = $e->getMessage();
+            }
+
+            $this->sendJsonResponse($response);
+        }      
+    }
+
+    private function sendJsonResponse(array $response): void {
+        echo wp_json_encode($response);
+        exit();
+    }
+        
 
     public function includes(): void {
 	

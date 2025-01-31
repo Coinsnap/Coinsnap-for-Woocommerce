@@ -31,7 +31,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	// Define user facing set variables.
 	$this->title        = $this->getTitle();
 	$this->description  = $this->getDescription();
-        $this->order_button_text = $this->getButton(); //__( 'Proceed to payment gateway', 'coinsnap-for-woocommerce' );
+        $this->order_button_text = $this->getButton();
 
 	$this->apiHelper = new CoinsnapApiHelper();
 		// Debugging & informational settings.
@@ -306,7 +306,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 // Handle multiple orders found
                 if (count($orders) > 1) {
                     Logger::debug('Found multiple orders for invoiceId: ' . $postData->invoiceId);
-                    Logger::debug(print_r($orders, true));
                     wp_die('Multiple orders found for this invoiceId', '', ['response' => 409]);
                 }
 
@@ -417,26 +416,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				$invalidStates = [ 'Expired', 'Invalid' ];
 				if ( in_array( $invoice->getData()['status'], $invalidStates ) ) {
 					return false;
-				} else {
-					// Check also if the payment methods match, only needed if separate payment methods enabled.
-					if (get_option('coinsnap_separate_gateways') === 'yes') {
-						$pmInvoice = $invoice->getData()['checkout']['paymentMethods'];
-						$pmInvoice = str_replace('-', '_', $pmInvoice);
-						sort($pmInvoice);
-                                                
-                                                /*
-						$pm = $this->getPaymentMethods();
-						sort($pm);
-						if ($pm === $pmInvoice) return true;
-                                                */
-						
-                                                // Mark existing invoice as invalid.
-						$order = wc_get_order($orderId);
-						$order->add_order_note(__('Coinsnap invoice manually set to invalid because customer went back to checkout and changed payment gateway.', 'coinsnap-for-woocommerce'));
-						$this->markInvoiceInvalid($invoiceId);
-						return false;
-					}
-					return true;
 				}
 			} catch ( \Throwable $e ) {
 				Logger::debug( $e->getMessage() );
@@ -519,7 +498,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		$metadata = [];
                 
 		// Send customer data only if option is set.
-		if ( get_option( 'coinsnap_send_customer_data' ) === 'yes' ) {
+		if ( get_option( 'coinsnap_send_customer_data' ) ) {
 			$metadata = $this->prepareCustomerMetadata( $order );
 		}
                 
@@ -660,7 +639,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Get customer visible gateway title.
 	 */
 	public function getTitle(): string {
-		return $this->get_option('title', 'Bitcoin, Lightning Network');
+		return $this->get_option('title', 'Bitcoin + Lightning');
 	}
 
 	/**
@@ -671,7 +650,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	}
 
 	public function getButton(): string {
-		return $this->get_option('button', 'Proceed to payment gateway');
+		return $this->get_option('button', 'Pay with Bitcoin');
 	}
 
 	/**
