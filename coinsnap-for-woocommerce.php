@@ -6,7 +6,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.1.10
+ * Version:         1.1.11
  * Requires PHP:    7.4
  * Tested up to:    6.7
  * Requires at least: 5.2
@@ -27,7 +27,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.10' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.11' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -84,7 +84,7 @@ class CoinsnapWCPlugin {
         if( wp_verify_nonce($_nonce) ){
             $response = [
                 'result' => false,
-                'message' => __('Coinsnap connection error', 'coinsnap-for-woocommerce')
+                'message' => __('WooCommerce: Coinsnap connection error', 'coinsnap-for-woocommerce')
             ];
 
             try {
@@ -101,7 +101,7 @@ class CoinsnapWCPlugin {
 
                 if ($webhookExists) {
                     $response['result'] = true;
-                    $response['message'] = __('Coinsnap server is connected', 'coinsnap-for-woocommerce');
+                    $response['message'] = __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce');
                     $this->sendJsonResponse($response);
                 }
 
@@ -113,8 +113,8 @@ class CoinsnapWCPlugin {
 
                 $response['result'] = (bool)$webhook;
                 $response['message'] = $webhook 
-                    ? __('Coinsnap server is connected', 'coinsnap-for-woocommerce')
-                    : __('Coinsnap connection error', 'coinsnap-for-woocommerce');
+                    ? __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce')
+                    : __('WooCommerce: Coinsnap connection error', 'coinsnap-for-woocommerce');
 
             }
             catch (Exception $e) {

@@ -14,7 +14,7 @@ class OrderStates {
         return [
             self::NEW                  => 'wc-pending',
             self::EXPIRED              => 'wc-cancelled',
-            self::SETTLED              => self::IGNORE,
+            self::SETTLED              => 'wc-completed',
             self::PROCESSING           => 'wc-on-hold'
 	];
     }

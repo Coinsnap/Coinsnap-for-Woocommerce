@@ -4,7 +4,7 @@ Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Requires at least: 5.2
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.10
+Stable tag: 1.1.11
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,3 +269,8 @@ If you have any other questions, please use our support area. After you have reg
 
 = 1.1.10 :: 2025-01-27 =
 * Added Coinsnap server connection check indication in backend.
+
+= 1.1.11 :: 2025-02-09 =
+* Update: Coinsnap server connection check indication in backend marks as "WooCommerce".
+* Default WooCommerce status for "Settled" is "Completed".
+* Compatibility with WooCommerce 9.6.x. is tested.
