@@ -11,7 +11,7 @@
  * Tested up to:    6.7
  * Requires at least: 5.2
  * WC requires at least: 6.0
- * WC tested up to: 9.6.2
+ * WC tested up to: 9.7.0
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *

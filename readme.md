@@ -17,7 +17,7 @@ Accept Bitcoin payments with WooCommerce. All Bitcoin payments are transferred d
 
 # Description #
 
-= Accept Bitcoin payments with WooCommerce - simple, fast & secure! =
+## Accept Bitcoin payments with WooCommerce - simple, fast & secure! ##
 
 To accept Bitcoin payments with WooCommerce has never been more simple and required less information – all you need to get started is an email and a Lightning wallet. The installation of our plugin is done in a few minutes – and you can start accepting Bitcoin payments with WooCommerce today!
 
