@@ -161,40 +161,33 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Note: `generate_$type_html()` is a pattern you can use from WooCommerce Settings API to render custom fields.
 	 */
 	public function generate_icon_upload_html() {
-		$mediaId = $this->get_option(self::ICON_MEDIA_OPTION);
-		$mediaSrc = '';
-		if ($mediaId) {
-			$mediaSrc = wp_get_attachment_image_src($mediaId)[0];
-		}
-		$iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
-
-		ob_start();
-		?>
-		<tr valign="top">
-			<th scope="row" class="titledesc"><?php echo esc_html(__('Gateway Icon:', 'coinsnap-for-woocommerce')); ?></th>
-			<td class="forminp" id="coinsnap_icon">
-				<div id="coinsnap_icon_container">
-					<input class="coinsnap-icon-button" type="button"
-						   name="woocommerce_coinsnap_icon_upload_button"
-						   value="<?php echo esc_html(__('Upload or select icon', 'coinsnap-for-woocommerce')); ?>"
-						   style="<?php echo $mediaId ? 'display:none;' : ''; ?>"
-					/>
-					<img class="coinsnap-icon-image" src="<?php echo esc_url($mediaSrc); ?>" style="<?php echo esc_attr($mediaId) ? '' : 'display:none;'; ?>" />
-					<input class="coinsnap-icon-remove" type="button"
-						   name="woocommerce_coinsnap_icon_button_remove"
-						   value="<?php echo esc_html(__('Remove image', 'coinsnap-for-woocommerce')); ?>"
-						   style="<?php echo $mediaId ? '' : 'display:none;'; ?>"
-					/>
-					<input class="input-text regular-input coinsnap-icon-value" type="hidden"
-						   name="<?php echo esc_attr($iconFieldName); ?>"
-						   id="<?php echo esc_attr($iconFieldName); ?>"
-						   value="<?php echo esc_attr($mediaId); ?>"
-					/>
-				</div>
-			</td>
-		</tr>
+            $mediaId = $this->get_option(self::ICON_MEDIA_OPTION);
+            $iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
+            ob_start();?>
+            <tr valign="top">
+                <th scope="row" class="titledesc"><?php echo esc_html(__('Gateway Icon:', 'coinsnap-for-woocommerce')); ?></th>
+                <td class="forminp" id="coinsnap_icon">
+                    <div id="coinsnap_icon_container">
+                        <input class="coinsnap-icon-button" type="button"
+                            name="woocommerce_coinsnap_icon_upload_button"
+                            value="<?php echo esc_html(__('Upload or select icon', 'coinsnap-for-woocommerce')); ?>"
+                            style="<?php echo $mediaId ? 'display:none;' : ''; ?>"
+			/><?php echo wp_get_attachment_image($mediaId,'full',false,array('class'  => 'coinsnap-icon-image'));?>
+			<input class="coinsnap-icon-remove" type="button"
+                            name="woocommerce_coinsnap_icon_button_remove"
+                            value="<?php echo esc_html(__('Remove image', 'coinsnap-for-woocommerce')); ?>"
+                            style="<?php echo $mediaId ? '' : 'display:none;'; ?>"
+			/>
+			<input class="input-text regular-input coinsnap-icon-value" type="hidden"
+                            name="<?php echo esc_attr($iconFieldName); ?>"
+                            id="<?php echo esc_attr($iconFieldName); ?>"
+                            value="<?php echo esc_attr($mediaId); ?>"
+			/>
+                    </div>
+                </td>
+            </tr>
         <?php
-		return ob_get_clean();
+            return ob_get_clean();
 	}
 
 	public function getId(): string {
