@@ -38,4 +38,9 @@ class PreciseNumber {
     {
         return $this->value;
     }
+    
+    public function __toFloat(): float
+    {
+        return (float)$this->value;
+    }
 }

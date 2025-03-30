@@ -95,53 +95,74 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 	// Load the order and check it.
 	$order = new \WC_Order( $orderId );
-		if ( $order->get_id() === 0 ) {
-			$message = 'Could not load order id ' . $orderId . ', aborting.';
-			Logger::debug( $message, true );
-			throw new \Exception( esc_html($message) );
+	if ( $order->get_id() === 0 ) {
+            $message = 'Could not load order id ' . $orderId . ', aborting.';
+            Logger::debug( $message, true );
+            throw new \Exception( esc_html($message) );
 	}
 
 	// Check if the order is a modal payment.
         if (null !== filter_input(INPUT_POST,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) {
             $action = filter_input(INPUT_POST,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-			if ( $action === 'coinsnap_modal_checkout' ) {
-				Logger::debug( 'process_payment called via modal checkout.' );
+            if ( $action === 'coinsnap_modal_checkout' ) {
+		Logger::debug( 'process_payment called via modal checkout.' );
             }
 	}
 
-		// Check for existing invoice and redirect instead.
-		if ( $this->validInvoiceExists( $orderId ) ) {
-			$existingInvoiceId = get_post_meta( $orderId, 'Coinsnap_id', true );
-			Logger::debug( 'Found existing Coinsnap invoice and redirecting to it. Invoice id: ' . $existingInvoiceId );
+	// Check for existing invoice and redirect instead.
+	if ( $this->validInvoiceExists( $orderId ) ) {
+            $existingInvoiceId = get_post_meta( $orderId, 'Coinsnap_id', true );
+            Logger::debug( 'Found existing Coinsnap invoice and redirecting to it. Invoice id: ' . $existingInvoiceId );
 
-			return [
-				'result' => 'success',
-				'redirect' => $this->apiHelper->getInvoiceRedirectUrl( $existingInvoiceId ),
-				'invoiceId' => $existingInvoiceId,
-				'orderCompleteLink' => $order->get_checkout_order_received_url(),
-			];
-		}
-
-		// Create an invoice.
-		Logger::debug( 'Creating invoice on Coinsnap Server' );
-		if ( $invoice = $this->createInvoice( $order ) ) {
-
-			// Todo: update order status and Coinsnap meta data.
-
-			Logger::debug( 'Invoice creation successful, redirecting user.' );
-
-			$url = $invoice->getData()['checkoutLink'];
-			
-			return [
-				'result' => 'success',
-				'redirect' => $url,
-				'invoiceId' => $invoice->getData()['id'],
-				'orderCompleteLink' => $order->get_checkout_order_received_url(),
-			];
-		}
+            return [
+		'result' => 'success',
+		'redirect' => $this->apiHelper->getInvoiceRedirectUrl( $existingInvoiceId ),
+		'invoiceId' => $existingInvoiceId,
+		'orderCompleteLink' => $order->get_checkout_order_received_url(),
+            ];
 	}
 
-	public function process_admin_options() {
+	// Create an invoice.
+        Logger::debug( 'Invoice data check' );
+        
+        $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
+        $amount = $order->get_total();
+        $currency = $order->get_currency();
+        
+        $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ));
+        $checkInvoiceError = array(
+            'amountError' => 'Invoice amount cannot be less than ',
+            'currencyError' => 'Currency is not supported by Coinsnap'
+        );
+        
+        if($checkInvoice['result'] === true){
+            Logger::debug( 'Creating invoice on Coinsnap Server' );
+            
+            if( $invoice = $this->createInvoice( $order ) ) {
+
+                Logger::debug( 'Invoice creation successful, redirecting user.' );
+
+		$url = $invoice->getData()['checkoutLink'];
+			
+		return [
+                    'result' => 'success',
+                    'redirect' => $url,
+                    'invoiceId' => $invoice->getData()['id'],
+                    'orderCompleteLink' => $order->get_checkout_order_received_url(),
+		];
+            }
+        }
+        else {
+            $errorMessage = esc_html($checkInvoiceError[$checkInvoice['error']]);
+            if($checkInvoice['error'] == 'amountError'){
+                $errorMessage .= ' '.$checkInvoice['min_value'].' '.strtoupper( $currency );
+            }
+            Logger::debug( $errorMessage );
+            throw new \Exception( $errorMessage );
+        }
+    }
+
+    public function process_admin_options() {
 		// Store media id.
 		$iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
                 if ($mediaId = sanitize_key(filter_input(INPUT_POST,$iconFieldName,FILTER_SANITIZE_FULL_SPECIAL_CHARS ))) {
@@ -483,93 +504,71 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Create an invoice on Coinsnap Server.
 	 */
 	public function createInvoice( \WC_Order $order ): ?\Coinsnap\Result\Invoice {
-		// In case some plugins customizing the order number we need to pass that along, defaults to internal ID.
-		$orderNumber = $order->get_order_number();
-                $orderID = ''.$order->get_id();
-		Logger::debug( 'Got order number: ' . $orderNumber . ' and order ID: ' . $orderID );
+            
+            // In case some plugins customizing the order number we need to pass that along, defaults to internal ID.
+            $orderNumber = $order->get_order_number();
+            $orderID = ''.$order->get_id();
+            Logger::debug( 'Got order number: ' . $orderNumber . ' (order ID: ' . $orderID .')' );
 
-		$metadata = [];
+            $metadata = [];
                 
-		// Send customer data only if option is set.
-		if ( get_option( 'coinsnap_send_customer_data' ) ) {
-			$metadata = $this->prepareCustomerMetadata( $order );
-		}
+            // Send customer data only if option is set.
+            if ( get_option( 'coinsnap_send_customer_data' ) ) {
+                $metadata = $this->prepareCustomerMetadata( $order );
+            }
                 
-                $buyerEmail = $this->prepareCustomerMetadata( $order )['buyerEmail'];
-                $buyerName = $this->prepareCustomerMetadata( $order )['buyerName'];
+            $buyerEmail = $this->prepareCustomerMetadata( $order )['buyerEmail'];
+            $buyerName = $this->prepareCustomerMetadata( $order )['buyerName'];
 
-		// Set included tax amount.
-		$metadata['taxIncluded'] = $order->get_cart_tax();
+            // Set included tax amount.
+            $metadata['taxIncluded'] = $order->get_cart_tax();
 
-		if(isset($orderNumber) && !empty($orderNumber)) $metadata['orderNumber'] = $orderNumber;
+            if(isset($orderNumber) && !empty($orderNumber)){
+                $metadata['orderNumber'] = $orderNumber;
+            }
                 
-                $redirectUrl     = $this->get_return_url( $order );
-                $currency = $order->get_currency();
-		$amount = PreciseNumber::parseString( $order->get_total() );		
+            $redirectUrl = $this->get_return_url( $order );
+            $currency = $order->get_currency();
+            $amount = PreciseNumber::parseString( $order->get_total() );		
 
-		// Checkout options.
-		$checkoutOptions = new InvoiceCheckoutOptions();
-		$checkoutOptions->setRedirectURL( $redirectUrl );
-		Logger::debug( 'Setting redirect url to: ' . $redirectUrl );
-/*
-		
-		// Payment methods.
-		if ($paymentMethods = $this->getPaymentMethods()) {
-			$checkoutOptions->setPaymentMethods($paymentMethods);
-                        Logger::debug( 'Payment methods: ' . print_R($paymentMethods,true) );
-		}
+            // Checkout options.
+            $checkoutOptions = new InvoiceCheckoutOptions();
+            $checkoutOptions->setRedirectURL( $redirectUrl );
+            
                 
+            //  Set automatic redirect after payment and wallet message (empty)
+            $redirectAutomatically = (get_option('coinsnap_autoredirect', 'yes') === 'yes')? true : false;
+            Logger::debug( 'Setting redirect automatically: ' . $redirectAutomatically );
+            
+            $walletMessage = '';
+
+            // Create the invoice on Coinsnap Server.
+            $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
+            Logger::debug( 'Client for invoice is created' );
                 
-                
-                
+            try {
+                $invoice = $client->createInvoice(
+                    $this->apiHelper->storeId,
+                    $currency,
+                    $amount,
+                    $orderID,
+                    $buyerEmail,
+                    $buyerName,
+                    $redirectUrl,
+                    COINSNAP_WC_REFERRAL_CODE,
+                    $metadata,
+                    $redirectAutomatically,
+                    $walletMessage
+                );
 
-		// Handle payment methods of type "promotion".
-		// Promotion type set 1 token per each quantity.
-                if ($this->getTokenType() === 'promotion') {
-			$currency = $this->primaryPaymentMethod ?? null;
-			$amount = PreciseNumber::parseInt( $this->getOrderTotalItemsQuantity($order));
-		} else { // Defaults.
-			$currency = $order->get_currency();
-			$amount = PreciseNumber::parseString( $order->get_total() ); // unlike method signature suggests, it returns string.
-		}
-                */
-                
-		// Handle Sats-mode.
-		// Because Coinsnap does not understand SAT as a currency we need to change to BTC and adjust the amount.
-		if ($currency === 'SAT') {
-			$currency = 'BTC';
-			$amountBTC = bcdiv($amount->__toString(), '100000000', 8);
-			$amount = PreciseNumber::parseString($amountBTC);
-                        Logger::debug( 'SATS as a currency is handled' );
-		}
+                $this->updateOrderMetadata( $order->get_id(), $invoice );
+                return $invoice;
+            }
+            catch ( \Throwable $e ) {
+                Logger::debug( $e->getMessage(), true );
+            }
 
-		// Create the invoice on Coinsnap Server.
-		$client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
-                Logger::debug( 'Client for invoice is created' );
-                
-		try {
-			$invoice = $client->createInvoice(
-				$this->apiHelper->storeId,  //$storeId
-				$currency,                  //$currency
-				$amount,                    //$amount
-				$orderID,              //$orderId
-                                $buyerEmail,                //$buyerEmail
-                                $buyerName,                 //$customerName
-                                $redirectUrl,               //$redirectUrl
-                                COINSNAP_WC_REFERRAL_CODE,     //$referralCode
-				$metadata,
-				$checkoutOptions
-			);
-
-			$this->updateOrderMetadata( $order->get_id(), $invoice );
-
-			return $invoice;
-
-		} catch ( \Throwable $e ) {
-			Logger::debug( $e->getMessage(), true );
-		}
-
-		return null;
+            return null;
 	}
 
 	/**
