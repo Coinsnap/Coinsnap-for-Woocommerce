@@ -90,6 +90,13 @@ class GlobalSettings extends \WC_Settings_Page {
 				'desc' => _x( 'Makes Satoshis/Sats available as currency "SAT" (can be found in WooCommerce->Settings->General)', 'global_settings', 'coinsnap-for-woocommerce' ), // and handles conversion to Bitcoin before creating the invoice on Coinsnap.
 				'id' => 'coinsnap_sats_mode'
 			],
+			'autoredirect' => [
+				'title' => __( 'Redirect after payment', 'coinsnap-for-woocommerce' ),
+				'type' => 'checkbox',
+				'default' => 'yes',
+				'desc' => _x( 'Redirect to Thank You page after payment automatically', 'global_settings', 'coinsnap-for-woocommerce' ),
+				'id' => 'coinsnap_autoredirect'
+			],
 			'debug' => [
 				'title' => __( 'Debug Log', 'coinsnap-for-woocommerce' ),
 				'type' => 'checkbox',

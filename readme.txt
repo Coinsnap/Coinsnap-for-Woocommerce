@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.7
-Stable tag: 1.1.12
+Stable tag: 1.2.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -276,3 +276,6 @@ If you have any other questions, please use our support area. After you have reg
 = 1.1.12 :: 2025-03-09 =
 * Fixed Wordpress warning about non-used wp_get_attachment_image() method for Coinsnap payment gateway icon in WooCommerce payment settings.
 * Compatibility with WooCommerce 9.7.x. is tested.
+
+= 1.2.0 :: 2025-03-28 =
+* Update: .

@@ -7,7 +7,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.1.12
+ * Version:         1.2.0
  * Requires PHP:    7.4
  * Tested up to:    6.7
  * Requires at least: 5.2
@@ -29,7 +29,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.1.12' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.2.0' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -38,6 +38,7 @@ if(!defined('COINSNAP_SERVER_URL')){define( 'COINSNAP_SERVER_URL', 'https://app.
 if(!defined('COINSNAP_API_PATH')){define( 'COINSNAP_API_PATH', '/api/v1/');}
 if(!defined('COINSNAP_SERVER_PATH')){define( 'COINSNAP_SERVER_PATH', 'stores' );}
 if(!defined('COINSNAP_WC_REFERRAL_CODE')){define( 'COINSNAP_WC_REFERRAL_CODE', 'DEV1e1ea54fedd507e2f447e2963' );}
+if(!defined('COINSNAP_CURRENCIES')){define( 'COINSNAP_CURRENCIES', array("EUR","USD","SATS","BTC","CAD","JPY","GBP","CHF","RUB") );}
 
 class CoinsnapWCPlugin {
     
@@ -86,7 +87,7 @@ class CoinsnapWCPlugin {
         if( wp_verify_nonce($_nonce) ){
             $response = [
                 'result' => false,
-                'message' => __('WooCommerce: Coinsnap connection error', 'coinsnap-for-woocommerce')
+                'message' => __('WooCommerce: Coinsnap server is disconnected', 'coinsnap-for-woocommerce')
             ];
 
             try {
@@ -116,7 +117,7 @@ class CoinsnapWCPlugin {
                 $response['result'] = (bool)$webhook;
                 $response['message'] = $webhook 
                     ? __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce')
-                    : __('WooCommerce: Coinsnap connection error', 'coinsnap-for-woocommerce');
+                    : __('WooCommerce: Coinsnap server is disconnected', 'coinsnap-for-woocommerce');
 
             }
             catch (Exception $e) {
@@ -147,10 +148,33 @@ class CoinsnapWCPlugin {
 	}
 
 	// Setup other dependencies.
+        
+        // Delete non-supported currencies
+        add_filter('woocommerce_currencies',[$this, 'currenciesFilter']);
+        
+         
         // Make SAT / Sats as currency available.        
 	if (get_option('coinsnap_sats_mode') === 'yes') {
             SatsMode::instance();
 	}
+    }
+    
+    public function currenciesFilter($currencies){
+        
+        $apiHelper = new CoinsnapApiHelper();
+        $client = new \Coinsnap\Client\Invoice($apiHelper->url, $apiHelper->apiKey);
+        $coinsnapCurrencies = $client->getCurrencies();
+        
+        foreach($currencies as $currency_key => $currency_value){
+            if( !in_array($currency_key,$coinsnapCurrencies) ){
+                unset($currencies[$currency_key]);
+                $currency = get_option( 'woocommerce_currency' );
+                if($currency_key === $currency){
+                    update_option( 'woocommerce_currency','USD' );
+                }
+            }
+        }
+        return $currencies;
     }
 
     public static function initPaymentGateways($gateways): array {
