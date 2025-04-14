@@ -25,7 +25,7 @@ class Invoice extends AbstractClient{
         
         $coinsnapCurrencies = $this->getCurrencies();
         
-        if(defined('COINSNAP_CURRENCIES')){
+        if(is_array($coinsnapCurrencies)){
             if(!in_array($currency,$coinsnapCurrencies)){
                 return array('result' => false,'error' => 'currencyError','min_value' => '');
             }

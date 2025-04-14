@@ -96,7 +96,7 @@ After you have installed and activated the Coinsnap for WooCommerce plugin, you 
 
 ![Go to the Coinsnap Settings tab in WooCommerce settings](https://resources.coinsnap.org/products/woocommerce/images/screenshot-3.png)
 
-You will see in a red message on the top of the tab, that there is a **Coinsnap connection error**. Ignore this for now, for we will now connect the plugin with your Coinsnap account.
+You will see in a red message on the top of the tab, that there is a **Coinsnap serer is disconnected**. Ignore this for now, for we will now connect the plugin with your Coinsnap account.
 
 
 To do that, you need to enter your Coinsnap **Store ID** and your Coinsnap **API key**.
@@ -289,4 +289,10 @@ If you have any other questions, please use our support area. After you have reg
 * Fixed Wordpress warning about non-used wp_get_attachment_image() method for Coinsnap payment gateway icon in WooCommerce payment settings.
 * Compatibility with WooCommerce 9.7.x. is tested.
 
+##### 1.2.0 :: 2025-04-04 =
+* Update: Woocommerce currencies list is limited by currencies, supported by Coinsnap.
+* Update: After plugin activation or update non-supported currency switches to USD.
+* Update: Added option "Redirect after payment automatically".
+* Update: Prevented redirect to payment gateway if payment amount is less than 1 SAT or currency in not supported by Coinsnap.
+* Update: Error message changed to "Coinsnap server is disconnected" if Coinsnap server is not connected or there is webhook error.
 

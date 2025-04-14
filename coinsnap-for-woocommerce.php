@@ -7,13 +7,13 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.2.0
+ * Version:         1.3.0
  * Requires PHP:    7.4
  * Tested up to:    6.7
  * Requires at least: 5.2
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 9.7.1
+ * WC tested up to: 9.8.1
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -29,7 +29,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.2.0' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.3.0' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -46,15 +46,14 @@ class CoinsnapWCPlugin {
 
     public function __construct() {
 	$this->includes();
-
-	add_action('woocommerce_thankyou_coinsnap', [$this, 'orderStatusThankYouPage'], 10, 1);
+        add_action('woocommerce_thankyou_coinsnap', [$this, 'orderStatusThankYouPage'], 10, 1);
 
 	// Run the updates.
 	\Coinsnap\WC\Helper\UpdateManager::processUpdates();
 
 	if (is_admin()) {
             
-            add_action( 'admin_enqueue_scripts', [ $this, 'connectionCheckScript' ] );
+            add_action( 'admin_enqueue_scripts', [ $this, 'connectionScriptsLoader' ] );
             add_action( 'wp_ajax_coinsnap_connection_handler', [$this, 'coinsnapConnectionHandler'] );
             
             // Register our custom global settings page.
@@ -73,22 +72,31 @@ class CoinsnapWCPlugin {
 	}
     }
     
-    public function connectionCheckScript(){
+    public function connectionScriptsLoader(){
         wp_register_style('coinsnap-backend-style', plugins_url('assets/css/coinsnap-backend-style.css',__FILE__),array(),COINSNAP_WC_VERSION);
         wp_enqueue_style('coinsnap-backend-style');
+        wp_enqueue_script('coinsnap-admin-fields',plugin_dir_url( __FILE__ ) . 'assets/js/adminFields.js',[ 'jquery' ],COINSNAP_WC_VERSION,true);
         wp_enqueue_script('coinsnap-connection-check',plugin_dir_url( __FILE__ ) . 'assets/js/connectionCheck.js',[ 'jquery' ],COINSNAP_WC_VERSION,true);
-        wp_add_inline_script( 'coinsnap-connection-check', 'var wc_secret = "'.wp_create_nonce().'";', 'before' );
+        
+        wp_localize_script('coinsnap-connection-check', 'coinsnap_ajax', array(
+          'ajax_url' => admin_url('admin-ajax.php'),
+          'nonce'  => wp_create_nonce( 'coinsnap-ajax-nonce' ),
+        ));
     }
     
     public function coinsnapConnectionHandler(){
         
         $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        $_provider = get_option('coinsnap_provider');
+        $_message_disconnected = ($_provider !== 'btcpay')? 
+            __('WooCommerce: Coinsnap server is disconnected', 'coinsnap-for-woocommerce') :
+            __('WooCommerce: BTCPay server is disconnected', 'coinsnap-for-woocommerce');
+        $_message_connected = ($_provider !== 'btcpay')?
+            __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce') : 
+            __('WooCommerce: BTCPay server is connected', 'coinsnap-for-woocommerce');
         
-        if( wp_verify_nonce($_nonce) ){
-            $response = [
-                'result' => false,
-                'message' => __('WooCommerce: Coinsnap server is disconnected', 'coinsnap-for-woocommerce')
-            ];
+        if( wp_verify_nonce($_nonce,'coinsnap-ajax-nonce') ){
+            $response = ['result' => false,'message' => $_message_disconnected];
 
             try {
                 if (!CoinsnapApiHelper::checkApiConnection()) {
@@ -96,29 +104,16 @@ class CoinsnapWCPlugin {
                 }
 
                 $apiHelper = new CoinsnapApiHelper();
-                $webhookExists = CoinsnapApiWebhook::webhookExists(
-                    $apiHelper->url,
-                    $apiHelper->apiKey,
-                    $apiHelper->storeId
-                );
+                $webhookExists = CoinsnapApiWebhook::webhookExists($apiHelper->url,$apiHelper->apiKey,$apiHelper->storeId);
 
-                if ($webhookExists) {
-                    $response['result'] = true;
-                    $response['message'] = __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce');
+                if($webhookExists) {
+                    $response = ['result' => true,'message' => $_message_connected];
                     $this->sendJsonResponse($response);
                 }
 
-                $webhook = CoinsnapApiWebhook::registerWebhook(
-                    $apiHelper->url,
-                    $apiHelper->apiKey,
-                    $apiHelper->storeId
-                );
-
+                $webhook = CoinsnapApiWebhook::registerWebhook($apiHelper->url,$apiHelper->apiKey,$apiHelper->storeId);
                 $response['result'] = (bool)$webhook;
-                $response['message'] = $webhook 
-                    ? __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce')
-                    : __('WooCommerce: Coinsnap server is disconnected', 'coinsnap-for-woocommerce');
-
+                $response['message'] = $webhook ? $_message_connected : $_message_disconnected.' (Webhook)';
             }
             catch (Exception $e) {
                 $response['message'] = $e->getMessage();
@@ -222,6 +217,8 @@ class CoinsnapWCPlugin {
             Notice::addNotice('error', $curlMessage);
 	}
     }
+    
+    
 
     public static function orderStatusThankYouPage($order_id){
 	if (!$order = wc_get_order($order_id)) {
