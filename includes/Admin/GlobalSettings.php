@@ -256,21 +256,21 @@ class GlobalSettings extends \WC_Settings_Page {
         $hasCredentials = true;
         
         if(empty($apiUrl)){
-            $messageNotConnecting = _('Did not try to connect to API because Server URL parameter was missing','coinsnap-for-woocommerce');
+            $messageNotConnecting = __('Did not try to connect to API because Server URL parameter was missing','coinsnap-for-woocommerce');
             Notice::addNotice('warning', $messageNotConnecting);
             Logger::debug($messageNotConnecting);
             $hasCredentials = false;
         }
             
         if(empty($storeId)){
-            $messageNotConnecting = _('Did not try to connect to API because Store Id parameter was missing','coinsnap-for-woocommerce');
+            $messageNotConnecting = __('Did not try to connect to API because Store Id parameter was missing','coinsnap-for-woocommerce');
             Notice::addNotice('warning', $messageNotConnecting);
             Logger::debug($messageNotConnecting);
             $hasCredentials = false;
         }
             
         if(empty($apiKey)){
-            $messageNotConnecting = _('Did not try to connect to API because API Key parameter was missing','coinsnap-for-woocommerce');
+            $messageNotConnecting = __('Did not try to connect to API because API Key parameter was missing','coinsnap-for-woocommerce');
             Notice::addNotice('warning', $messageNotConnecting);
             Logger::debug($messageNotConnecting);
             $hasCredentials = false;
