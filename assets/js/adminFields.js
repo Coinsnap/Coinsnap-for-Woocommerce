@@ -2,13 +2,10 @@ jQuery(function ($) {
     
     if($('#woocommerce_coinsnap_discount_type').length){
         
+        enableDiscount();
+        
         $('#woocommerce_coinsnap_discount_enable').change(function(){
-            if($(this).prop('checked')){
-                $('.discount').closest('tr').show();
-            }
-            else {
-                $('.discount').closest('tr').hide();
-            }
+            enableDiscount();
         });
         
         $('#woocommerce_coinsnap_discount_amount_limit').change(function(){
@@ -33,7 +30,9 @@ jQuery(function ($) {
             $(this).val($(this).val().replace(/[^0-9,]/g,''));
         });
         
-        setDiscount();
+        if($('#woocommerce_coinsnap_discount_enable').prop('checked')){
+            setDiscount();
+        }
         
         $('#woocommerce_coinsnap_discount_type').change(function(){
             setDiscount();
@@ -47,6 +46,15 @@ jQuery(function ($) {
         $('#coinsnap_provider').change(function(){
             setProvider();
         });
+    }
+    
+    function enableDiscount(){
+        if($('#woocommerce_coinsnap_discount_enable').prop('checked')){
+            $('.discount').closest('tr').show();
+        }
+        else {
+            $('.discount').closest('tr').hide();
+        }
     }
     
     function setDiscount(){
