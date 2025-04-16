@@ -1,8 +1,8 @@
 === Bitcoin payment for WooCommerce ===
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
-Tested up to: 6.7
-Stable tag: 1.2.0
+Tested up to: 6.8
+Stable tag: 1.3.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -283,3 +283,9 @@ If you have any other questions, please use our support area. After you have reg
 * Update: Added option "Redirect after payment automatically".
 * Update: Prevented redirect to payment gateway if payment amount is less than 1 SAT or currency in not supported by Coinsnap.
 * Update: Error message changed to "Coinsnap server is disconnected" if Coinsnap server is not connected or there is webhook error.
+
+= 1.3.0 :: 2025-04-16 =
+* Update: BTCPay server added as a Bitcoin payment gateway
+* Update: Added discount for payment with Coinsnap functionality
+* Compatibility with WooCommerce 9.8.x. is tested.
+* Compatibility with Wordpress 6.8 is tested.
