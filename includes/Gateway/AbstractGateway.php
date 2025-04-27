@@ -371,22 +371,24 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 // Get headers and check for signature
                 $headers = getallheaders();
                 $signature = null;
-
+                $_provider = get_option('coinsnap_provider');
+                
                 foreach ($headers as $key => $value) {
-                    if (strtolower($key) === 'x-coinsnap-sig') {
+                    if ((strtolower($key) === 'x-coinsnap-sig' && $_provider === 'coinsnap') || (strtolower($key) === 'btcpay-sig' && $_provider === 'btcpay')) {
                         $signature = $value;
                     }
                 }
 
                 // Handle missing or invalid signature
                 if (!isset($signature)) {
-                    Logger::debug('Missing X-Coinsnap-Sig header');
+                    $missingHeader = ($_provider === 'coinsnap')? 'X-Coinsnap-Sig' : 'BTCPay-Sig';
+                    Logger::debug("Missing $missingHeader header for Webhook payload request");
                     wp_die('Authentication required', '', ['response' => 401]);
                 }
 
                 // Validate the signature
                 if (!$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
-                    Logger::debug('Invalid webhook signature received');
+                    Logger::debug("Invalid webhook signature ($signature) received");
                     wp_die('Invalid authentication signature', '', ['response' => 401]);
                 }
 
@@ -406,7 +408,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                 // Handle no orders found
                 if (count($orders) === 0) {
-                    Logger::debug('Could not load order by Coinsnap invoiceId: ' . $postData->invoiceId);
+                    Logger::debug('Could not load order by '.ucfirst($_provider).' invoiceId: ' . $postData->invoiceId);
                     wp_die('No order found for this invoiceId.', '', ['response' => 200]);
                 }
 
@@ -624,10 +626,12 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             $currency = $order->get_currency();
             $amount = PreciseNumber::parseString( $order->get_total() );		
 
-            // Checkout options.
-            $checkoutOptions = new InvoiceCheckoutOptions();
-            $checkoutOptions->setRedirectURL( $redirectUrl );
-            
+            // Handle Sats-mode because BTCPay does not understand SAT as a currency we need to change to BTC and adjust the amount.
+            if ($currency === 'SATS' && get_option('coinsnap_provider') === 'btcpay') {
+                $currency = 'BTC';
+                $amountBTC = bcdiv($amount->__toString(), '100000000', 8);
+                $amount = PreciseNumber::parseString($amountBTC);
+            }
                 
             //  Set automatic redirect after payment and wallet message (empty)
             $redirectAutomatically = (get_option('coinsnap_autoredirect', 'yes') === 'yes')? true : false;
@@ -704,6 +708,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		// Store relevant Coinsnap invoice data.
                 $order = wc_get_order($orderId);
 		$order->update_meta_data( 'Coinsnap_redirect', $invoice->getData()['checkoutLink'] );
+		$order->update_meta_data( 'Coinsnap_invoiceId', $invoice->getData()['invoiceId'] );
 		$order->update_meta_data( 'Coinsnap_id', $invoice->getData()['id'] );
                 Logger::debug( 'Store relevant Coinsnap invoice data for order ' . $orderId . ': Coinsnap_id: ' . $invoice->getData()['id'] );
                 $order->save();

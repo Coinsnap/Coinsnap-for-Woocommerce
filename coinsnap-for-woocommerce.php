@@ -13,7 +13,7 @@
  * Requires at least: 5.2
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 9.8.1
+ * WC tested up to: 9.8.2
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -188,7 +188,7 @@ class CoinsnapWCPlugin {
         if (!CoinsnapApiHelper::getConfig()){
             $message = sprintf(
                 /* translators: 1: Link to settings page opening tag 2: Link to settings page closing tag */
-                esc_html__('Plugin not configured yet, please %1$sconfigure the plugin here%2$s','coinsnap-for-woocommerce'),
+                esc_html__('Plugin is not configured yet, please %1$sconfigure the plugin here%2$s','coinsnap-for-woocommerce'),
 		'<a href="' . esc_url(admin_url('admin.php?page=wc-settings&tab=coinsnap_settings')) . '">','</a>'
             );
             Notice::addNotice('error', $message);
@@ -197,7 +197,7 @@ class CoinsnapWCPlugin {
 
 //  Checks if PHP version is too low or WooCommerce is not installed or CURL is not available and displays notice on admin dashboard
     public function dependenciesNotification() {
-        // Check PHP version.
+        // Check PHP version.70
 	if ( version_compare( PHP_VERSION, COINSNAP_WC_PHP_VERSION, '<' ) ) {
             $versionMessage = sprintf( 
                 /* translators: 1: PHP version */
