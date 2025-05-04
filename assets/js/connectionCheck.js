@@ -9,14 +9,14 @@ jQuery(function ($) {
         connectionCheckElement = '#jp-admin-notices';
     }
     
-    let ajaxurl = '/wp-admin/admin-ajax.php';
+    let ajaxurl = coinsnap_ajax['ajax_url'];
     let data = {
 	action: 'coinsnap_connection_handler',
-        _wpnonce: wc_secret
+        _wpnonce: coinsnap_ajax['nonce']
     };
 
     jQuery.post( ajaxurl, data, function( response ){
-        console.log( 'Coinsnap connection check JSON:' + response );
+        
         connectionCheckResponse = $.parseJSON(response);
         let resultClass = (connectionCheckResponse.result === true)? 'success' : 'error';
         
@@ -33,10 +33,4 @@ jQuery(function ($) {
             $('#coinsnapConnectionStatus').html('<span class="'+resultClass+'">'+ connectionCheckResponse.message +'</span>');
         }
     });
-    
-    
-    
-    
-    
-    
 });

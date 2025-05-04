@@ -23,6 +23,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         // General gateway setup.
 	$this->icon              = $this->getIcon();
 	$this->has_fields        = false;
+        $this->coinsnap_discount = 0;
 
 	// Load the settings.
 	$this->init_form_fields();
@@ -42,18 +43,58 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		add_action('admin_enqueue_scripts', [$this, 'addAdminScripts']);
 		add_action('wp_enqueue_scripts', [$this, 'addPublicScripts']);
 		add_action('woocommerce_update_options_payment_gateways_' . $this->getId(), [$this, 'process_admin_options']);
+                add_action('woocommerce_cart_calculate_fees', [$this, 'cartCoinsnapDiscount'] , 10, 1 );
+	
 
         // Supported features.
         $this->supports = ['products'];
     }
+    
+    
+    public function cartCoinsnapDiscount($cart){
+        if (WC()->session->chosen_payment_method == 'coinsnap' && $this->get_option('discount_enable')) {
+            
+            $cart_amount = $cart->cart_contents_total;
+            
+            $discount_type = $this->get_option('discount_type');
+            $isDiscount = false;
+            
+            if($discount_type === 'fixed'){
+                $discount_amount = round($this->get_option('discount_amount') + 0.0,2);
+                $discount_amount_limit = $this->get_option('discount_amount_limit') + 0.0;
+                
+                if($discount_amount > 0 && $discount_amount_limit > 0 && $discount_amount_limit < 100){
+                    if($discount_amount > ($cart_amount * $discount_amount_limit / 100)){
+                        $discount_amount = round($cart_amount * $discount_amount_limit / 100,2);
+                    }
+                    if($discount_amount < $cart_amount){
+                        $isDiscount = true;
+                    }
+                }
+            }
+            else {
+                $discount_percentage = $this->get_option('discount_percentage');
+                
+                if($discount_percentage > 0 && $discount_percentage < 100){
+                    $discount_amount = $cart_amount * $discount_percentage / 100;
+                    $isDiscount = true;
+                }
+            }
+            if($isDiscount){
+                $cart->add_fee( __('Coinsnap discount','coinsnap-for-woocommerce'), -$discount_amount );
+                $this->coinsnap_discount = $discount_amount;
+            }
+        }
+    }
 
 	//  Initialise Gateway Settings Form Fields
 	public function init_form_fields() {
+            $currency = get_option( 'woocommerce_currency' );
 		$this->form_fields = [
 			'enabled' => [
 				'title'       => __( 'Enabled/Disabled', 'coinsnap-for-woocommerce' ),
 				'type'        => 'checkbox',
-				'label'       => __( 'Enable this payment gateway.', 'coinsnap-for-woocommerce' ),
+				'label'       => __( 'Enable this payment gateway', 'coinsnap-for-woocommerce' ),
 				'default'     => 'no',
 				'value'       => 'yes',
 				'desc_tip'    => false,
@@ -66,18 +107,67 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				'desc_tip'    => true,
 			],
 			'description' => [
-				'title'       => __( 'Customer Message', 'coinsnap-for-woocommerce' ),
+				'title'       => __( 'Customer Message','coinsnap-for-woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Message to explain how the customer will be paying for the purchase.', 'coinsnap-for-woocommerce' ),
 				'default'     => $this->getDescription(),
 				'desc_tip'    => true,
 			],
 			'button' => [
-				'title'       => __('Button Text', 'coinsnap-for-woocommerce'),
+				'title'       => __('Button Text','coinsnap-for-woocommerce'),
 				'type'        => 'text',
 				'description' => __('Text on the button', 'coinsnap-for-woocommerce'),
 				'default'     => $this->getButton(),
 				'desc_tip'    => true,
+			],
+			'discount_enable' => [
+				'title'       => __( 'Enable discount', 'coinsnap-for-woocommerce' ),
+				'type'        => 'checkbox',
+				'label'       => __( 'Enable discount', 'coinsnap-for-woocommerce' ),
+				'default'     => 'no',
+				'value'       => 'yes',
+				'desc_tip'    => false,
+			],
+			'discount_type' => [
+				'title'       => __( 'Discount type', 'coinsnap-for-woocommerce' ),
+				'type'        => 'select',
+				'label'       => __( 'Discount type', 'coinsnap-for-woocommerce' ),
+				'description' => sprintf(
+                                                    /* translators: 1: Currency */
+                                                    __( 'Choose discount type: %1$s or percents', 'coinsnap-for-woocommerce' ),$currency),
+				'options'   => [
+                                                    'fixed' => 'Fixed',
+                                                    'percentage'   => 'Percentage'
+                                                ],
+				'desc_tip'    => true,
+                            'class' => 'discount'
+			],
+                    
+			'discount_amount' => [
+				'title'       => sprintf(
+                                                    /* translators: 1: Currency */
+                                                    __('Discount amount, %1$s', 'coinsnap-for-woocommerce'),$currency),
+				'type'        => 'decimal',
+				'description' => __('Discount amount', 'coinsnap-for-woocommerce'),
+				'default'     => 0,
+				'desc_tip'    => true,
+                            'class' => 'discount discount-amount',
+			],
+			'discount_amount_limit' => [
+				'title'       => __('Max discount amount, %', 'coinsnap-for-woocommerce'),
+				'type'        => 'decimal',
+				'description' => __('Max discount amount for fixed discount, %', 'coinsnap-for-woocommerce'),
+				'default'     => 0,
+				'desc_tip'    => true,
+                            'class' => 'discount discount-amount',
+			],
+			'discount_percentage' => [
+				'title'       => __('Discount amount, %', 'coinsnap-for-woocommerce'),
+				'type'        => 'decimal',
+				'description' => __('Discount amount in percents (%)', 'coinsnap-for-woocommerce'),
+				'default'     => 0,
+				'desc_tip'    => true,
+                            'class' => 'discount discount-percentage',
 			],
 			'icon_upload' => [
 				'type'        => 'icon_upload',
@@ -95,53 +185,77 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 	// Load the order and check it.
 	$order = new \WC_Order( $orderId );
-		if ( $order->get_id() === 0 ) {
-			$message = 'Could not load order id ' . $orderId . ', aborting.';
-			Logger::debug( $message, true );
-			throw new \Exception( esc_html($message) );
+	if ( $order->get_id() === 0 ) {
+            $message = 'Could not load order id ' . $orderId . ', aborting.';
+            Logger::debug( $message, true );
+            throw new \Exception( esc_html($message) );
 	}
 
 	// Check if the order is a modal payment.
         if (null !== filter_input(INPUT_POST,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) {
             $action = filter_input(INPUT_POST,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-			if ( $action === 'coinsnap_modal_checkout' ) {
-				Logger::debug( 'process_payment called via modal checkout.' );
+            if ( $action === 'coinsnap_modal_checkout' ) {
+		Logger::debug( 'process_payment called via modal checkout.' );
             }
 	}
 
-		// Check for existing invoice and redirect instead.
-		if ( $this->validInvoiceExists( $orderId ) ) {
-			$existingInvoiceId = get_post_meta( $orderId, 'Coinsnap_id', true );
-			Logger::debug( 'Found existing Coinsnap invoice and redirecting to it. Invoice id: ' . $existingInvoiceId );
+	// Check for existing invoice and redirect instead.
+	if ( $this->validInvoiceExists( $orderId ) ) {
+            $existingInvoiceId = get_post_meta( $orderId, 'Coinsnap_id', true );
+            Logger::debug( 'Found existing Coinsnap invoice and redirecting to it. Invoice id: ' . $existingInvoiceId );
 
-			return [
-				'result' => 'success',
-				'redirect' => $this->apiHelper->getInvoiceRedirectUrl( $existingInvoiceId ),
-				'invoiceId' => $existingInvoiceId,
-				'orderCompleteLink' => $order->get_checkout_order_received_url(),
-			];
-		}
-
-		// Create an invoice.
-		Logger::debug( 'Creating invoice on Coinsnap Server' );
-		if ( $invoice = $this->createInvoice( $order ) ) {
-
-			// Todo: update order status and Coinsnap meta data.
-
-			Logger::debug( 'Invoice creation successful, redirecting user.' );
-
-			$url = $invoice->getData()['checkoutLink'];
-			
-			return [
-				'result' => 'success',
-				'redirect' => $url,
-				'invoiceId' => $invoice->getData()['id'],
-				'orderCompleteLink' => $order->get_checkout_order_received_url(),
-			];
-		}
+            return [
+		'result' => 'success',
+		'redirect' => $this->apiHelper->getInvoiceRedirectUrl( $existingInvoiceId ),
+		'invoiceId' => $existingInvoiceId,
+		'orderCompleteLink' => $order->get_checkout_order_received_url(),
+            ];
 	}
 
-	public function process_admin_options() {
+	// Create an invoice.
+        Logger::debug( 'Invoice data check' );
+        
+        $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
+        $amount = $order->get_total();
+        $currency = $order->get_currency();
+        
+        $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ));
+        
+        if($checkInvoice['result'] === true){
+            Logger::debug( 'Creating invoice on Coinsnap Server' );
+            
+            if( $invoice = $this->createInvoice( $order ) ) {
+
+                Logger::debug( 'Invoice creation successful, redirecting user.' );
+
+		$url = $invoice->getData()['checkoutLink'];
+			
+		return [
+                    'result' => 'success',
+                    'redirect' => $url,
+                    'invoiceId' => $invoice->getData()['id'],
+                    'orderCompleteLink' => $order->get_checkout_order_received_url(),
+		];
+            }
+        }
+        else {
+            
+            if($checkInvoice['error'] === 'currencyError'){
+                $errorMessage = sprintf( 
+                /* translators: 1: Currency */
+                __( 'Currency %1$s is not supported by Coinsnap', 'coinsnap-for-woocommerce' ), strtoupper( $currency ));
+            }      
+            elseif($checkInvoice['error'] === 'amountError'){
+                $errorMessage = sprintf( 
+                /* translators: 1: Amount, 2: Currency */
+                __( 'Invoice amount cannot be less than %1$s %2$s', 'coinsnap-for-woocommerce' ), $checkInvoice['min_value'], strtoupper( $currency ));
+            }
+            Logger::debug( $errorMessage );
+            throw new \Exception( esc_html($errorMessage) );
+        }
+    }
+
+    public function process_admin_options() {
 		// Store media id.
 		$iconFieldName = 'woocommerce_' . $this->getId() . '_' . self::ICON_MEDIA_OPTION;
                 if ($mediaId = sanitize_key(filter_input(INPUT_POST,$iconFieldName,FILTER_SANITIZE_FULL_SPECIAL_CHARS ))) {
@@ -257,22 +371,24 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 // Get headers and check for signature
                 $headers = getallheaders();
                 $signature = null;
-
+                $_provider = get_option('coinsnap_provider');
+                
                 foreach ($headers as $key => $value) {
-                    if (strtolower($key) === 'x-coinsnap-sig') {
+                    if ((strtolower($key) === 'x-coinsnap-sig' && $_provider === 'coinsnap') || (strtolower($key) === 'btcpay-sig' && $_provider === 'btcpay')) {
                         $signature = $value;
                     }
                 }
 
                 // Handle missing or invalid signature
                 if (!isset($signature)) {
-                    Logger::debug('Missing X-Coinsnap-Sig header');
+                    $missingHeader = ($_provider === 'coinsnap')? 'X-Coinsnap-Sig' : 'BTCPay-Sig';
+                    Logger::debug("Missing $missingHeader header for Webhook payload request");
                     wp_die('Authentication required', '', ['response' => 401]);
                 }
 
                 // Validate the signature
                 if (!$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
-                    Logger::debug('Invalid webhook signature received');
+                    Logger::debug("Invalid webhook signature ($signature) received");
                     wp_die('Invalid authentication signature', '', ['response' => 401]);
                 }
 
@@ -292,7 +408,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                 // Handle no orders found
                 if (count($orders) === 0) {
-                    Logger::debug('Could not load order by Coinsnap invoiceId: ' . $postData->invoiceId);
+                    Logger::debug('Could not load order by '.ucfirst($_provider).' invoiceId: ' . $postData->invoiceId);
                     wp_die('No order found for this invoiceId.', '', ['response' => 200]);
                 }
 
@@ -483,125 +599,106 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Create an invoice on Coinsnap Server.
 	 */
 	public function createInvoice( \WC_Order $order ): ?\Coinsnap\Result\Invoice {
-		// In case some plugins customizing the order number we need to pass that along, defaults to internal ID.
-		$orderNumber = $order->get_order_number();
-                $orderID = ''.$order->get_id();
-		Logger::debug( 'Got order number: ' . $orderNumber . ' and order ID: ' . $orderID );
+            
+            // In case some plugins customizing the order number we need to pass that along, defaults to internal ID.
+            $orderNumber = $order->get_order_number();
+            $orderID = ''.$order->get_id();
+            Logger::debug( 'Got order number: ' . $orderNumber . ' (order ID: ' . $orderID .')' );
 
-		$metadata = [];
+            $metadata = [];
                 
-		// Send customer data only if option is set.
-		if ( get_option( 'coinsnap_send_customer_data' ) ) {
-			$metadata = $this->prepareCustomerMetadata( $order );
-		}
+            // Send customer data only if option is set.
+            if ( get_option( 'coinsnap_send_customer_data' ) ) {
+                $metadata = $this->prepareCustomerMetadata( $order );
+            }
                 
-                $buyerEmail = $this->prepareCustomerMetadata( $order )['buyerEmail'];
-                $buyerName = $this->prepareCustomerMetadata( $order )['buyerName'];
+            $buyerEmail = $this->prepareCustomerMetadata( $order )['buyerEmail'];
+            $buyerName = $this->prepareCustomerMetadata( $order )['buyerName'];
 
-		// Set included tax amount.
-		$metadata['taxIncluded'] = $order->get_cart_tax();
+            // Set included tax amount.
+            $metadata['taxIncluded'] = $order->get_cart_tax();
 
-		if(isset($orderNumber) && !empty($orderNumber)) $metadata['orderNumber'] = $orderNumber;
+            if(isset($orderNumber) && !empty($orderNumber)){
+                $metadata['orderNumber'] = $orderNumber;
+            }
                 
-                $redirectUrl     = $this->get_return_url( $order );
-                $currency = $order->get_currency();
-		$amount = PreciseNumber::parseString( $order->get_total() );		
+            $redirectUrl = $this->get_return_url( $order );
+            $currency = $order->get_currency();
+            $amount = PreciseNumber::parseString( $order->get_total() );		
 
-		// Checkout options.
-		$checkoutOptions = new InvoiceCheckoutOptions();
-		$checkoutOptions->setRedirectURL( $redirectUrl );
-		Logger::debug( 'Setting redirect url to: ' . $redirectUrl );
-/*
-		
-		// Payment methods.
-		if ($paymentMethods = $this->getPaymentMethods()) {
-			$checkoutOptions->setPaymentMethods($paymentMethods);
-                        Logger::debug( 'Payment methods: ' . print_R($paymentMethods,true) );
-		}
+            // Handle Sats-mode because BTCPay does not understand SAT as a currency we need to change to BTC and adjust the amount.
+            if ($currency === 'SATS' && get_option('coinsnap_provider') === 'btcpay') {
+                $currency = 'BTC';
+                $amountBTC = bcdiv($amount->__toString(), '100000000', 8);
+                $amount = PreciseNumber::parseString($amountBTC);
+            }
                 
+            //  Set automatic redirect after payment and wallet message (empty)
+            $redirectAutomatically = (get_option('coinsnap_autoredirect', 'yes') === 'yes')? true : false;
+            Logger::debug( 'Setting redirect automatically: ' . $redirectAutomatically );
+            
+            $walletMessage = ($this->coinsnap_discount > 0)? 'Coinsnap discount: '.$this->coinsnap_discount.' '.$currency : '';
+            $metadata['coinsnapDiscount'] = $this->coinsnap_discount;
+
+            // Create the invoice on Coinsnap Server.
+            $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
+            Logger::debug( 'Client for invoice is created' );
                 
-                
-                
+            try {
+                $invoice = $client->createInvoice(
+                    $this->apiHelper->storeId,
+                    $currency,
+                    $amount,
+                    $orderID,
+                    $buyerEmail,
+                    $buyerName,
+                    $redirectUrl,
+                    COINSNAP_WC_REFERRAL_CODE,
+                    $metadata,
+                    $redirectAutomatically,
+                    $walletMessage
+                );
 
-		// Handle payment methods of type "promotion".
-		// Promotion type set 1 token per each quantity.
-                if ($this->getTokenType() === 'promotion') {
-			$currency = $this->primaryPaymentMethod ?? null;
-			$amount = PreciseNumber::parseInt( $this->getOrderTotalItemsQuantity($order));
-		} else { // Defaults.
-			$currency = $order->get_currency();
-			$amount = PreciseNumber::parseString( $order->get_total() ); // unlike method signature suggests, it returns string.
-		}
-                */
-                
-		// Handle Sats-mode.
-		// Because Coinsnap does not understand SAT as a currency we need to change to BTC and adjust the amount.
-		if ($currency === 'SAT') {
-			$currency = 'BTC';
-			$amountBTC = bcdiv($amount->__toString(), '100000000', 8);
-			$amount = PreciseNumber::parseString($amountBTC);
-                        Logger::debug( 'SATS as a currency is handled' );
-		}
+                $this->updateOrderMetadata( $order->get_id(), $invoice );
+                return $invoice;
+            }
+            catch ( \Throwable $e ) {
+                Logger::debug( $e->getMessage(), true );
+            }
 
-		// Create the invoice on Coinsnap Server.
-		$client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
-                Logger::debug( 'Client for invoice is created' );
-                
-		try {
-			$invoice = $client->createInvoice(
-				$this->apiHelper->storeId,  //$storeId
-				$currency,                  //$currency
-				$amount,                    //$amount
-				$orderID,              //$orderId
-                                $buyerEmail,                //$buyerEmail
-                                $buyerName,                 //$customerName
-                                $redirectUrl,               //$redirectUrl
-                                COINSNAP_WC_REFERRAL_CODE,     //$referralCode
-				$metadata,
-				$checkoutOptions
-			);
-
-			$this->updateOrderMetadata( $order->get_id(), $invoice );
-
-			return $invoice;
-
-		} catch ( \Throwable $e ) {
-			Logger::debug( $e->getMessage(), true );
-		}
-
-		return null;
+            return null;
 	}
 
 	/**
 	 * Maps customer billing metadata.
 	 */
 	protected function prepareCustomerMetadata( \WC_Order $order ): array {
-		return [
-			'buyerEmail'    => $order->get_billing_email(),
-			'buyerName'     => $order->get_formatted_billing_full_name(),
-			'buyerAddress1' => $order->get_billing_address_1(),
-			'buyerAddress2' => $order->get_billing_address_2(),
-			'buyerCity'     => $order->get_billing_city(),
-			'buyerState'    => $order->get_billing_state(),
-			'buyerZip'      => $order->get_billing_postcode(),
-			'buyerCountry'  => $order->get_billing_country()
-		];
+            return [
+		'buyerEmail'    => $order->get_billing_email(),
+		'buyerName'     => $order->get_formatted_billing_full_name(),
+		'buyerAddress1' => $order->get_billing_address_1(),
+		'buyerAddress2' => $order->get_billing_address_2(),
+		'buyerCity'     => $order->get_billing_city(),
+		'buyerState'    => $order->get_billing_state(),
+		'buyerZip'      => $order->get_billing_postcode(),
+		'buyerCountry'  => $order->get_billing_country()
+            ];
 	}
 
 	/**
 	 * Maps POS metadata.
 	 */
 	protected function preparePosMetadata( $order ): string {
-		$posData = [
-			'WooCommerce' => [
-				'Order ID'       => $order->get_id(),
-				'Order Number'   => $order->get_order_number(),
-				'Order URL'      => $order->get_edit_order_url(),
-				'Plugin Version' => constant( 'COINSNAP_WC_VERSION' )
-			]
-		];
+            $posData = [
+                'WooCommerce' => [
+                    'Order ID'       => $order->get_id(),
+                    'Order Number'   => $order->get_order_number(),
+                    'Order URL'      => $order->get_edit_order_url(),
+                    'Plugin Version' => constant( 'COINSNAP_WC_VERSION' )
+                ]
+            ];
 
-		return wp_json_encode( $posData, JSON_THROW_ON_ERROR );
+            return wp_json_encode( $posData, JSON_THROW_ON_ERROR );
 	}
 
 	/**
@@ -611,6 +708,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		// Store relevant Coinsnap invoice data.
                 $order = wc_get_order($orderId);
 		$order->update_meta_data( 'Coinsnap_redirect', $invoice->getData()['checkoutLink'] );
+		$order->update_meta_data( 'Coinsnap_invoiceId', $invoice->getData()['invoiceId'] );
 		$order->update_meta_data( 'Coinsnap_id', $invoice->getData()['id'] );
                 Logger::debug( 'Store relevant Coinsnap invoice data for order ' . $orderId . ': Coinsnap_id: ' . $invoice->getData()['id'] );
                 $order->save();
@@ -642,6 +740,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		return $this->get_option('description', 'You will be redirected to the Bitcoin-Lightning Payment Page to complete your purchase');
 	}
 
+	/**
+	 * Get customer button text.
+	 */
 	public function getButton(): string {
 		return $this->get_option('button', 'Pay with Bitcoin');
 	}

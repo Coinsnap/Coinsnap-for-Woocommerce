@@ -9,7 +9,7 @@ class SatsMode {
 	private static $instance;
 
 	public $currencies = [
-		'SAT' => ["Satoshis", "Sats"]
+		'SATS' => ["Satoshis", "Sats"]
 	];
 
 	public function __construct() {
@@ -26,7 +26,7 @@ class SatsMode {
 	}
 
 	public function addSymbol($symbol, $currency) {
-		if ($currency === 'SAT'){
+		if ($currency === 'SATS'){
 			$symbol = 'Sats';
                 }
 		return $symbol;
