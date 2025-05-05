@@ -2,14 +2,14 @@
 
 # Bitcoin payment for WooCommerce via Coinsnap payment gateway
 
-## Coinsnap for WooCommerce 1.1.12
+## Coinsnap for WooCommerce 1.3.0
 
 * Contributors: coinsnap
 * Tags: Lightning, Lightning Payment, SATS, Satoshi sats, bitcoin, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency, lightning payment processor
 * Requires at least: 5.2
-* Tested up to: 6.7
+* Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.1.12
+* Stable tag: 1.3.0
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,13 +76,15 @@ Coinsnap’s Bitcoin payment plugin for WooCommerce makes it amazingly simple fo
 
 # Installation #
 
-## 1. Install the Coinsnap for WooCommerce plugin from the WordPress plugin repository
+## 1. Install the Coinsnap WooCommerce plugin from our Github page
 
-![Install the Coinsnap for WooCommerce Plugin in WordPress](https://resources.coinsnap.org/products/woocommerce/images/screenshot-1.png)
+If you don’t want to install Coinsnap WooCommerce plugin directly from your WordPress backend, download the Coinsnap for WooCommerce plugin from the [Coinsnap Github page here](https://github.com/Coinsnap/Coinsnap-for-Woocommerce).
 
-The Coinsnap for WooCommerce plugin can be searched and installed in the WordPress plugin directory.
+![Download Coinsnap for WooCommerce on github](https://resources.coinsnap.org/products/woocommerce/images/screenshot-11.png)
 
-You can easily find the Coinsnap for WooCommerce plugin under Plugins/Install new plugin if you enter Coinsnap WooCommerce in the search field. Simply click on Install now in the Coinsnap plugin and WordPress will install it for you.
+Find the green button labeled **Code**. When you click on it, the menu opens and Download ZIP appears. Here you can download the latest version of the Coinsnap plugin to your computer.
+
+Then use the “**Upload plugin**” function to install it. Click on “**Install now**” and the Coinsnap for WooCommerce plugin will be added to your WordPress website. It can then be connected to the Coinsnap payment gateway.
 
 Now WordPress will offer you to Activate the pugin – click the button and you set to go!
 
@@ -96,7 +98,7 @@ After you have installed and activated the Coinsnap for WooCommerce plugin, you 
 
 ![Go to the Coinsnap Settings tab in WooCommerce settings](https://resources.coinsnap.org/products/woocommerce/images/screenshot-3.png)
 
-You will see in a red message on the top of the tab, that there is a **Coinsnap connection error**. Ignore this for now, for we will now connect the plugin with your Coinsnap account.
+You will see in a red message on the top of the tab, that there is a **Coinsnap serer is disconnected**. Ignore this for now, for we will now connect the plugin with your Coinsnap account.
 
 
 To do that, you need to enter your Coinsnap **Store ID** and your Coinsnap **API key**.
@@ -162,15 +164,14 @@ You will now be redirected to the Bitcoin-Lightning payment page to complete the
 ![Invoice is paid](https://resources.coinsnap.org/products/woocommerce/images/screenshot-13.png)
 
 
-## 2. Install the Coinsnap WooCommerce plugin from our Github page
+## 2. Install the Coinsnap for WooCommerce plugin from the WordPress plugin repository
 
-If you don’t want to install Coinsnap WooCommerce plugin directly from your WordPress backend, download the Coinsnap for WooCommerce plugin from the [Coinsnap Github page here](https://github.com/Coinsnap/Coinsnap-for-Woocommerce).
 
-![Download Coinsnap for WooCommerce on github](https://resources.coinsnap.org/products/woocommerce/images/screenshot-11.png)
+![Install the Coinsnap for WooCommerce Plugin in WordPress](https://resources.coinsnap.org/products/woocommerce/images/screenshot-1.png)
 
-Find the green button labeled **Code**. When you click on it, the menu opens and Download ZIP appears. Here you can download the latest version of the Coinsnap plugin to your computer.
+The Coinsnap for WooCommerce plugin can be searched and installed in the WordPress plugin directory.
 
-Then use the “**Upload plugin**” function to install it. Click on “**Install now**” and the Coinsnap for WooCommerce plugin will be added to your WordPress website. It can then be connected to the Coinsnap payment gateway.
+You can easily find the Coinsnap for WooCommerce plugin under Plugins/Install new plugin if you enter Coinsnap WooCommerce in the search field. Simply click on Install now in the Coinsnap plugin and WordPress will install it for you.
 
 As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
 
@@ -280,13 +281,25 @@ If you have any other questions, please use our support area. After you have reg
 ##### 1.1.10 :: 2025-01-27
 * Added Coinsnap server connection check indication in backend.
 
-##### 1.1.11 :: 2025-02-09 =
+##### 1.1.11 :: 2025-02-09
 * Update: Coinsnap server connection check indication in backend marks as "WooCommerce".
 * Default WooCommerce status for "Settled" is "Completed".
 * Compatibility with WooCommerce 9.6.x. is tested.
 
-##### 1.1.12 :: 2025-03-09 =
+##### 1.1.12 :: 2025-03-09
 * Fixed Wordpress warning about non-used wp_get_attachment_image() method for Coinsnap payment gateway icon in WooCommerce payment settings.
 * Compatibility with WooCommerce 9.7.x. is tested.
 
+##### 1.2.0 :: 2025-04-04
+* Update: Woocommerce currencies list is limited by currencies, supported by Coinsnap.
+* Update: After plugin activation or update non-supported currency switches to USD.
+* Update: Added option "Redirect after payment automatically".
+* Update: Prevented redirect to payment gateway if payment amount is less than 1 SAT or currency in not supported by Coinsnap.
+* Update: Error message changed to "Coinsnap server is disconnected" if Coinsnap server is not connected or there is webhook error.
+
+##### 1.3.0 :: 2025-04-16
+* Update: BTCPay server added as a Bitcoin payment gateway
+* Update: Added discount for payment with Coinsnap functionality
+* Compatibility with WooCommerce 9.8.x. is tested.
+* Compatibility with Wordpress 6.8 is tested.
 

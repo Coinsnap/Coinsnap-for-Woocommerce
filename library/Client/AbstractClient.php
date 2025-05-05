@@ -60,7 +60,8 @@ class AbstractClient{
         return [
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            'x-api-key' => $this->getApiKey()
+            'x-api-key' => $this->getApiKey(),
+            'Authorization' => 'token '.$this->getApiKey()
         ];
     }
 

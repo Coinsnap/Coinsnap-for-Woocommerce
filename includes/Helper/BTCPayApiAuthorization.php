@@ -1,19 +1,18 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\WC\Helper;
+defined( 'ABSPATH' ) || exit();
 
-class CoinsnapApiAuthorization {
+class BTCPayApiAuthorization {
 	public const REQUIRED_PERMISSIONS = [
-		'coinsnap.store.canviewinvoices',
-		'coinsnap.store.cancreateinvoice',
-		'coinsnap.store.webhooks.canmodifywebhooks',
-		'coinsnap.store.canviewstoresettings',
-		'coinsnap.store.canmodifyinvoices'
+		'btcpay.store.canviewinvoices',
+		'btcpay.store.cancreateinvoice',
+		'btcpay.store.canviewstoresettings',
+		'btcpay.store.canmodifyinvoices'
 	];
 	public const OPTIONAL_PERMISSIONS = [
-		'coinsnap.store.cancreatenonapprovedpullpayments'
+		'btcpay.store.cancreatenonapprovedpullpayments',
+		'btcpay.store.webhooks.canmodifywebhooks',
 	];
 
 	private $apiKey;
@@ -81,6 +80,14 @@ class CoinsnapApiAuthorization {
 			return array_merge($carry, [explode(':', $permission)[0]]);
 		}, []);
 
-		return in_array('coinsnap.store.cancreatenonapprovedpullpayments', $permissions, true);
+		return in_array('btcpay.store.cancreatenonapprovedpullpayments', $permissions, true);
+	}
+
+	public function hasWebhookPermission(): bool {
+		$permissions = array_reduce($this->permissions, static function (array $carry, string $permission) {
+			return array_merge($carry, [explode(':', $permission)[0]]);
+		}, []);
+
+		return in_array('btcpay.store.webhooks.canmodifywebhooks', $permissions, true);
 	}
 }

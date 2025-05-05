@@ -32,23 +32,40 @@ class CoinsnapApiHelper {
     }
     
     public static function getConfig(): array {
-        $url = COINSNAP_SERVER_URL;
-        $key = get_option('coinsnap_api_key');
-        if($url && $key) {
+        $url = (get_option('coinsnap_provider')!=='btcpay')? COINSNAP_SERVER_URL : get_option('btcpay_server_url');
+        $api_key = (get_option('coinsnap_provider')!=='btcpay')? get_option('coinsnap_api_key') : get_option('btcpay_api_key');
+        $store_id = (get_option('coinsnap_provider')!=='btcpay')? get_option('coinsnap_store_id', null) : get_option('btcpay_store_id', null);
+        $webhook = get_option('coinsnap_webhook', null);
+        
+        if($url && $api_key) {
             return [
                 'url' => rtrim( $url, '/' ),
-                'api_key' => $key,
-                'store_id' => get_option( 'coinsnap_store_id', null ),
-		'webhook' => get_option('coinsnap_webhook', null)
+                'api_key' => $api_key,
+                'store_id' => $store_id,
+		'webhook' => $webhook
             ];
         } 
-        else return [];
+        else {
+            return [];
+        }
     }
     
-    public static function checkApiConnection(): bool {
-        if ($config = self::getConfig()) {
-            $client = new Store($config['url'], $config['api_key']);
+    public static function checkApiConnection(string $apiUrl = null,string $storeId = null,string $apiKey = null): bool {
+        $config = [];
+
+	if ($apiUrl && $apiKey && $storeId) {
+            $config['url'] = $apiUrl;
+            $config['store_id'] = $storeId;
+            $config['api_key'] = $apiKey;
+	}
+        else {
+            $config = self::getConfig();
+	}
+        
+        if ($config) {
+            $client = new Store($config['url'], $config['api_key']);            
             $store = $client->getStore($config['store_id']);
+            
             if ($store['code'] === 200) {
                 return true;
             }

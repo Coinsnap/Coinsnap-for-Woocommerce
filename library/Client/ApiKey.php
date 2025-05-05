@@ -11,7 +11,7 @@ class ApiKey extends AbstractClient{
 //  Create a URL you can send the user to. He/she will be prompted to create an API key that corresponds with your needs.    
     public static function getAuthorizeUrl(string $baseUrl, array $permissions, ?string $applicationName, ?bool $strict, ?bool $selectiveStores, ?string $redirectToUrlAfterCreation, ?string $applicationIdentifier): string
     {
-        $url = rtrim($baseUrl, '/') . '/api/v1/'.COINSNAP_SERVER_PATH.'/';
+        $url = rtrim($baseUrl, '/') . '/api-keys/authorize';
 
         $params = [];
         $params['permissions'] = $permissions;
