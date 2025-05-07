@@ -41,7 +41,7 @@ jQuery(function ($) {
             if(connectionCheckResponse.display === 'hideable'){
                 $('#coinsnapConnectionTopStatus').addClass('is-dismissible').append('<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>');
                 $('#coinsnapConnectionTopStatus .notice-dismiss').click(function(){
-                    setCookie('isConnectionStatusHidden', 1, 3);
+                    setCookie('isConnectionStatusHidden', 1, 30);
                     $('#coinsnapConnectionTopStatus').hide(500); 
                 });
             }
@@ -60,10 +60,9 @@ jQuery(function ($) {
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    function setCookie(name, value, seconds) {
-        const d = new Date();
-        d.setTime(d.getTime() + (seconds * 1000*3600));
-        const expires = "expires=" + d.toUTCString();
+    function setCookie(name, value, days) {
+        const expDate = new Date(Date.now() + days * 86400000);
+        const expires = "expires=" + expDate.toUTCString();
         document.cookie = name + "=" + value + ";" + expires + ";path=/";
     }
 });
