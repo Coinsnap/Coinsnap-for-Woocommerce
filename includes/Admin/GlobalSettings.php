@@ -116,17 +116,7 @@ class GlobalSettings extends \WC_Settings_Page {
 		'id' => 'btcpay_api_key',
                 'class' => 'btcpay required'
             ],
-            /*        
-            'btcpay_webhook' => [
-		'title'       => esc_html_x( 'Webhook secret (optional)', 'global_settings','coinsnap-for-woocommerce' ),
-		'type'        => 'text',
-		'desc_tip'    => _x( 'The BTCPay webhook endpoint can be reached here: ' . site_url() . '/wc-api/btcpaygf_default/', 'global_settings', 'coinsnap-for-woocommerce' ),
-		'desc'        => _x( 'If left empty an webhook will created automatically on save. Only fill out if you know the webhook secret and the webhook was created manually on BTCPay Server.', 'global_settings', 'coinsnap-for-woocommerce'),
-                'custom_attributes' => ['required' => 'required'],
-		'id' => 'btcpay_webhook',
-                'class' => 'btcpay'
-            ],
-            */
+            
             'default_description' => [
 		'title'       => esc_html_x('Default Customer Message','global_settings','coinsnap-for-woocommerce' ),
 		'type'        => 'textarea',
@@ -157,6 +147,17 @@ class GlobalSettings extends \WC_Settings_Page {
 		'id' => 'coinsnap_sats_mode'
             ],
             
+            'connection_status_display' => [
+                'title'     => esc_html_x( 'Display connection status', 'global_settings','coinsnap-for-woocommerce' ),
+		'type'      => 'select',
+                'options'   => [
+                    'everywhere'  => __( 'On all Admin pages', 'coinsnap-for-woocommerce' ),
+                    'hideable' => __( 'Can be hidden from Admin pages', 'coinsnap-for-woocommerce' ),
+                    'settingspage' => __( 'On settings page only', 'coinsnap-for-woocommerce' )
+                ],
+                'id' => 'coinsnap_connection_status_display',
+            ],
+                    
             'autoredirect' => [
                 'title' => __( 'Redirect after payment', 'coinsnap-for-woocommerce' ),
 		'type' => 'checkbox',

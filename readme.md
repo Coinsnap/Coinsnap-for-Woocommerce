@@ -233,73 +233,85 @@ If you have any other questions, please use our support area. After you have reg
 
 # Changelog
 
-##### 1.0.0 :: 2023-08-03
+#### 1.0.0 :: 2023-08-03
 * First public release for testing.
 
-##### 1.0.5 :: 2023-12-12
+#### 1.0.5 :: 2023-12-12
 * Payment button text setting is added.
 
-##### 1.1.0 :: 2024-02-28
+#### 1.1.0 :: 2024-02-28
 * Basic Wordpress Blocks support is added.
 
-##### 1.1.1 :: 2024-03-22
+#### 1.1.1 :: 2024-03-22
 * Restructured loader.
 
-##### 1.1.2 :: 2024-05-08
+#### 1.1.2 :: 2024-05-08
 * Payment status display update.
 * Fix: Payment status changing.
 
-##### 1.1.3 :: 2024-07-03 
+#### 1.1.3 :: 2024-07-03 
 * Order number and order ID separation.
 * Full order metadata array transmission.
 
-##### 1.1.4 :: 2024-10-03 
+#### 1.1.4 :: 2024-10-03 
 * Wordpress library update.
 * Data output security update.
 * Compatibility with WooCommerce 9.3.x. is tested
 * Fix: order ID variable type is ?string.
 
-##### 1.1.5 :: 2024-10-11 
+#### 1.1.5 :: 2024-10-11 
 * Wordpress library update.
 * Fixed error on checkout.
 
-##### 1.1.6 :: 2024-11-06 
+#### 1.1.6 :: 2024-11-06 
 * Coinsnap connection errors exception update.
 * Update of Coinsnap gateway icon upload functionality.
 * Update of payment method name by default (Bitcoin-Lightning)
 
-##### 1.1.7 :: 2024-12-10 
+#### 1.1.7 :: 2024-12-10 
 * Fixed bug in ConnectException handler.
 
-##### 1.1.8 :: 2024-12-24 
+#### 1.1.8 :: 2024-12-24 
 * Fixed mismatch variables types bug in ConnectException function call.
 
-##### 1.1.9 :: 2025-01-18 
+#### 1.1.9 :: 2025-01-18 
 * Fixed webhook creation bug in processWebhook function call.
 * Update of webhook payload response statuses.
 
-##### 1.1.10 :: 2025-01-27
+#### 1.1.10 :: 2025-01-27
 * Added Coinsnap server connection check indication in backend.
 
-##### 1.1.11 :: 2025-02-09
+#### 1.1.11 :: 2025-02-09
 * Update: Coinsnap server connection check indication in backend marks as "WooCommerce".
 * Default WooCommerce status for "Settled" is "Completed".
 * Compatibility with WooCommerce 9.6.x. is tested.
 
-##### 1.1.12 :: 2025-03-09
+#### 1.1.12 :: 2025-03-09
 * Fixed Wordpress warning about non-used wp_get_attachment_image() method for Coinsnap payment gateway icon in WooCommerce payment settings.
 * Compatibility with WooCommerce 9.7.x. is tested.
 
-##### 1.2.0 :: 2025-04-04
+#### 1.2.0 :: 2025-04-04
 * Update: Woocommerce currencies list is limited by currencies, supported by Coinsnap.
 * Update: After plugin activation or update non-supported currency switches to USD.
 * Update: Added option "Redirect after payment automatically".
 * Update: Prevented redirect to payment gateway if payment amount is less than 1 SAT or currency in not supported by Coinsnap.
 * Update: Error message changed to "Coinsnap server is disconnected" if Coinsnap server is not connected or there is webhook error.
 
-##### 1.3.0 :: 2025-04-16
+#### 1.3.0 :: 2025-04-16
 * Update: BTCPay server added as a Bitcoin payment gateway
 * Update: Added discount for payment with Coinsnap functionality
 * Compatibility with WooCommerce 9.8.x. is tested.
 * Compatibility with Wordpress 6.8 is tested.
 
+#### 1.3.1 :: 2025-05-01
+* Update: If BTCPay server is chosen as a Bitcoin payment gateway, we don't limit WooCommerce currencies list.
+* Compatibility with Wordpress 6.8.1 is tested.
+* Compatibility with WooCommerce 9.8.3. is tested.
+
+#### 1.3.5 :: 2025-05-05
+* Update: Prevented redirect to BTCPay server if payment amount is less than 0.000005869 BTC (0.50 EUR) for onchain payments, 0.000001 BTC (1 SAT) for Lightning payment or currency in not supported.
+* Update: BTCPay setup wizard is added in BTCPay server settings.
+
+#### 1.3.6 :: 2025-05-06
+* Update: Minimum order amount is added to connection status notice.
+* Update: Woocommerce store admin can choose where to show connection status notice and hide it from all the Admin pages.

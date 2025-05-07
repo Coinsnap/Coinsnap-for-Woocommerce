@@ -225,20 +225,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             $storePaymentMethods = $store->getStorePaymentMethods($this->apiHelper->storeId);
             
             if ($storePaymentMethods['code'] === 200) {
-                
-                if(count($storePaymentMethods['result']) > 0){
-                    $isOnChain = false;
-                    $isLightning = false;
-                    foreach($storePaymentMethods['result'] as $storePaymentMethod){
-                        if($storePaymentMethod['enabled'] > 0 && stripos($storePaymentMethod['paymentMethodId'],'BTC') !== false){
-                            $isOnChain = true;
-                        }
-                        if($storePaymentMethod['enabled'] > 0 && $storePaymentMethod['paymentMethodId'] === 'Lightning') {
-                            $isLightning = true;
-                        }
-                    }
-                }
-                else {
+                if(!$storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
                     $errorMessage = __( 'No payment method is configured on BTCPay server', 'coinsnap-for-woocommerce' );
                     throw new \Exception( esc_html($errorMessage) );
                 }
@@ -247,10 +234,10 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 Logger::debug( 'Error loading BTCPay store payment methods');
             }
             
-            if($isOnChain && !$isLightning){
+            if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
                 $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'bitcoin');
             }
-            elseif($isLightning){
+            elseif($storePaymentMethods['result']['lightning']){
                 $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'lightning');
             }
             else {

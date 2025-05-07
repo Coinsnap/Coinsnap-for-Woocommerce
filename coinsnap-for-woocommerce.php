@@ -7,7 +7,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.3.5
+ * Version:         1.3.6
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 5.2
@@ -89,6 +89,37 @@ class CoinsnapWCPlugin {
         
         $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
         $_provider = get_option('coinsnap_provider');
+        $apiHelper = new CoinsnapApiHelper();
+        $client = new \Coinsnap\Client\Invoice($apiHelper->url,$apiHelper->apiKey);
+        $currency = strtoupper(get_option( 'woocommerce_currency' ));
+        
+        if($_provider === 'btcpay'){
+            $store = new \Coinsnap\Client\Store($apiHelper->url,$apiHelper->apiKey);            
+            $storePaymentMethods = $store->getStorePaymentMethods($apiHelper->storeId);
+            
+            if ($storePaymentMethods['code'] === 200) {
+                if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
+                    $checkInvoice = $client->checkPaymentData(0,$currency,'bitcoin','calculation');
+                }
+                elseif($storePaymentMethods['result']['lightning']){
+                    $checkInvoice = $client->checkPaymentData(0,$currency,'lightning','calculation');
+                }
+            }
+            else {
+                Logger::debug( 'Error loading BTCPay store payment methods');
+            }
+        }
+        else {
+            $checkInvoice = $client->checkPaymentData(0,$currency,'coinsnap','calculation');
+        }
+        
+        if(isset($checkInvoice) && $checkInvoice['result']){
+            $connectionData = __('Min order amount is', 'coinsnap-for-woocommerce') .' '. $checkInvoice['min_value'].' '.$currency;
+        }
+        else {
+            $connectionData = __('No payment method is configured', 'coinsnap-for-woocommerce');
+        }
+        
         $_message_disconnected = ($_provider !== 'btcpay')? 
             __('WooCommerce: Coinsnap server is disconnected', 'coinsnap-for-woocommerce') :
             __('WooCommerce: BTCPay server is disconnected', 'coinsnap-for-woocommerce');
@@ -97,24 +128,24 @@ class CoinsnapWCPlugin {
             __('WooCommerce: BTCPay server is connected', 'coinsnap-for-woocommerce');
         
         if( wp_verify_nonce($_nonce,'coinsnap-ajax-nonce') ){
-            $response = ['result' => false,'message' => $_message_disconnected];
+            $response = ['result' => false,'message' => $_message_disconnected,'display' => get_option('coinsnap_connection_status_display')];
 
             try {
                 if (!CoinsnapApiHelper::checkApiConnection()) {
                     $this->sendJsonResponse($response);
                 }
-
-                $apiHelper = new CoinsnapApiHelper();
+                
                 $webhookExists = CoinsnapApiWebhook::webhookExists($apiHelper->url,$apiHelper->apiKey,$apiHelper->storeId);
 
                 if($webhookExists) {
-                    $response = ['result' => true,'message' => $_message_connected];
+                    $response = ['result' => true,'message' => $_message_connected.' ('.$connectionData.')','display' => get_option('coinsnap_connection_status_display')];
                     $this->sendJsonResponse($response);
                 }
 
                 $webhook = CoinsnapApiWebhook::registerWebhook($apiHelper->url,$apiHelper->apiKey,$apiHelper->storeId);
                 $response['result'] = (bool)$webhook;
-                $response['message'] = $webhook ? $_message_connected : $_message_disconnected.' (Webhook)';
+                $response['message'] = $webhook ? $_message_connected.' ('.$connectionData.')' : $_message_disconnected.' (Webhook)';
+                $response['display'] = get_option('coinsnap_connection_status_display');
             }
             catch (Exception $e) {
                 $response['message'] = $e->getMessage();

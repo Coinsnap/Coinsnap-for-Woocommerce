@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.8
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -298,3 +298,7 @@ If you have any other questions, please use our support area. After you have reg
 = 1.3.5 :: 2025-05-05 =
 * Update: Prevented redirect to BTCPay server if payment amount is less than 0.000005869 BTC (0.50 EUR) for onchain payments, 0.000001 BTC (1 SAT) for Lightning payment or currency in not supported.
 * Update: BTCPay setup wizard is added in BTCPay server settings.
+
+= 1.3.6 :: 2025-05-06 =
+* Update: Minimum order amount is added to connection status notice.
+* Update: Woocommerce store admin can choose where to show connection status notice and hide it from all the Admin pages.
