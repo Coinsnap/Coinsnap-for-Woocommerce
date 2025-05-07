@@ -1,15 +1,15 @@
 ![Bitcoin payment for WooCommerce](https://resources.coinsnap.org/products/woocommerce/images/cover.png)
 
-# Bitcoin payment for WooCommerce via Coinsnap payment gateway
+# Bitcoin payment for WooCommerce
 
-## Coinsnap for WooCommerce 1.3.0
+## Bitcoin payment for WooCommerce via Coinsnap and BTCPay payment gateway
 
 * Contributors: coinsnap
-* Tags: Lightning, Lightning Payment, SATS, Satoshi sats, bitcoin, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency, lightning payment processor
-* Requires at least: 5.2
+* Tags: Lightning, Lightning Payment, SATS, Satoshi sats, bitcoin, BTCPay, Coinsnap, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency, lightning payment processor
+* Requires at least: 6.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.3.0
+* Stable tag: 1.3.6
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -315,3 +315,4 @@ If you have any other questions, please use our support area. After you have reg
 #### 1.3.6 :: 2025-05-06
 * Update: Minimum order amount is added to connection status notice.
 * Update: Woocommerce store admin can choose where to show connection status notice and hide it from all the Admin pages.
+* Compatibility with WooCommerce 9.8.4. is tested.

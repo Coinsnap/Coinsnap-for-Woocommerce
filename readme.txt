@@ -302,3 +302,4 @@ If you have any other questions, please use our support area. After you have reg
 = 1.3.6 :: 2025-05-06 =
 * Update: Minimum order amount is added to connection status notice.
 * Update: Woocommerce store admin can choose where to show connection status notice and hide it from all the Admin pages.
+* Compatibility with WooCommerce 9.8.4. is tested.

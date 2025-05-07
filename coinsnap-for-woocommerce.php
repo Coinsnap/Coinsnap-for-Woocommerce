@@ -10,10 +10,10 @@
  * Version:         1.3.6
  * Requires PHP:    7.4
  * Tested up to:    6.8
- * Requires at least: 5.2
+ * Requires at least: 6.0
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 9.8.3
+ * WC tested up to: 9.8.4
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
