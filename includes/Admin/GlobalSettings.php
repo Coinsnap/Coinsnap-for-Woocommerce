@@ -69,7 +69,7 @@ class GlobalSettings extends \WC_Settings_Page {
                 'title'       => esc_html_x( 'API Key*', 'global_settings','coinsnap-for-woocommerce' ),
                 'type'        => 'text',
                 'desc_tip'    => _x( 'Your Coinsnap API Key. You can find it on the store settings page on your Coinsnap Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
-		'desc'        => _x('Coinsnap API requires authentication with an API key.<br/>Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.<br/><br/>', 'global_settings', 'coinsnap-for-woocommerce'),
+		'desc'        => _x('Coinsnap API requires authentication with an API key.<br/>Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.', 'global_settings', 'coinsnap-for-woocommerce'),
                 'default'     => '',
                 'custom_attributes' => ['required' => 'required'],
 		'id' => 'coinsnap_api_key',
@@ -90,9 +90,8 @@ class GlobalSettings extends \WC_Settings_Page {
             'btcpay_store_wizard' => [
                 'title'       => esc_html_x( 'Setup wizard', 'global_settings','coinsnap-for-woocommerce' ),
 		'type'  => 'custom_markup',
-		'markup'  => '<button class="button button-primary btcpay-apikey-link" target="_blank">Generate API key</button>',
-		'id'    => 'btcpay_wizard_button',
-                'class' => 'btcpay'
+		'markup'  => '<button class="button button-primary btcpay btcpay-apikey-link" target="_blank">Generate API key</button>',
+		'id'    => 'btcpay_wizard_button'
             ],
 			
             
@@ -151,9 +150,9 @@ class GlobalSettings extends \WC_Settings_Page {
                 'title'     => esc_html_x( 'Display connection status', 'global_settings','coinsnap-for-woocommerce' ),
 		'type'      => 'select',
                 'options'   => [
-                    'everywhere'  => __( 'On all Admin pages', 'coinsnap-for-woocommerce' ),
+                    'settingspage' => __( 'On settings page only', 'coinsnap-for-woocommerce' ),
                     'hideable' => __( 'Can be hidden from Admin pages', 'coinsnap-for-woocommerce' ),
-                    'settingspage' => __( 'On settings page only', 'coinsnap-for-woocommerce' )
+                    'everywhere'  => __( 'On all Admin pages', 'coinsnap-for-woocommerce' )
                 ],
                 'id' => 'coinsnap_connection_status_display',
             ],
@@ -292,9 +291,12 @@ class GlobalSettings extends \WC_Settings_Page {
     }
     
     public function coinsnap_output_custom_markup_field($value) {
-        echo '<tr valign="top">';
-        echo (!empty($value['title']))? '<th scope="row" class="titledesc">' . esc_html($value['title']) . '</th>' : '<th scope="row" class="titledesc">&nbsp;</th>';
-        echo '<td class="forminp" id="'.esc_html($value['id']).'">'.wp_kses($value['markup'],['button' => array('class' => true,'id' => true,'target' => true)]).'</td>';
-        echo '</tr>';
+        //$_provider = get_option('coinsnap_provider');
+        //if($_provider === 'btcpay'){
+            echo '<tr valign="top">';
+            echo (!empty($value['title']))? '<th scope="row" class="titledesc">' . esc_html($value['title']) . '</th>' : '<th scope="row" class="titledesc">&nbsp;</th>';
+            echo '<td class="forminp" id="'.esc_html($value['id']).'">'.wp_kses($value['markup'],['button' => array('class' => true,'id' => true,'target' => true)]).'</td>';
+            echo '</tr>';
+        //}
     }
 }

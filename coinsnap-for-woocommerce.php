@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.3.0' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.3.6' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}

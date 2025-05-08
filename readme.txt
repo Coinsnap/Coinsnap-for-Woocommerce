@@ -212,12 +212,13 @@ If you have any other questions, please use our support area. After you have reg
 5. You find these data in your Coinsnap backend
 6. Add these strings in fields 2 and 3, respectively
 7. Go to „Payments“ tab in the WooCommerce settings to activate Bitcoin payment (1)
-8. Customize the checkout process according to your needs 
+8. Customize the checkout process according to your needs
 9. Bitcoin payment activated
-10. Coinsnap plugin connected
-11. Download Coinsnap for WooCommerce on github
-12. QR code on the Bitcoin payment page
-13. Invoice is paid
+10. Coinsnap plugin connected to Coinsnap payment gateway
+11. Coinsnap plugin connected to BTCPay server
+12. Download Coinsnap for WooCommerce on github
+13. QR code on the Bitcoin payment page
+14. Invoice is paid
 
 == Changelog ==
 = 1.0.0 :: 2023-08-03 =
