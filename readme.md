@@ -309,7 +309,7 @@ If you have any other questions, please use our support area. After you have reg
 * Compatibility with WooCommerce 9.8.3. is tested.
 
 #### 1.3.5 :: 2025-05-05
-* Update: Prevented redirect to BTCPay server if payment amount is less than 0.000005869 BTC (0.50 EUR) for onchain payments, 0.000001 BTC (1 SAT) for Lightning payment or currency in not supported.
+* Update: Prevented redirect to BTCPay server if payment amount is less than 0.000005869 BTC (0.50 EUR) for onchain payments, 0.000001 BTC (1 SAT) for Lightning payment or currency is not supported.
 * Update: BTCPay setup wizard is added in BTCPay server settings.
 
 #### 1.3.6 :: 2025-05-06

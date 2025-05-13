@@ -417,11 +417,12 @@ add_action( 'template_redirect', function() {
     }
     
     // Data does get submitted with url-encoded payload, so parse $_POST here.
-    if (!empty($_POST)) {
+    if (!empty($_POST) || wp_verify_nonce(filter_input(INPUT_POST,'wp_nonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS),'-1')) {
         $data['apiKey'] = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? null;
-        if (is_array($_POST['permissions'])) {
-            foreach ($_POST['permissions'] as $key => $value) {
-                $data['permissions'][$key] = sanitize_text_field($_POST['permissions'][$key] ?? null);
+        $permissions = (isset($_POST['permissions']) && is_array($_POST['permissions']))? $_POST['permissions'] : null;
+        if (isset($permissions)) {
+            foreach ($permissions as $key => $value) {
+                $data['permissions'][$key] = sanitize_text_field($permissions[$key] ?? null);
             }
         }
     }
