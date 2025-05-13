@@ -405,8 +405,6 @@ add_action( 'template_redirect', function() {
 
     $rawData = file_get_contents('php://input');
     Logger::debug('Redirect payload: ' . $rawData);
-
-    $data = json_decode( $rawData, true );
     
     $btcpay_server_url = get_option( 'btcpay_server_url');
     $btcpay_api_key  = get_option( 'btcpay_api_key');
@@ -420,10 +418,10 @@ add_action( 'template_redirect', function() {
     
     // Data does get submitted with url-encoded payload, so parse $_POST here.
     if (!empty($_POST)) {
-        $data['apiKey'] = sanitize_html_class(filter_input(INPUT_GET,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? null);
-	if (is_array($_POST['permissions'])) {
+        $data['apiKey'] = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? null;
+        if (is_array($_POST['permissions'])) {
             foreach ($_POST['permissions'] as $key => $value) {
-                $data['permissions'][$key] = sanitize_text_field(filter_input(INPUT_GET,$key,FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? null);
+                $data['permissions'][$key] = sanitize_text_field($_POST['permissions'][$key] ?? null);
             }
         }
     }
@@ -435,11 +433,12 @@ add_action( 'template_redirect', function() {
 			
             update_option('btcpay_api_key', $apiData->getApiKey());
             update_option('btcpay_store_id', $apiData->getStoreID());
+            update_option('coinsnap_provider', 'btcpay');
 
             Notice::addNotice('success', __('Successfully received api key and store id from BTCPay Server API. Please finish setup by saving this settings form.', 'coinsnap-for-woocommerce'));
 
             // Register a webhook.
-            if (CoinsnapGivewpClass::registerWebhook($btcpay_server_url, $apiData->getApiKey(), $apiData->getStoreID())) {
+            if (CoinsnapApiWebhook::registerWebhook($btcpay_server_url, $apiData->getApiKey(), $apiData->getStoreID())) {
                 $messageWebhookSuccess = __( 'Successfully registered a new webhook on BTCPay Server.', 'coinsnap-for-woocommerce' );
                 Notice::addNotice('success', $messageWebhookSuccess, true );
             }
