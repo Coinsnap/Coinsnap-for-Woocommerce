@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class ApiKey extends AbstractClient{
+class BTCPayApiKey extends AbstractClient{
 
 //  Create a URL you can send the user to. He/she will be prompted to create an API key that corresponds with your needs.    
     public static function getAuthorizeUrl(string $baseUrl, array $permissions, ?string $applicationName, ?bool $strict, ?bool $selectiveStores, ?string $redirectToUrlAfterCreation, ?string $applicationIdentifier): string

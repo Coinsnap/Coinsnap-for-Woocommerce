@@ -20,7 +20,12 @@ class Store extends AbstractClient{
         
         $json_decode = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         $result = (json_last_error() === JSON_ERROR_NONE)? $json_decode : array('error' => json_last_error());
-        return new \Coinsnap\Result\Store(array('code' => $response->getStatus(), 'result' => $result));
+        if ($response->getStatus() === 200) {
+            return new \Coinsnap\Result\Store(array('code' => $response->getStatus(), 'result' => $result));
+        }
+        else {
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), (int)esc_html($response->getStatus()), esc_html($response->getBody()));
+        }
     }
 
     /**
@@ -32,10 +37,20 @@ class Store extends AbstractClient{
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
-
-        $json_decode = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $result = (json_last_error() === JSON_ERROR_NONE)? $json_decode : array('error' => json_last_error());
-        return new \Coinsnap\Result\Store(array('code' => $response->getStatus(), 'result' => $result));
+        
+        if ($response->getStatus() === 200) {
+            $stores_array = [];
+            $json_decode = json_decode($response->getBody(), true);
+            
+            foreach ($json_decode as $item) {                
+                $item = new \Coinsnap\Result\Store($item);
+                $stores_array[] = $item;
+            }
+            return $stores_array;
+        }
+        else {
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), (int)esc_html($response->getStatus()), esc_html($response->getBody()));
+        }
     }
 
     /**

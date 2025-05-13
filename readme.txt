@@ -304,3 +304,8 @@ If you have any other questions, please use our support area. After you have reg
 * Update: Minimum order amount is added to connection status notice.
 * Update: Woocommerce store admin can choose where to show connection status notice and hide it from all the Admin pages.
 * Compatibility with WooCommerce 9.8.4. is tested.
+
+= 1.3.7 :: 2025-05-13 =
+* Update: Coinsnap Wordpress library.
+* Update: Permissions check is added to BTCPay server request handler on BTCPay server connection setup process.
+* Compatibility with WooCommerce 9.8.5. is tested.
