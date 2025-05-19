@@ -7,7 +7,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.3.8
+ * Version:         1.3.9
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.3.8' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.3.9' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -88,12 +88,22 @@ class CoinsnapWCPlugin {
     public function coinsnapConnectionHandler(){
         
         $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
-        $_provider = get_option('coinsnap_provider');
         $apiHelper = new CoinsnapApiHelper();
+        
+        if(empty($apiHelper->url) || empty($apiHelper->apiKey)){
+            $response = [
+                    'result' => false,
+                    'message' => __('WooCommerce: empty gateway URL or API Key', 'coinsnap-for-woocommerce')
+            ];
+            $this->sendJsonResponse($response);
+        }
+        
+        $_provider = get_option('coinsnap_provider');
         $client = new \Coinsnap\Client\Invoice($apiHelper->url,$apiHelper->apiKey);
         $currency = strtoupper(get_option( 'woocommerce_currency' ));
         
         if($_provider === 'btcpay'){
+            
             $store = new \Coinsnap\Client\Store($apiHelper->url,$apiHelper->apiKey);            
             $storePaymentMethods = $store->getStorePaymentMethods($apiHelper->storeId);
             
@@ -106,7 +116,12 @@ class CoinsnapWCPlugin {
                 }
             }
             else {
-                Logger::debug( 'Error loading BTCPay store payment methods');
+                Logger::debug('Error store data loading (Wrong or empty Store ID)');
+                $response = [
+                    'result' => false,
+                    'message' => __('WooCommerce: Error store loading. Wrong or empty Store ID', 'coinsnap-for-woocommerce')
+                ];
+                $this->sendJsonResponse($response);
             }
         }
         else {
@@ -132,6 +147,7 @@ class CoinsnapWCPlugin {
 
             try {
                 if (!CoinsnapApiHelper::checkApiConnection()) {
+                    Logger::debug('API connection is not established');
                     $this->sendJsonResponse($response);
                 }
                 
@@ -148,7 +164,8 @@ class CoinsnapWCPlugin {
                 $response['display'] = get_option('coinsnap_connection_status_display');
             }
             catch (Exception $e) {
-                $response['message'] = $e->getMessage();
+                $response['message'] = 'API connection is not established';
+                Logger::debug($e->getMessage());
             }
 
             $this->sendJsonResponse($response);
