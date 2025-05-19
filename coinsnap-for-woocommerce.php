@@ -103,23 +103,24 @@ class CoinsnapWCPlugin {
         $currency = strtoupper(get_option( 'woocommerce_currency' ));
         
         if($_provider === 'btcpay'){
-            
-            $store = new \Coinsnap\Client\Store($apiHelper->url,$apiHelper->apiKey);            
-            $storePaymentMethods = $store->getStorePaymentMethods($apiHelper->storeId);
-            
-            if ($storePaymentMethods['code'] === 200) {
-                if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
-                    $checkInvoice = $client->checkPaymentData(0,$currency,'bitcoin','calculation');
-                }
-                elseif($storePaymentMethods['result']['lightning']){
-                    $checkInvoice = $client->checkPaymentData(0,$currency,'lightning','calculation');
+            try {
+                $store = new \Coinsnap\Client\Store($apiHelper->url,$apiHelper->apiKey);            
+                $storePaymentMethods = $store->getStorePaymentMethods($apiHelper->storeId);
+
+                if ($storePaymentMethods['code'] === 200) {
+                    if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
+                        $checkInvoice = $client->checkPaymentData(0,$currency,'bitcoin','calculation');
+                    }
+                    elseif($storePaymentMethods['result']['lightning']){
+                        $checkInvoice = $client->checkPaymentData(0,$currency,'lightning','calculation');
+                    }
                 }
             }
-            else {
-                Logger::debug('Error store data loading (Wrong or empty Store ID)');
+            catch (Exception $e) {
+                Logger::debug($e->getMessage());
                 $response = [
-                    'result' => false,
-                    'message' => __('WooCommerce: Error store loading. Wrong or empty Store ID', 'coinsnap-for-woocommerce')
+                        'result' => false,
+                        'message' => __('WooCommerce: Error store loading. Wrong or empty Store ID', 'coinsnap-for-woocommerce')
                 ];
                 $this->sendJsonResponse($response);
             }

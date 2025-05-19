@@ -63,27 +63,32 @@ class Store extends AbstractClient{
         $headers = $this->getRequestHeaders();
         $method = 'GET';
         $response = $this->getHttpClient()->request($method, $url, $headers);
+        if ($response->getStatus() === 200) {
 
-        $json_decode = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        
-        if(json_last_error() === JSON_ERROR_NONE){
-            $result = array('response' => $json_decode);
-            if(count($json_decode) > 0){
-                $result['onchain'] = false;
-                $result['lightning'] = false;
-                foreach($json_decode as $storePaymentMethod){
-                    if($storePaymentMethod['enabled'] > 0 && stripos($storePaymentMethod['paymentMethodId'],'BTC') !== false){
-                        $result['onchain'] = true;
-                    }
-                    if($storePaymentMethod['enabled'] > 0 && $storePaymentMethod['paymentMethodId'] === 'Lightning') {
-                        $result['lightning'] = true;
+            $json_decode = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+
+            if(json_last_error() === JSON_ERROR_NONE){
+                $result = array('response' => $json_decode);
+                if(count($json_decode) > 0){
+                    $result['onchain'] = false;
+                    $result['lightning'] = false;
+                    foreach($json_decode as $storePaymentMethod){
+                        if($storePaymentMethod['enabled'] > 0 && stripos($storePaymentMethod['paymentMethodId'],'BTC') !== false){
+                            $result['onchain'] = true;
+                        }
+                        if($storePaymentMethod['enabled'] > 0 && $storePaymentMethod['paymentMethodId'] === 'Lightning') {
+                            $result['lightning'] = true;
+                        }
                     }
                 }
             }
+            else {
+                $result = array('error' => json_last_error());
+            }
+            return new \Coinsnap\Result\Store(array('code' => $response->getStatus(), 'result' => $result));
         }
         else {
-            $result = array('error' => json_last_error());
+            throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), (int)esc_html($response->getStatus()), esc_html($response->getBody()));
         }
-        return new \Coinsnap\Result\Store(array('code' => $response->getStatus(), 'result' => $result));
     }
 }
