@@ -51,6 +51,7 @@ jQuery(document).ready(function ($) {
     function enableDiscount(){
         if($('#woocommerce_coinsnap_discount_enable').prop('checked')){
             $('.discount').closest('tr').show();
+            setDiscount();
         }
         else {
             $('.discount').closest('tr').hide();

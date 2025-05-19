@@ -51,37 +51,41 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
     
     
     public function cartCoinsnapDiscount($cart){
-        if (WC()->session->chosen_payment_method == 'coinsnap' && $this->get_option('discount_enable')) {
+        if (WC()->session->chosen_payment_method == 'coinsnap') {
             
-            $cart_amount = $cart->cart_contents_total;
+            $discount_enabled = (null !== $this->get_option('discount_enable') && $this->get_option('discount_enable') > 0)? true : false;
+            if($discount_enabled){
             
-            $discount_type = $this->get_option('discount_type');
-            $isDiscount = false;
-            
-            if($discount_type === 'fixed'){
-                $discount_amount = round($this->get_option('discount_amount') + 0.0,2);
-                $discount_amount_limit = $this->get_option('discount_amount_limit') + 0.0;
-                
-                if($discount_amount > 0 && $discount_amount_limit > 0 && $discount_amount_limit < 100){
-                    if($discount_amount > ($cart_amount * $discount_amount_limit / 100)){
-                        $discount_amount = round($cart_amount * $discount_amount_limit / 100,2);
+                $cart_amount = $cart->cart_contents_total;
+
+                $discount_type = $this->get_option('discount_type');
+                $isDiscount = false;
+
+                if($discount_type === 'fixed' && floatval($this->get_option('discount_amount')) > 0){
+                    $discount_amount = round(floatval($this->get_option('discount_amount')),2);
+                    $discount_amount_limit = floatval($this->get_option('discount_amount_limit'));
+
+                    if($discount_amount > 0 && $discount_amount_limit > 0 && $discount_amount_limit < 100){
+                        if($discount_amount > ($cart_amount * $discount_amount_limit / 100)){
+                            $discount_amount = round($cart_amount * $discount_amount_limit / 100,2);
+                        }
+                        if($discount_amount < $cart_amount){
+                            $isDiscount = true;
+                        }
                     }
-                    if($discount_amount < $cart_amount){
+                }
+                elseif(null !== $this->get_option('discount_percentage')) {
+                    $discount_percentage = $this->get_option('discount_percentage');
+
+                    if($discount_percentage > 0 && $discount_percentage < 100){
+                        $discount_amount = $cart_amount * $discount_percentage / 100;
                         $isDiscount = true;
                     }
                 }
-            }
-            else {
-                $discount_percentage = $this->get_option('discount_percentage');
-                
-                if($discount_percentage > 0 && $discount_percentage < 100){
-                    $discount_amount = $cart_amount * $discount_percentage / 100;
-                    $isDiscount = true;
+                if($isDiscount){
+                    $cart->add_fee( __('Coinsnap discount','coinsnap-for-woocommerce'), -$discount_amount );
+                    $this->coinsnap_discount = $discount_amount;
                 }
-            }
-            if($isDiscount){
-                $cart->add_fee( __('Coinsnap discount','coinsnap-for-woocommerce'), -$discount_amount );
-                $this->coinsnap_discount = $discount_amount;
             }
         }
     }

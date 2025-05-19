@@ -9,7 +9,7 @@
 * Requires at least: 6.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.3.7
+* Stable tag: 1.3.8
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -321,3 +321,7 @@ If you have any other questions, please use our support area. After you have reg
 * Update: Coinsnap Wordpress library.
 * Update: Permissions check is added to BTCPay server request handler on BTCPay server connection setup process.
 * Compatibility with WooCommerce 9.8.5. is tested.
+
+#### 1.3.8 :: 2025-05-19
+* Fixed bug in payment process when discount is disabled.
+* Fixed bug with discount fields turning on on payment settings page.
