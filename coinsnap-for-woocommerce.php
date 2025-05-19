@@ -424,7 +424,7 @@ add_action( 'template_redirect', function() {
     Logger::debug('Redirect payload: ' . $rawData);
     
     $btcpay_server_url = get_option( 'btcpay_server_url');
-    $btcpay_api_key  = get_option( 'btcpay_api_key');
+    $btcpay_api_key  = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     
     $client = new \Coinsnap\Client\Store($btcpay_server_url,$btcpay_api_key);
     if (count($client->getStores()) < 1) {
