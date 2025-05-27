@@ -223,7 +223,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         $currency = $order->get_currency();
         
         $_provider = get_option('coinsnap_provider');
-        if($_provider !== 'coinsnap'){
+        if($_provider == 'btcpay'){
         
             $store = new Store($this->apiHelper->url, $this->apiHelper->apiKey);            
             $storePaymentMethods = $store->getStorePaymentMethods($this->apiHelper->storeId);

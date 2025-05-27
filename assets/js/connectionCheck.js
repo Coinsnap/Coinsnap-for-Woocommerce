@@ -9,23 +9,24 @@ jQuery(function ($) {
         connectionCheckElement = '#jp-admin-notices';
     }
     
-    let ajaxurl = coinsnap_ajax['ajax_url'];
+    let ajaxurl = coinsnap_ajax.ajax_url;
     let data = {
 	action: 'coinsnap_connection_handler',
-        _wpnonce: coinsnap_ajax['nonce']
+        _wpnonce: coinsnap_ajax.nonce
     };
 
     jQuery.post( ajaxurl, data, function( response ){
         
         connectionCheckResponse = $.parseJSON(response);
         let resultClass = (connectionCheckResponse.result === true)? 'success' : 'error';
+        let connectionStatusDisplay = (connectionCheckResponse.display !== '' && connectionCheckResponse.display !== null)? connectionCheckResponse.display : 'settingspage';
         if(connectionCheckResponse.display === 'everywhere'){
             setCookie('isConnectionStatusHidden', 0, -1);
         }
         var isConnectionStatusHidden = getCookie('isConnectionStatusHidden');
         
         
-        if(connectionCheckResponse.display !== 'settingspage' && connectionCheckResponse.display !== '' && !isConnectionStatusHidden){        
+        if(connectionStatusDisplay !== 'settingspage' && !isConnectionStatusHidden){        
         
             $connectionCheckMessage = '<div id="coinsnapConnectionTopStatus" class="message '+resultClass+' notice" style="margin-top: 10px;"><p>'+ connectionCheckResponse.message +'</p></div>';
         

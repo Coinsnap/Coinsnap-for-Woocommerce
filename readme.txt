@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.8
-Stable tag: 1.3.9
+Stable tag: 1.3.10
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -316,3 +316,7 @@ If you have any other questions, please use our support area. After you have reg
 
 = 1.3.9 :: 2025-05-19 =
 * Updated connection check errors handler
+
+= 1.3.10 :: 2025-05-27 =
+* Fixed bug in payment process when payment provider wasn't chosen.
+* Updated gateway connection status displaying conditions.
