@@ -147,7 +147,7 @@ class Webhook extends AbstractClient {
         $method = 'DELETE';
         $response = $this->getHttpClient()->request($method, $url, $headers);
 
-        if ($response->getStatus() !== 200) {
+        if ($response->getStatus() !== 204 && $response->getStatus() !== 200) {
             throw $this->getExceptionByStatusCode(esc_html($method), esc_url($url), (int)esc_html($response->getStatus()), esc_html($response->getBody()));
         }
     }

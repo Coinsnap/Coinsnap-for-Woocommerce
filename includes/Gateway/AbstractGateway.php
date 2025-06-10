@@ -407,12 +407,13 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                 // Get headers and check for signature
                 $headers = getallheaders();
-                $signature = null;
-                $_provider = get_option('coinsnap_provider');
+                $signature = null; $payloadKey = null;
+                $_provider = (get_option('coinsnap_provider') === 'btcpay')? 'btcpay' : 'coinsnap';
                 
                 foreach ($headers as $key => $value) {
                     if ((strtolower($key) === 'x-coinsnap-sig' && $_provider === 'coinsnap') || (strtolower($key) === 'btcpay-sig' && $_provider === 'btcpay')) {
                         $signature = $value;
+                        $payloadKey = strtolower($key);
                     }
                 }
 
@@ -425,7 +426,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                 // Validate the signature
                 if (!$this->apiHelper->validWebhookRequest($signature, $rawPostData)) {
-                    Logger::debug("Invalid webhook signature ($signature) received");
+                    Logger::debug("Invalid webhook signature for $payloadKey ($signature) received");
                     wp_die('Invalid authentication signature', '', ['response' => 401]);
                 }
 
@@ -481,7 +482,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		Logger::debug('Updating order status with webhook event received for processing: ' . $webhookData->type);
+		Logger::debug('Updating order (ID = '.$order->get_id().') status with webhook event received for processing: ' . $webhookData->type);
 		// Get configured order states or fall back to defaults.
 		if (!$configuredOrderStates = get_option('coinsnap_order_states')) {
 			$configuredOrderStates = (new OrderStates())->getDefaultOrderStateMappings();
