@@ -37,8 +37,8 @@ class CoinsnapApiWebhook {
             }
         }
         catch (\Throwable $e) {
-		Logger::debug('Error fetching webhooks for store ID '.$storeId.'. Message: ' . $e->getMessage());
-            }
+            Logger::debug('Error fetching webhooks for store ID '.$storeId.'. Message: ' . $e->getMessage());
+        }
 	return false;
     }
 
