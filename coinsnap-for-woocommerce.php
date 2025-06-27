@@ -13,7 +13,7 @@
  * Requires at least: 6.0
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 9.9.4
+ * WC tested up to: 9.9.5
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
