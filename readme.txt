@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.8
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -328,3 +328,9 @@ If you have any other questions, please use our support area. After you have reg
 
 = 1.4.1 :: 2025-06-20 =
 * Update: Unique name for BTCPay server setup Wizard return URL is set.
+
+= 1.4.2 :: 2025-07-19 =
+* Update: Added nonce check for BTCPay server request in Wizard setup flow.
+* Updated Generate API Key button behavior.
+* Compatibility with WooCommerce 10.0. is tested.
+* Compatibility with Wordpress 6.8.2 is tested.

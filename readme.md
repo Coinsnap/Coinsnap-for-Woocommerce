@@ -9,7 +9,7 @@
 * Requires at least: 6.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.4.0
+* Stable tag: 1.4.2
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -338,5 +338,11 @@ If you have any other questions, please use our support area. After you have reg
 * Update: Checking and deleting all the inactive webhooks for the store.
 * Compatibility with WooCommerce 9.9.3. is tested.
 
-#### 1.4.1 :: 2025-06-20 =
+#### 1.4.1 :: 2025-06-20
 * Update: Unique name for BTCPay server setup Wizard return URL is set.
+
+#### 1.4.2 :: 2025-07-19
+* Update: Added nonce check for BTCPay server request in Wizard setup flow.
+* Updated Generate API Key button behavior.
+* Compatibility with WooCommerce 10.0. is tested.
+* Compatibility with Wordpress 6.8.2 is tested.

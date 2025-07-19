@@ -7,13 +7,13 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.4.1
+ * Version:         1.4.2
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 9.9.5
+ * WC tested up to: 10.0.2
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.4.1' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.4.2' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -406,6 +406,7 @@ add_filter( 'plugin_action_links_coinsnap-woocommerce/coinsnap-woocommerce.php',
 add_filter('request', function($vars) {
     if (isset($vars['coinsnap-for-woocommerce-btcpay-settings-callback'])) {
         $vars['coinsnap-for-woocommerce-btcpay-settings-callback'] = true;
+        $vars['coinsnap-for-woocommerce-btcpay-nonce'] = wp_create_nonce('coinsnap-btcpay-nonce');
     }
     return $vars;
 });
@@ -416,6 +417,10 @@ add_action( 'template_redirect', function() {
 
     // Only continue on a coinsnap-for-woocommerce-btcpay-settings-callback request.
     if (! isset( $wp_query->query_vars['coinsnap-for-woocommerce-btcpay-settings-callback'] ) ) {
+        return;
+    }
+            
+    if(!isset($wp_query->query_vars['coinsnap-for-woocommerce-btcpay-nonce']) || !wp_verify_nonce($wp_query->query_vars['coinsnap-for-woocommerce-btcpay-nonce'],'coinsnap-btcpay-nonce')){
         return;
     }
 
@@ -435,12 +440,14 @@ add_action( 'template_redirect', function() {
     }
     
     // Data does get submitted with url-encoded payload, so parse $_POST here.
-    if (!empty($_POST) || wp_verify_nonce(filter_input(INPUT_POST,'wp_nonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS),'-1')) {
+    if (!empty($_POST)) {
         $data['apiKey'] = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? null;
-        $permissions = (isset($_POST['permissions']) && is_array($_POST['permissions']))? $_POST['permissions'] : null;
-        if (isset($permissions)) {
-            foreach ($permissions as $key => $value) {
-                $data['permissions'][$key] = sanitize_text_field($permissions[$key] ?? null);
+            if(isset($_POST['permissions'])){
+                $permissions = array_map('sanitize_text_field', wp_unslash($_POST['permissions']));
+                if(is_array($permissions)){
+                foreach ($permissions as $key => $value) {
+                    $data['permissions'][$key] = sanitize_text_field($permissions[$key] ?? null);
+                }
             }
         }
     }

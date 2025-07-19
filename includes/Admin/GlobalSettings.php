@@ -90,7 +90,7 @@ class GlobalSettings extends \WC_Settings_Page {
             'btcpay_store_wizard' => [
                 'title'       => esc_html_x( 'Setup wizard', 'global_settings','coinsnap-for-woocommerce' ),
 		'type'  => 'custom_markup',
-		'markup'  => '<button class="button button-primary btcpay btcpay-apikey-link" target="_blank">Generate API key</button>',
+		'markup'  => '<button class="button button-primary btcpay btcpay-apikey-link" type="button" target="_blank">Generate API key</button>',
 		'id'    => 'btcpay_wizard_button'
             ],
 			
