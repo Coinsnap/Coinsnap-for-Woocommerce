@@ -6,6 +6,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use Coinsnap\WC\Helper\Logger;
+
 class Store extends AbstractClient{
 
     /**
@@ -72,13 +74,21 @@ class Store extends AbstractClient{
                 if(count($json_decode) > 0){
                     $result['onchain'] = false;
                     $result['lightning'] = false;
+                    $result['usdt'] = false;
                     foreach($json_decode as $storePaymentMethod){
+                        
+                        //Logger::debug('Payment Method: '.$storePaymentMethod['paymentMethodId']);
+                        
                         if($storePaymentMethod['enabled'] > 0 && stripos($storePaymentMethod['paymentMethodId'],'BTC') !== false){
                             $result['onchain'] = true;
                         }
-                        if($storePaymentMethod['enabled'] > 0 && $storePaymentMethod['paymentMethodId'] === 'Lightning') {
+                        if($storePaymentMethod['enabled'] > 0 && ($storePaymentMethod['paymentMethodId'] === 'Lightning' || stripos($storePaymentMethod['paymentMethodId'],'-LN') !== false)) {
                             $result['lightning'] = true;
                         }
+                        if($storePaymentMethod['enabled'] > 0 && stripos($storePaymentMethod['paymentMethodId'],'USDT') !== false){
+                            $result['usdt'] = true;
+                        }
+                        
                     }
                 }
             }

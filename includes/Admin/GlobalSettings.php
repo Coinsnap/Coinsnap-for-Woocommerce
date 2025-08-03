@@ -15,7 +15,7 @@ class GlobalSettings extends \WC_Settings_Page {
 
     public function __construct(){
 	$this->id = 'coinsnap_settings';
-	$this->label = __( 'Coinsnap Settings', 'coinsnap-for-woocommerce' );
+	$this->label = __( 'Coinsnap', 'coinsnap-for-woocommerce' );
 	
         // Register custom field type order_states with OrderStatesField class.
 	add_action('woocommerce_admin_field_coinsnap_order_states', [(new OrderStates()), 'renderOrderStatesHtml']);
@@ -211,7 +211,7 @@ class GlobalSettings extends \WC_Settings_Page {
                         
                         //  Check if we already have a webhook registered for that store.
 			if (CoinsnapApiWebhook::webhookExists( $apiUrl, $apiKey, $storeId )){
-                            $messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation.', 'coinsnap-for-woocommerce' );
+                            $messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation for store ', 'coinsnap-for-woocommerce' ).$storeId;
                             Notice::addNotice('info', $messageReuseWebhook, true);
                             Logger::debug($messageReuseWebhook);
 			}
@@ -224,13 +224,13 @@ class GlobalSettings extends \WC_Settings_Page {
                             //  if webhook is created
                             if ( $webhook ) {
                                 $messageWebhookSuccess = ($coinsnap_provider !== 'btcpay')? 
-                                    __( 'Successfully registered a new webhook on Coinsnap Server.','coinsnap-for-woocommerce' ) :
-                                    __( 'Successfully registered a new webhook on BTCPay Server.','coinsnap-for-woocommerce' );
+                                    __( 'Successfully registered a new webhook for store on Coinsnap Server.','coinsnap-for-woocommerce' ) :
+                                    __( 'Successfully registered a new webhook for store on the server ','coinsnap-for-woocommerce' ).$apiUrl;
                                 Notice::addNotice('success', $messageWebhookSuccess, true );
                                 Logger::debug( $messageWebhookSuccess );
                             }
                             else {
-				$messageWebhookError = __( 'Could not register a new webhook on the store.','coinsnap-for-woocommerce' );
+				$messageWebhookError = __( 'Could not register a new webhook on the store ','coinsnap-for-woocommerce' ).$storeId;
 				Notice::addNotice('error', $messageWebhookError );
 				Logger::debug($messageWebhookError, true);
                             }

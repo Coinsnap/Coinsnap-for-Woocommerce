@@ -401,17 +401,19 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             try {
                 // First check if we have any input
                 $rawPostData = file_get_contents("php://input");
+                
                 if (!$rawPostData) {
+                    Logger::debug("No raw post data received");
                     wp_die('No raw post data received', '', ['response' => 400]);
                 }
 
                 // Get headers and check for signature
                 $headers = getallheaders();
                 $signature = null; $payloadKey = null;
-                $_provider = (get_option('coinsnap_provider') === 'btcpay')? 'btcpay' : 'coinsnap';
+                $_provider = (get_option('coinsnap_provider') === 'btcpay')? 'btcpay' : 'coinsnap';                
                 
                 foreach ($headers as $key => $value) {
-                    if ((strtolower($key) === 'x-coinsnap-sig' && $_provider === 'coinsnap') || (strtolower($key) === 'btcpay-sig' && $_provider === 'btcpay')) {
+                    if (strtolower($key) === 'x-coinsnap-sig' || strtolower($key) === 'btcpay-sig') {
                         $signature = $value;
                         $payloadKey = strtolower($key);
                     }
@@ -430,54 +432,61 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                     wp_die('Invalid authentication signature', '', ['response' => 401]);
                 }
 
-                // Parse the JSON payload
-                $postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
+                try {
+                    // Parse the JSON payload
+                    $postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
 
-                if (!isset($postData->invoiceId)) {
-                    Logger::debug('No Coinsnap invoiceId provided, aborting.');
-                    wp_die('No Coinsnap invoiceId provided', '', ['response' => 400]);
+                    if (!isset($postData->invoiceId)) {
+                        Logger::debug('No Coinsnap invoiceId provided, aborting.');
+                        wp_die('No Coinsnap invoiceId provided', '', ['response' => 400]);
+                    }
+
+                    if(strpos($postData->invoiceId,'test_') !== false){
+                        Logger::debug('Successful webhook test');
+                        wp_die('Successful webhook test', '', ['response' => 200]);
+                    }
+
+                    // Load the order by metadata field Coinsnap_id
+                    $orders = wc_get_orders([
+                        'meta_key' => 'Coinsnap_id',
+                        'meta_value' => $postData->invoiceId
+                    ]);
+
+                    // Handle no orders found
+                    if (count($orders) === 0) {
+                        Logger::debug('Could not load order by '.ucfirst($_provider).' invoiceId: ' . $postData->invoiceId);
+                        wp_die('No order found for this invoiceId.', '', ['response' => 200]);
+                    }
+
+                    // Handle multiple orders found
+                    if (count($orders) > 1) {
+                        Logger::debug('Found multiple orders for invoiceId: ' . $postData->invoiceId);
+                        wp_die('Multiple orders found for this invoiceId', '', ['response' => 409]);
+                    }
+
+                    // Process the order status
+                    $this->processOrderStatus($orders[0], $postData);
+
+                    // Return success
+                    http_response_code(200);
+                    exit('OK');
+                }
+                
+                catch (JsonException $e) {
+                    Logger::debug('Error decoding webhook payload: ' . $e->getMessage());
+                    wp_die('Invalid JSON payload', '', ['response' => 400]);
                 }
 
-                // Load the order by metadata field Coinsnap_id
-                $orders = wc_get_orders([
-                    'meta_key' => 'Coinsnap_id',
-                    'meta_value' => $postData->invoiceId
-                ]);
-
-                // Handle no orders found
-                if (count($orders) === 0) {
-                    Logger::debug('Could not load order by '.ucfirst($_provider).' invoiceId: ' . $postData->invoiceId);
-                    wp_die('No order found for this invoiceId.', '', ['response' => 200]);
-                }
-
-                // Handle multiple orders found
-                if (count($orders) > 1) {
-                    Logger::debug('Found multiple orders for invoiceId: ' . $postData->invoiceId);
-                    wp_die('Multiple orders found for this invoiceId', '', ['response' => 409]);
-                }
-
-                // Process the order status
-                $this->processOrderStatus($orders[0], $postData);
-
-                // Return success
-                http_response_code(200);
-                exit('OK');
-
-            }
-            catch (JsonException $e) {
-                Logger::debug('Error decoding webhook payload: ' . $e->getMessage());
-                Logger::debug($rawPostData);
-                wp_die('Invalid JSON payload', '', ['response' => 400]);
             }
             catch (\Throwable $e) {
                 Logger::debug('Unexpected error processing webhook: ' . $e->getMessage());
-                Logger::debug($rawPostData);
                 wp_die('Internal server error', '', ['response' => 500]);
             }
         }
 
 	protected function processOrderStatus(\WC_Order $order, \stdClass $webhookData) {
-		if (!in_array($webhookData->type, CoinsnapApiWebhook::WEBHOOK_EVENTS)) {
+            $webhook_events = (get_option('coinsnap_provider')==='btcpay')? CoinsnapApiWebhook::BTCPAY_WEBHOOK_EVENTS : CoinsnapApiWebhook::COINSNAP_WEBHOOK_EVENTS;
+            if (!in_array($webhookData->type, $webhook_events)) {
 			Logger::debug('Webhook event received but ignored: ' . $webhookData->type);
 			return;
 		}
@@ -487,22 +496,27 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		if (!$configuredOrderStates = get_option('coinsnap_order_states')) {
 			$configuredOrderStates = (new OrderStates())->getDefaultOrderStateMappings();
 		}
+                
+                
 
 		switch ($webhookData->type) {
 			case 'New':
-				if ($webhookData->afterExpiration) {
-					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
-					$order->add_order_note(__('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.', 'coinsnap-for-woocommerce'));
-				} else {
-					// No need to change order status here, only leave a note.
-					$order->add_order_note(__('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.', 'coinsnap-for-woocommerce'));
-				}
+                        case 'InvoiceCreated':    
+                            if ($webhookData->afterExpiration) {
+                                $this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
+                            	$order->add_order_note(__('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.', 'coinsnap-for-woocommerce'));
+                            }
+                            else {
+                                // No need to change order status here, only leave a note.
+                                $order->add_order_note(__('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.', 'coinsnap-for-woocommerce'));
+                            }
 
-				// Store payment data (exchange rate, address).
-				//$this->updateWCOrderPayments($order);
-				break;
+                            // Store payment data (exchange rate, address).
+                            //$this->updateWCOrderPayments($order);
+                            break;
 			
 			case 'Settled':
+                        case 'InvoiceSettled':
 				$order->payment_complete();
 				if ($webhookData->overPaid) {
 					$order->add_order_note(__('Invoice payment settled but was overpaid.', 'coinsnap-for-woocommerce'));
@@ -516,7 +530,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				//$this->updateWCOrderPayments($order);
 
 				break;
-			case 'Processing': // The invoice is paid in full.
+			case 'Processing':
+                        case 'InvoiceProcessing':
+                                // The invoice is paid in full.
 				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::PROCESSING]);
 				if ($webhookData->overPaid) {
 					$order->add_order_note(__('Invoice payment received fully with overpayment, waiting for settlement.', 'coinsnap-for-woocommerce'));
@@ -525,6 +541,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				}
 				break;
 			case 'Expired':
+                        case 'InvoiceExpired':
 				if ($webhookData->partiallyPaid) {
 					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
 					$order->add_order_note(__('Invoice expired but was paid partially, please check.', 'coinsnap-for-woocommerce'));
@@ -534,6 +551,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				}
 				break;
 			case 'Invalid':
+                        case 'InvoiceInvalid':
 				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::INVALID]);
 				if ($webhookData->manuallyMarked) {
 					$order->add_order_note(__('Invoice manually marked invalid.', 'coinsnap-for-woocommerce'));
@@ -659,6 +677,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             if(isset($orderNumber) && !empty($orderNumber)){
                 $metadata['orderNumber'] = $orderNumber;
             }
+            if(get_option('coinsnap_provider') === 'btcpay') {
+                $metadata['orderId'] = $orderID;
+            }
                 
             $redirectUrl = $this->get_return_url( $order );
             $currency = $order->get_currency();
@@ -670,6 +691,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 $amountBTC = bcdiv($amount->__toString(), '100000000', 8);
                 $amount = PreciseNumber::parseString($amountBTC);
             }
+            
                 
             //  Set automatic redirect after payment and wallet message (empty)
             $redirectAutomatically = (get_option('coinsnap_autoredirect', 'yes') === 'yes')? true : false;
@@ -680,7 +702,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
             // Create the invoice on Coinsnap Server.
             $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
-            Logger::debug( 'Client for invoice is created' );
+            Logger::debug( 'Client for invoice is created. Payment amount is '.$amount.' '.$currency );
                 
             try {
                 $invoice = $client->createInvoice(

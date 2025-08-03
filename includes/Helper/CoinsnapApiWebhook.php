@@ -8,7 +8,8 @@ use Coinsnap\Client\Webhook;
 use Coinsnap\Result\Webhook as WebhookResult;
 
 class CoinsnapApiWebhook {
-    public const WEBHOOK_EVENTS = ['New','Expired','Settled','Processing'];
+    public const COINSNAP_WEBHOOK_EVENTS = ['New','Expired','Settled','Processing','Invalid'];
+    public const BTCPAY_WEBHOOK_EVENTS = ['InvoiceCreated','InvoiceExpired','InvoiceSettled','InvoiceProcessing','InvoiceInvalid'];
 
 //  Get locally stored webhook data and check if it exists on the store.
     public static function webhookExists(string $apiUrl, string $apiKey, string $storeId): bool {
@@ -48,10 +49,11 @@ class CoinsnapApiWebhook {
 	public static function registerWebhook(string $apiUrl, $apiKey, $storeId): ?WebhookResult {
 		try {
 			$whClient = new Webhook( $apiUrl, $apiKey );
+                        $webhook_events = (get_option('coinsnap_provider')==='btcpay')? self::BTCPAY_WEBHOOK_EVENTS : self::COINSNAP_WEBHOOK_EVENTS;
 			$webhook = $whClient->createWebhook(
 				$storeId,   //$storeId
 				WC()->api_request_url( 'coinsnap' ), //$url
-				self::WEBHOOK_EVENTS,   //$specificEvents
+				$webhook_events,   //$specificEvents
 				null    //$secret
 			);
 
@@ -89,11 +91,12 @@ class CoinsnapApiWebhook {
 		if ($config = CoinsnapApiHelper::getConfig()) {
 			try {
 				$whClient = new Webhook( $config['url'], $config['api_key'] );
+                                $webhook_events = (get_option('coinsnap_provider')==='btcpay')? self::BTCPAY_WEBHOOK_EVENTS : self::COINSNAP_WEBHOOK_EVENTS;
 				$webhook = $whClient->updateWebhook(
 					$config['store_id'],
 					$webhookUrl,
 					$webhookId,
-					$events ?? self::WEBHOOK_EVENTS,
+					$events ?? $webhook_events,
 					$enabled,
 					$automaticRedelivery,
 					$secret

@@ -9,7 +9,7 @@
 * Requires at least: 6.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.4.2
+* Stable tag: 1.5.0
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -346,3 +346,8 @@ If you have any other questions, please use our support area. After you have reg
 * Updated Generate API Key button behavior.
 * Compatibility with WooCommerce 10.0. is tested.
 * Compatibility with Wordpress 6.8.2 is tested.
+
+#### 1.5.0 :: 2025-08-03
+* Updated BTCPay server minimum payment amount calculation system.
+* Updated BTCPay server events and webhook payload handler.
+* Compatibility with WooCommerce 10.0.4 is tested.

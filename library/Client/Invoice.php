@@ -61,8 +61,9 @@ class Invoice extends AbstractClient{
             }
             
             else {
+                $eurbtc = (isset($btcPayCurrencies['data']['eur']['value']))? 1/$btcPayCurrencies['data']['eur']['value']*0.50 : 0.000005;
                 $rate = 1/$btcPayCurrencies['data'][strtolower($currency)]['value'];
-                $min_value_btcpay = ($provider === 'bitcoin')? 0.000005869 : 0.000001;
+                $min_value_btcpay = ($provider === 'bitcoin')? $eurbtc : 0.0000001;
                 $min_value = $min_value_btcpay/$rate;
                 
                if($mode === 'calculation'){
@@ -91,13 +92,7 @@ class Invoice extends AbstractClient{
                 return array('result' => false,'error' => 'currencyError','min_value' => '');
             }
             
-            $min_value_array = array(
-                "SATS" => 1,
-                "JPY" => 1,
-                "RUB" => 1,
-                "BTC" => 0.000001
-            );
-            
+            $min_value_array = ["SATS" => 1,"JPY" => 1,"RUB" => 1,"BTC" => 0.000001];
             $min_value = (isset($min_value_array[$currency]))? $min_value_array[$currency] : 0.01;
             
             if($mode === 'calculation'){
@@ -138,7 +133,7 @@ class Invoice extends AbstractClient{
         // Prepare metadata.
         if(!isset($metaData['orderNumber']) && !empty($orderId)){ $metaData['orderNumber'] = $orderId;}
         if(!isset($metaData['customerName']) && !empty($customerName)){ $metaData['customerName'] = $customerName;}
-
+        
         $body_array = array(
             'amount' => $amount !== null ? $amount->__toString() : null,
             'currency' => $currency,
@@ -148,7 +143,12 @@ class Invoice extends AbstractClient{
             'metadata' => (count($metaData) > 0)? $metaData : null,
             'referralCode' => $referralCode,
             'redirectAutomatically' => $redirectAutomatically,
-            'walletMessage' => $walletMessage
+            'walletMessage' => $walletMessage,
+            'checkout' => [
+                'redirectUrl'           => $redirectUrl,
+                'redirectAutomatically' => $redirectAutomatically,
+                'redirectUrl' => $redirectUrl,
+            ]
         );
 
         $body = wp_json_encode($body_array,JSON_THROW_ON_ERROR);

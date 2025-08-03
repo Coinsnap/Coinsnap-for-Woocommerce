@@ -7,13 +7,13 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.4.2
+ * Version:         1.5.0
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 10.0.2
+ * WC tested up to: 10.0.4
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.4.2' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.5.0' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -108,10 +108,10 @@ class CoinsnapWCPlugin {
                 $storePaymentMethods = $store->getStorePaymentMethods($apiHelper->storeId);
 
                 if ($storePaymentMethods['code'] === 200) {
-                    if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
+                    if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning'] && !$storePaymentMethods['result']['usdt']){
                         $checkInvoice = $client->checkPaymentData(0,$currency,'bitcoin','calculation');
                     }
-                    elseif($storePaymentMethods['result']['lightning']){
+                    elseif($storePaymentMethods['result']['lightning'] || $storePaymentMethods['result']['usdt']){
                         $checkInvoice = $client->checkPaymentData(0,$currency,'lightning','calculation');
                     }
                 }
@@ -377,8 +377,6 @@ function coinsnap_payment_init() {
 
 //  Bootstrap stuff on init.
 add_action('init', function() {
-    // Adding textdomain and translation support.
-    load_plugin_textdomain('coinsnap-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
     // Setting up and handling custom endpoint for api key redirect from Coinsnap Server.
     add_rewrite_endpoint('coinsnap-for-woocommerce-btcpay-settings-callback', EP_ROOT);
     // Flush rewrite rules only once after activation.
