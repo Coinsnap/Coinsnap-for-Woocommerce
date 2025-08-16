@@ -81,7 +81,7 @@ class Invoice extends AbstractClient{
             }
         }
         
-        if($provider === 'coinsnap'){
+        if($provider === 'coinsnap' || $provider === 'lightning'){
         
             $coinsnapCurrencies = $this->getCurrencies();
 

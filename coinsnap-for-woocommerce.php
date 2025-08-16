@@ -7,13 +7,13 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.5.0
+ * Version:         1.5.1
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 10.0.4
+ * WC tested up to: 10.1.0
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.5.0' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.5.1' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -387,15 +387,15 @@ add_action('init', function() {
 });
 
 // Action links on plugin overview.
-add_filter( 'plugin_action_links_coinsnap-woocommerce/coinsnap-woocommerce.php', function ($links){
+add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), function ($links){
     // Settings link.
     $settings_url = esc_url( add_query_arg(['page' => 'wc-settings','tab' => 'coinsnap_settings'],get_admin_url() . 'admin.php') );
     $settings_link = "<a href='$settings_url'>" . __( 'Settings', 'coinsnap-for-woocommerce' ) . '</a>';
     $logs_link = "<a target='_blank' href='" . Logger::getLogFileUrl() . "'>" . __('Debug log', 'coinsnap-for-woocommerce') . "</a>";
-    $docs_link = "<a target='_blank' href='". esc_url('https://coinsnap.io/en/coinsnap-woocommerce-plugin/') . "'>" . __('Docs', 'coinsnap-for-woocommerce') . "</a>";
-    //$support_link = "<a target='_blank' href='". esc_url('https://coinsnap.io') . "'>" . __('Support Chat', 'coinsnap-for-woocommerce') . "</a>";
+    $docs_link = "<a target='_blank' href='". esc_url('https://coinsnap.io/coinsnap-for-woocommerce-plugin/') . "'>" . __('Docs', 'coinsnap-for-woocommerce') . "</a>";
+    $installation_link = "<a target='_blank' href='". esc_url('https://coinsnap.io/coinsnap-for-woocommerce-installation-guide/') . "'>" . __('Installation guide', 'coinsnap-for-woocommerce') . "</a>";
 
-    array_unshift($links,$settings_link,$logs_link,$docs_link,$support_link);
+    array_unshift($links,$settings_link,$logs_link,$docs_link,$installation_link);
     return $links;
 });
 
