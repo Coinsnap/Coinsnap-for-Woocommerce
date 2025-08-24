@@ -401,17 +401,15 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             try {
                 // First check if we have any input
                 $rawPostData = file_get_contents("php://input");
-                
                 if (!$rawPostData) {
-                    Logger::debug("No raw post data received");
                     wp_die('No raw post data received', '', ['response' => 400]);
                 }
 
                 // Get headers and check for signature
                 $headers = getallheaders();
+                $_provider = (get_option('coinsnap_provider') === 'btcpay')? 'btcpay' : 'coinsnap'; 
                 $signature = null; $payloadKey = null;
-                $_provider = (get_option('coinsnap_provider') === 'btcpay')? 'btcpay' : 'coinsnap';                
-                
+
                 foreach ($headers as $key => $value) {
                     if (strtolower($key) === 'x-coinsnap-sig' || strtolower($key) === 'btcpay-sig') {
                         $signature = $value;
@@ -421,8 +419,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                 // Handle missing or invalid signature
                 if (!isset($signature)) {
-                    $missingHeader = ($_provider === 'coinsnap')? 'X-Coinsnap-Sig' : 'BTCPay-Sig';
-                    Logger::debug("Missing $missingHeader header for Webhook payload request");
                     wp_die('Authentication required', '', ['response' => 401]);
                 }
 
@@ -437,19 +433,19 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                     $postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
 
                     if (!isset($postData->invoiceId)) {
-                        Logger::debug('No Coinsnap invoiceId provided, aborting.');
                         wp_die('No Coinsnap invoiceId provided', '', ['response' => 400]);
                     }
 
                     if(strpos($postData->invoiceId,'test_') !== false){
-                        Logger::debug('Successful webhook test');
                         wp_die('Successful webhook test', '', ['response' => 200]);
                     }
+
+                    $invoice_id = esc_html($postData->invoiceId);
 
                     // Load the order by metadata field Coinsnap_id
                     $orders = wc_get_orders([
                         'meta_key' => 'Coinsnap_id',
-                        'meta_value' => $postData->invoiceId
+                        'meta_value' => $invoice_id
                     ]);
 
                     // Handle no orders found
