@@ -7,13 +7,13 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.5.1
+ * Version:         1.5.2
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 10.1.1
+ * WC tested up to: 10.1.2
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.5.1' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.5.2' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}

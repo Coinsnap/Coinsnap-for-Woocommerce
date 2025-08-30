@@ -25,8 +25,8 @@ class Webhook extends AbstractClient {
 
     public function createWebhook(string $storeId, string $url, ?array $specificEvents, ?string $secret): \Coinsnap\Result\WebhookCreated {
         $data = [
-            'enabled' => $enabled,
-            'automaticRedelivery' => $automaticRedelivery,
+            //'enabled' => $enabled,
+            //'automaticRedelivery' => $automaticRedelivery,
             'url' => $url
         ];
 
