@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.8
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -351,3 +351,6 @@ If you have any other questions, please use our support area. After you have reg
 = 1.5.2 :: 2025-08-30 =
 * Fixed error with webhook registration on BTCPay server
 * Compatibility with WooCommerce 10.1.2 is tested.
+
+= 1.5.3 :: 2025-09-12 =
+* Updated webhook payload handler

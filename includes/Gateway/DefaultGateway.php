@@ -16,7 +16,7 @@ class DefaultGateway extends AbstractGateway {
 		//$this->order_button_text  = __('Pay with Bitcoin', 'coinsnap-for-woocommerce');
 		// Admin facing title and description.
 		$this->method_title       = 'Coinsnap (default)';
-		$this->method_description = __('Coinsnap default gateway supporting all available tokens on your store.', 'coinsnap-for-woocommerce');
+		$this->method_description = __('Coinsnap Bitcoin-Lightning gateway', 'coinsnap-for-woocommerce');
 
 		// Actions.
 		add_action('woocommerce_api_coinsnap', [$this, 'processWebhook']);

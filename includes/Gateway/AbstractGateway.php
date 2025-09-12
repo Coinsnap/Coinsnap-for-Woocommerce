@@ -398,10 +398,13 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 	// Process webhooks from Coinsnap.
         public function processWebhook() {
+            
+            Logger::debug("Webhook payload request");
             try {
                 // First check if we have any input
                 $rawPostData = file_get_contents("php://input");
                 if (!$rawPostData) {
+                    Logger::debug("No raw post data received");
                     wp_die('No raw post data received', '', ['response' => 400]);
                 }
 
@@ -419,6 +422,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                 // Handle missing or invalid signature
                 if (!isset($signature)) {
+                    Logger::debug("Authentication required");
                     wp_die('Authentication required', '', ['response' => 401]);
                 }
 
@@ -430,13 +434,16 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                 try {
                     // Parse the JSON payload
+                    Logger::debug("Webhook payload process started");
                     $postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
 
-                    if (!isset($postData->invoiceId)) {
+                    if (null === $postData->invoiceId) {
+                        Logger::debug("No Coinsnap invoiceId provided");
                         wp_die('No Coinsnap invoiceId provided', '', ['response' => 400]);
                     }
 
                     if(strpos($postData->invoiceId,'test_') !== false){
+                        Logger::debug("Successful webhook test");
                         wp_die('Successful webhook test', '', ['response' => 200]);
                     }
 
@@ -456,7 +463,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
                     // Handle multiple orders found
                     if (count($orders) > 1) {
-                        Logger::debug('Found multiple orders for invoiceId: ' . $postData->invoiceId);
+                        Logger::debug('Found multiple orders for invoiceId: ' . $invoice_id);
                         wp_die('Multiple orders found for this invoiceId', '', ['response' => 409]);
                     }
 
@@ -498,7 +505,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		switch ($webhookData->type) {
 			case 'New':
                         case 'InvoiceCreated':    
-                            if ($webhookData->afterExpiration) {
+                            if (property_exists($webhookData,'afterExpiration')) {
                                 $this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
                             	$order->add_order_note(__('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.', 'coinsnap-for-woocommerce'));
                             }
@@ -514,7 +521,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			case 'Settled':
                         case 'InvoiceSettled':
 				$order->payment_complete();
-				if ($webhookData->overPaid) {
+				if (property_exists($webhookData,'overPaid')) {
 					$order->add_order_note(__('Invoice payment settled but was overpaid.', 'coinsnap-for-woocommerce'));
 					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::SETTLED_PAID_OVER]);
 				} else {
@@ -530,7 +537,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                         case 'InvoiceProcessing':
                                 // The invoice is paid in full.
 				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::PROCESSING]);
-				if ($webhookData->overPaid) {
+				if (property_exists($webhookData,'overPaid')) {
 					$order->add_order_note(__('Invoice payment received fully with overpayment, waiting for settlement.', 'coinsnap-for-woocommerce'));
 				} else {
 					$order->add_order_note(__('Invoice payment received fully, waiting for settlement.', 'coinsnap-for-woocommerce'));
@@ -538,7 +545,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				break;
 			case 'Expired':
                         case 'InvoiceExpired':
-				if ($webhookData->partiallyPaid) {
+				if (property_exists($webhookData,'partiallyPaid')) {
 					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::EXPIRED_PAID_PARTIAL]);
 					$order->add_order_note(__('Invoice expired but was paid partially, please check.', 'coinsnap-for-woocommerce'));
 				} else {
@@ -549,7 +556,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			case 'Invalid':
                         case 'InvoiceInvalid':
 				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::INVALID]);
-				if ($webhookData->manuallyMarked) {
+				if (null !== $webhookData->manuallyMarked) {
 					$order->add_order_note(__('Invoice manually marked invalid.', 'coinsnap-for-woocommerce'));
 				} else {
 					$order->add_order_note(__('Invoice became invalid.', 'coinsnap-for-woocommerce'));
@@ -764,7 +771,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		// Store relevant Coinsnap invoice data.
                 $order = wc_get_order($orderId);
 		$order->update_meta_data( 'Coinsnap_redirect', $invoice->getData()['checkoutLink'] );
-		$order->update_meta_data( 'Coinsnap_invoiceId', $invoice->getData()['invoiceId'] );
 		$order->update_meta_data( 'Coinsnap_id', $invoice->getData()['id'] );
                 Logger::debug( 'Store relevant Coinsnap invoice data for order ' . $orderId . ': Coinsnap_id: ' . $invoice->getData()['id'] );
                 $order->save();
