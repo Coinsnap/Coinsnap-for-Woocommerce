@@ -367,3 +367,6 @@ If you have any other questions, please use our support area. After you have reg
 
 #### 1.5.3 :: 2025-09-12
 * Updated webhook payload handler
+
+#### 1.5.4 :: 2025-09-18
+* Update: Coinsnap is active payment method on checkout if no payment method is set.

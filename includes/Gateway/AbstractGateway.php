@@ -51,7 +51,17 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
     
     
     public function cartCoinsnapDiscount($cart){
-        if (WC()->session->chosen_payment_method == 'coinsnap') {
+        
+        $payment_method = WC()->session->get('chosen_payment_method');
+        Logger::debug( 'Payment method: ' . $payment_method );
+        
+        if(empty($payment_method) && $this->get_option('enabled')>0){
+            WC()->session->set('chosen_payment_method', 'coinsnap');
+            WC()->cart->calculate_totals();
+            WC()->session->save_data();
+        }
+        
+        if ($payment_method === 'coinsnap') {
             
             $discount_enabled = (null !== $this->get_option('discount_enable') && $this->get_option('discount_enable') > 0)? true : false;
             if($discount_enabled){
