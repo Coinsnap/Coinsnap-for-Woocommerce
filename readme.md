@@ -9,7 +9,7 @@
 * Requires at least: 6.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.5.3
+* Stable tag: 1.6.0
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -370,3 +370,6 @@ If you have any other questions, please use our support area. After you have reg
 
 #### 1.5.4 :: 2025-09-18
 * Update: Coinsnap is active payment method on checkout if no payment method is set.
+
+#### 1.6.0 :: 2025-09-23
+* Update: Bitcoin discount is indicated in payment methods list on Checkout page

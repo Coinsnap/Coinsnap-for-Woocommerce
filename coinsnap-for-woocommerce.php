@@ -7,7 +7,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.5.4
+ * Version:         1.6.0
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.5.4' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.6.0' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -71,6 +71,23 @@ class CoinsnapWCPlugin {
             //$this->legacyPluginNotification(); // Not ready
             $this->notConfiguredNotification();
 	}
+        
+        
+        add_action( 'wp_ajax_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
+        
+    }
+    
+    public function coinsnapCheckoutHandler(){
+        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
+            wp_die('Unauthorized!', '', ['response' => 401]);
+        }
+            
+        $gateway = new DefaultGateway;
+        $discount = $gateway->getDiscount();
+            
+        $response = ['result'=>true,'message'=>$discount];
+        $this->sendJsonResponse($response);
     }
     
     public function connectionScriptsLoader(){
@@ -234,8 +251,18 @@ class CoinsnapWCPlugin {
     }
     
     public static function enqueueScripts(): void {
-        wp_register_style('coinsnap_payment', plugins_url('assets/css/coinsnap-style.css',__FILE__),array(),COINSNAP_WC_VERSION);
-        wp_enqueue_style('coinsnap_payment');
+        
+        if(get_self_link() === wc_get_checkout_url()){
+            wp_register_style('coinsnap_payment', plugins_url('assets/css/coinsnap-woocommerce-checkout.css',__FILE__),array(),COINSNAP_WC_VERSION);
+            wp_enqueue_style('coinsnap_payment');
+            
+            wp_enqueue_script('coinsnap-woocommerce-checkout',plugin_dir_url( __FILE__ ) . 'assets/js/coinsnap-woocommerce-checkout.js',[ 'jquery' ],COINSNAP_WC_VERSION,true);
+        
+            wp_localize_script('coinsnap-woocommerce-checkout', 'coinsnap_ajax', array(
+              'ajax_url' => admin_url('admin-ajax.php'),
+              'nonce'  => wp_create_nonce( 'coinsnap-ajax-nonce' ),
+            ));
+        }
     }
 
 //  Checks if the plugin is not configured yet method shows notice & link to the config page on admin dashboard

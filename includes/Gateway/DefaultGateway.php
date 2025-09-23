@@ -40,20 +40,8 @@ class DefaultGateway extends AbstractGateway {
 	 * @inheritDoc
 	 */
 	public function init_form_fields(): void {
-		parent::init_form_fields();/*
-		$this->form_fields += [
-			'enforce_payment_tokens' => [
-				'title'       => __( 'Enforce payment tokens', 'coinsnap-for-woocommerce' ),
-				'type'        => 'checkbox',
-				'label'       => __( 'Enforce payment methods "payment". This way tokens of type promotion will be excluded for this gateway.', 'coinsnap-for-woocommerce' ),
-				'default'     => 'yes',
-				'value'       => 'yes',
-				'description' => __( 'This will override the default Coinsnap payment method (defaults to all supported by Coinsnap Server) and enforce to tokens of type "payment". This is useful if you have enabled separate payment gateways and want full control on what is available on Coinsnap Server payment page.', 'coinsnap-for-woocommerce' ),
-				'desc_tip'    => true,
-			],
-		];*/
+		parent::init_form_fields();
 	}
-
 	
 	public function getPaymentMethods(): array {
 

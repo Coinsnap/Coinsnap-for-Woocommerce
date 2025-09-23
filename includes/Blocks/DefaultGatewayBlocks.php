@@ -32,20 +32,10 @@ final class DefaultGatewayBlocks extends AbstractPaymentMethodType {
         $script_asset_path = COINSNAP_PLUGIN_FILE_PATH . 'assets/js/blocks.asset.php';
         $script_asset = file_exists( $script_asset_path ) ? require( $script_asset_path ) : array('dependencies' => array(),'version' => COINSNAP_VERSION);
 
-	wp_register_script(
-			'coinsnap-gateway-blocks',
-			$script_url,
-			$script_asset['dependencies'],
-			$script_asset['version'],
-			true
-	);
+	wp_register_script('coinsnap-gateway-blocks',$script_url,$script_asset['dependencies'],$script_asset['version'],true);
 
 	if ( function_exists('wp_set_script_translations') ) {
-			wp_set_script_translations(
-				'coinsnap-gateway-blocks',
-				'coinsnap-for-woocommerce',
-				COINSNAP_PLUGIN_FILE_PATH . 'languages/'
-			);
+            wp_set_script_translations('coinsnap-gateway-blocks','coinsnap-for-woocommerce',COINSNAP_PLUGIN_FILE_PATH . 'languages/');
 	}
 
         return [ 'coinsnap-gateway-blocks' ];

@@ -31,7 +31,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	// Define user facing set variables.
 	$this->title        = $this->getTitle();
 	$this->description  = $this->getDescription();
-        $this->order_button_text = $this->getButton();
+        $this->order_button_text = $this->getButton();	
 
 	$this->apiHelper = new CoinsnapApiHelper();
 		// Debugging & informational settings.
@@ -49,6 +49,21 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         $this->supports = ['products'];
     }
     
+    /**
+     * Get customer visible gateway title.
+     */
+    public function getDiscount(): string {
+	$discount_enabled = (null !== $this->get_option('discount_enable') && $this->get_option('discount_enable') > 0)? true : false;
+        if($discount_enabled){
+            $discount_type = $this->get_option('discount_type');
+            if($discount_type === 'fixed' && floatval($this->get_option('discount_amount')) > 0){
+                return '<span class="discount_value">-'.esc_html(floatval($this->get_option('discount_amount'))).'</span><span class="discount_currency">'.esc_html(strtoupper(get_option( 'woocommerce_currency' ))).'</span>';
+            }
+            elseif(null !== $this->get_option('discount_percentage')) {
+                return '<span class="discount_percent">-'.esc_html($this->get_option('discount_percentage')).'<small>%</small></span>';
+            }
+        }
+    }
     
     public function cartCoinsnapDiscount($cart){
         
@@ -93,7 +108,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                     }
                 }
                 if($isDiscount){
-                    $cart->add_fee( __('Coinsnap discount','coinsnap-for-woocommerce'), -$discount_amount );
+                    $cart->add_fee( __('Bitcoin discount','coinsnap-for-woocommerce'), -$discount_amount );
                     $this->coinsnap_discount = $discount_amount;
                 }
             }
