@@ -74,6 +74,7 @@ class CoinsnapWCPlugin {
         
         
         add_action( 'wp_ajax_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
+        add_action( 'wp_ajax_nopriv_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         
     }
     
