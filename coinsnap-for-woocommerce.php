@@ -253,7 +253,7 @@ class CoinsnapWCPlugin {
     
     public static function enqueueScripts(): void {
         
-        if(get_self_link() === wc_get_checkout_url()){
+        if(get_self_link() === wc_get_checkout_url()){  //   || get_self_link() === wc_get_cart_url()
             wp_register_style('coinsnap_payment', plugins_url('assets/css/coinsnap-woocommerce-checkout.css',__FILE__),array(),COINSNAP_WC_VERSION);
             wp_enqueue_style('coinsnap_payment');
             

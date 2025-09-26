@@ -29,14 +29,18 @@ input[value="coinsnap"] + div span.wc-block-components-payment-method-label {
     position:relative;
 }
 
-#coinsnap-bitcoin-discount {
+.wp-block-woocommerce-checkout-order-summary-fee-block,
+.wc-block-components-totals-fees__bitcoin-discount {
+    position:relative;
+}
+
+.coinsnap-bitcoin-discount {
     position:absolute;
     top:-5px;
     left:60%;
     z-index:10;
     color:#FFF;
-    background: #66AA33;
-    background-image:linear-gradient(#66AA33,#558811);
+    background: #F7A70A;
     display:block;
     width: 40px; height:40px;
     font-size:14px;
@@ -46,13 +50,13 @@ input[value="coinsnap"] + div span.wc-block-components-payment-method-label {
     line-height:40px;
 }
 
-#coinsnap-bitcoin-discount .discount_value {
+.coinsnap-bitcoin-discount .discount_value {
     display:block;
     line-height:0;
     margin-top:15px;
 }
 
-#coinsnap-bitcoin-discount .discount_currency {
+.coinsnap-bitcoin-discount .discount_currency {
     font-size:10px;
     font-weight:normal;
     display:block;

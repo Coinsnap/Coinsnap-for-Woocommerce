@@ -34,23 +34,26 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         $this->order_button_text = $this->getButton();	
 
 	$this->apiHelper = new CoinsnapApiHelper();
-		// Debugging & informational settings.
-		$this->debug_php_version    = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
-		$this->debug_plugin_version = COINSNAP_WC_VERSION;
-
-		// Actions.
-		add_action('admin_enqueue_scripts', [$this, 'addAdminScripts']);
-		add_action('wp_enqueue_scripts', [$this, 'addPublicScripts']);
-		add_action('woocommerce_update_options_payment_gateways_' . $this->getId(), [$this, 'process_admin_options']);
-                add_action('woocommerce_cart_calculate_fees', [$this, 'cartCoinsnapDiscount'] , 10, 1 );
 	
+        // Debugging & informational settings.
+        $this->debug_php_version    = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+        $this->debug_plugin_version = COINSNAP_WC_VERSION;
 
         // Supported features.
         $this->supports = ['products'];
+        
+        // Actions.
+	add_action('admin_enqueue_scripts', [$this, 'addAdminScripts']);
+	add_action('wp_enqueue_scripts', [$this, 'addPublicScripts']);
+	add_action('woocommerce_update_options_payment_gateways_' . $this->getId(), [$this, 'process_admin_options']);
+
+        if(!is_admin() && get_self_link() !== wc_get_cart_url()){
+            add_action('woocommerce_cart_calculate_fees', [$this, 'cartCoinsnapDiscount'] , 10, 1 );
+        }
     }
     
     /**
-     * Get customer visible gateway title.
+     * Discount value indication
      */
     public function getDiscount(): string {
 	$discount_enabled = (null !== $this->get_option('discount_enable') && $this->get_option('discount_enable') > 0)? true : false;
@@ -65,6 +68,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         }
     }
     
+    /**
+     * Calculate discount on checkout and show in invoice
+     */
     public function cartCoinsnapDiscount($cart){
         
         $payment_method = WC()->session->get('chosen_payment_method');
@@ -115,48 +121,49 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         }
     }
 
-	//  Initialise Gateway Settings Form Fields
-	public function init_form_fields() {
-            $currency = get_option( 'woocommerce_currency' );
-		$this->form_fields = [
-			'enabled' => [
+    //  Initialise Gateway Settings Form Fields
+    public function init_form_fields() {
+        $currency = get_option( 'woocommerce_currency' );
+        
+        $this->form_fields = [
+            'enabled' => [
 				'title'       => __( 'Enabled/Disabled', 'coinsnap-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => __( 'Enable this payment gateway', 'coinsnap-for-woocommerce' ),
 				'default'     => 'no',
 				'value'       => 'yes',
 				'desc_tip'    => false,
-			],
-			'title'       => [
+            ],
+            'title' => [
 				'title'       => __( 'Title', 'coinsnap-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Controls the name of this payment method as displayed to the customer during checkout.', 'coinsnap-for-woocommerce' ),
 				'default'     => $this->getTitle(),
 				'desc_tip'    => true,
-			],
-			'description' => [
+            ],
+            'description' => [
 				'title'       => __( 'Customer Message','coinsnap-for-woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Message to explain how the customer will be paying for the purchase.', 'coinsnap-for-woocommerce' ),
 				'default'     => $this->getDescription(),
 				'desc_tip'    => true,
-			],
-			'button' => [
+            ],
+            'button' => [
 				'title'       => __('Button Text','coinsnap-for-woocommerce'),
 				'type'        => 'text',
 				'description' => __('Text on the button', 'coinsnap-for-woocommerce'),
 				'default'     => $this->getButton(),
 				'desc_tip'    => true,
-			],
-			'discount_enable' => [
+            ],
+            'discount_enable' => [
 				'title'       => __( 'Enable discount', 'coinsnap-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => __( 'Enable discount', 'coinsnap-for-woocommerce' ),
 				'default'     => 'no',
 				'value'       => 'yes',
 				'desc_tip'    => false,
-			],
-			'discount_type' => [
+            ],
+            'discount_type' => [
 				'title'       => __( 'Discount type', 'coinsnap-for-woocommerce' ),
 				'type'        => 'select',
 				'label'       => __( 'Discount type', 'coinsnap-for-woocommerce' ),
@@ -169,10 +176,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                                                 ],
 				'desc_tip'    => true,
                             'class' => 'discount'
-			],
-                    
-			'discount_amount' => [
-				'title'       => sprintf(
+            ],
+            'discount_amount' => [
+		'title'       => sprintf(
                                                     /* translators: 1: Currency */
                                                     __('Discount amount, %1$s', 'coinsnap-for-woocommerce'),$currency),
 				'type'        => 'decimal',
@@ -180,28 +186,28 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 				'default'     => 0,
 				'desc_tip'    => true,
                             'class' => 'discount discount-amount',
-			],
-			'discount_amount_limit' => [
-				'title'       => __('Max discount amount, %', 'coinsnap-for-woocommerce'),
-				'type'        => 'decimal',
-				'description' => __('Max discount amount for fixed discount, %', 'coinsnap-for-woocommerce'),
-				'default'     => 0,
-				'desc_tip'    => true,
-                            'class' => 'discount discount-amount',
-			],
-			'discount_percentage' => [
-				'title'       => __('Discount amount, %', 'coinsnap-for-woocommerce'),
-				'type'        => 'decimal',
-				'description' => __('Discount amount in percents (%)', 'coinsnap-for-woocommerce'),
-				'default'     => 0,
-				'desc_tip'    => true,
-                            'class' => 'discount discount-percentage',
-			],
-			'icon_upload' => [
-				'type'        => 'icon_upload',
-			],
-		];
-	}
+            ],
+            'discount_amount_limit' => [
+		'title'       => __('Max discount amount, %', 'coinsnap-for-woocommerce'),
+		'type'        => 'decimal',
+		'description' => __('Max discount amount for fixed discount, %', 'coinsnap-for-woocommerce'),
+		'default'     => 0,
+		'desc_tip'    => true,
+                'class'       => 'discount discount-amount',
+            ],
+            'discount_percentage' => [
+		'title'       => __('Discount amount, %', 'coinsnap-for-woocommerce'),
+		'type'        => 'decimal',
+		'description' => __('Discount amount in percents (%)', 'coinsnap-for-woocommerce'),
+		'default'     => 0,
+		'desc_tip'    => true,
+                'class'       => 'discount discount-percentage',
+            ],
+            'icon_upload' => [
+                'type'        => 'icon_upload',
+            ],
+        ];
+    }
 
 //  @inheritDoc
     public function process_payment( $orderId ) {
