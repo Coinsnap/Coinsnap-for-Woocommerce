@@ -165,6 +165,15 @@ class GlobalSettings extends \WC_Settings_Page {
 		'id' => 'coinsnap_autoredirect'
             ],
             
+            'redirecturl' => [
+                'title' => __( 'Return URL after payment', 'coinsnap-for-woocommerce' ),
+		'type' => 'text',
+		'default' => '',
+		'desc' => _x( 'Custom return URL after successful payment (default URL if blank)', 'global_settings', 'coinsnap-for-woocommerce' ),
+		'id' => 'coinsnap_redirecturl'
+                
+            ],
+            
             'debug' => [
 		'title' => __( 'Debug Log', 'coinsnap-for-woocommerce' ),
 		'type' => 'checkbox',

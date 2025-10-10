@@ -49,10 +49,9 @@ class Invoice extends AbstractClient{
     
     public function checkPaymentData($amount,$currency,$provider = 'coinsnap',$mode = 'invoice'): array {
         
-        if($provider === 'bitcoin' || $provider === 'lightning'){
-            $btcPayCurrencies = $this->loadExchangeRates();
+        $btcPayCurrencies = $this->loadExchangeRates();
             
-            if(!$btcPayCurrencies['result']){
+        if(!$btcPayCurrencies['result']){
                 return array('result' => false,'error' => $btcPayCurrencies['error'],'min_value' => '');
             }
             
@@ -60,23 +59,25 @@ class Invoice extends AbstractClient{
                 return array('result' => false,'error' => 'currencyError','min_value' => '');
             }
             
-            else {
-                $eurbtc = (isset($btcPayCurrencies['data']['eur']['value']))? 1/$btcPayCurrencies['data']['eur']['value']*0.50 : 0.000005;
-                $rate = 1/$btcPayCurrencies['data'][strtolower($currency)]['value'];
-                $min_value_btcpay = ($provider === 'bitcoin')? $eurbtc : 0.0000001;
-                $min_value = $min_value_btcpay/$rate;
+            $rate = 1/$btcPayCurrencies['data'][strtolower($currency)]['value'];
                 
-               if($mode === 'calculation'){
-                    return array('result' => true, 'min_value' => round($min_value,2));
+        
+        if($provider === 'bitcoin' || $provider === 'lightning'){
+            
+            $eurbtc = (isset($btcPayCurrencies['data']['eur']['value']))? 1/$btcPayCurrencies['data']['eur']['value']*0.50 : 0.000005;
+            $min_value_btcpay = ($provider === 'bitcoin')? $eurbtc : 0.0000001;
+            $min_value = $min_value_btcpay/$rate;
+                
+            if($mode === 'calculation'){
+                return array('result' => true, 'min_value' => round($min_value,2),'rate' => $rate);
+            }
+                
+            else {                
+                if(round($amount * $rate * 1000000) < round($min_value_btcpay * 1000000)){
+                    return array('result' => false,'error' => 'amountError','min_value' => round($min_value,2));
                 }
-                
-                else {                
-                    if(round($amount * $rate * 1000000) < round($min_value_btcpay * 1000000)){
-                        return array('result' => false,'error' => 'amountError','min_value' => round($min_value,2));
-                    }
-                    else {
-                        return array('result' => true);
-                    }
+                else {
+                    return array('result' => true,'rate' => $rate);
                 }
             }
         }
@@ -107,7 +108,7 @@ class Invoice extends AbstractClient{
                     return array('result' => false,'error' => 'amountError','min_value' => $min_value);
                 }
                 else {
-                    return array('result' => true);
+                    return array('result' => true,'rate' => $rate);
                 }
             }            
         }

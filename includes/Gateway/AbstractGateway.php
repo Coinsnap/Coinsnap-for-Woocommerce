@@ -452,7 +452,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 }
 
                 // Handle missing or invalid signature
-                if (!isset($signature)) {
+                if (null === $signature) {
                     Logger::debug("Authentication required");
                     wp_die('Authentication required', '', ['response' => 401]);
                 }
@@ -715,15 +715,17 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 $metadata['orderId'] = $orderID;
             }
                 
-            $redirectUrl = $this->get_return_url( $order );
+            $redirectUrl = (!empty(get_option('coinsnap_redirecturl','')))? get_option('coinsnap_redirecturl') : $this->get_return_url( $order );
+            
             $currency = $order->get_currency();
             $amount = PreciseNumber::parseString( $order->get_total() );		
 
-            // Handle Sats-mode because BTCPay does not understand SAT as a currency we need to change to BTC and adjust the amount.
-            if ($currency === 'SATS' && get_option('coinsnap_provider') === 'btcpay') {
+            // Handle currencies non-supported by BTCPay Server, we need to change them BTC and adjust the amount.
+            if (($currency === 'SATS' || $currency === 'RUB') && get_option('coinsnap_provider') === 'btcpay') {
                 $currency = 'BTC';
-                $amountBTC = bcdiv($amount->__toString(), '100000000', 8);
-                $amount = PreciseNumber::parseString($amountBTC);
+                $rate = 1/$checkInvoice['rate'];
+                $amountBTC = bcdiv(strval($amount), strval($rate), 8);
+                $amount = (float)$amountBTC;
             }
             
                 
