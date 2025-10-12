@@ -208,6 +208,46 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             ],
         ];
     }
+    
+    public function checkAmount($amount, $currency){
+        
+        $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
+        $checkInvoice = [];
+        
+        $_provider = get_option('coinsnap_provider');
+        if($_provider == 'btcpay'){
+        
+            $store = new Store($this->apiHelper->url, $this->apiHelper->apiKey);            
+            $storePaymentMethods = $store->getStorePaymentMethods($this->apiHelper->storeId);
+            
+            if ($storePaymentMethods['code'] === 200) {
+                if(!$storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
+                    $errorMessage = __( 'No payment method is configured on BTCPay server', 'coinsnap-for-woocommerce' );
+                    throw new \Exception( esc_html($errorMessage) );
+                }
+            }
+            else {
+                Logger::debug( 'Error loading BTCPay store payment methods');
+            }
+            
+            if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
+                $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'bitcoin');
+            }
+            elseif($storePaymentMethods['result']['lightning']){
+                $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'lightning');
+            }
+            else {
+                $errorMessage = __( 'No payment method is configured on BTCPay server', 'coinsnap-for-woocommerce' );
+                throw new \Exception( esc_html($errorMessage) );
+            }
+        
+        }
+        else {
+            $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ));
+        }
+        
+        return $checkInvoice;
+    }
 
 //  @inheritDoc
     public function process_payment( $orderId ) {
@@ -253,39 +293,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         $amount = $order->get_total();
         $currency = $order->get_currency();
         
-        $_provider = get_option('coinsnap_provider');
-        if($_provider == 'btcpay'){
-        
-            $store = new Store($this->apiHelper->url, $this->apiHelper->apiKey);            
-            $storePaymentMethods = $store->getStorePaymentMethods($this->apiHelper->storeId);
-            
-            if ($storePaymentMethods['code'] === 200) {
-                if(!$storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
-                    $errorMessage = __( 'No payment method is configured on BTCPay server', 'coinsnap-for-woocommerce' );
-                    throw new \Exception( esc_html($errorMessage) );
-                }
-            }
-            else {
-                Logger::debug( 'Error loading BTCPay store payment methods');
-            }
-            
-            if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
-                $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'bitcoin');
-            }
-            elseif($storePaymentMethods['result']['lightning']){
-                $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'lightning');
-            }
-            else {
-                $errorMessage = __( 'No payment method is configured on BTCPay server', 'coinsnap-for-woocommerce' );
-                throw new \Exception( esc_html($errorMessage) );
-            }
-        
-        }
-        else {
-            $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ));
-        }
-        
-        
+        $checkInvoice = checkAmount($amount, $currency);
         
         if($checkInvoice['result'] === true){
             Logger::debug( 'Creating invoice on Coinsnap Server' );
@@ -715,52 +723,66 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 $metadata['orderId'] = $orderID;
             }
                 
-            $redirectUrl = (!empty(get_option('coinsnap_redirecturl','')))? get_option('coinsnap_redirecturl') : $this->get_return_url( $order );
+            $redirectUrl = (!empty(get_option('coinsnap_returnurl','')))? get_option('coinsnap_returnurl') : $this->get_return_url( $order );
             
             $currency = $order->get_currency();
-            $amount = PreciseNumber::parseString( $order->get_total() );		
-
-            // Handle currencies non-supported by BTCPay Server, we need to change them BTC and adjust the amount.
-            if (($currency === 'SATS' || $currency === 'RUB') && get_option('coinsnap_provider') === 'btcpay') {
-                $currency = 'BTC';
-                $rate = 1/$checkInvoice['rate'];
-                $amountBTC = bcdiv(strval($amount), strval($rate), 8);
-                $amount = (float)$amountBTC;
-            }
-            
-                
-            //  Set automatic redirect after payment and wallet message (empty)
-            $redirectAutomatically = (get_option('coinsnap_autoredirect', 'yes') === 'yes')? true : false;
-            Logger::debug( 'Setting redirect automatically: ' . $redirectAutomatically );
-            
-            $walletMessage = ($this->coinsnap_discount > 0)? 'Coinsnap discount: '.$this->coinsnap_discount.' '.$currency : '';
-            $metadata['coinsnapDiscount'] = $this->coinsnap_discount;
+            $amount = $order->get_total();
 
             // Create the invoice on Coinsnap Server.
             $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
-            Logger::debug( 'Client for invoice is created. Payment amount is '.$amount.' '.$currency );
-                
-            try {
-                $invoice = $client->createInvoice(
-                    $this->apiHelper->storeId,
-                    $currency,
-                    $amount,
-                    $orderID,
-                    $buyerEmail,
-                    $buyerName,
-                    $redirectUrl,
-                    COINSNAP_WC_REFERRAL_CODE,
-                    $metadata,
-                    $redirectAutomatically,
-                    $walletMessage
-                );
+            
+            $checkInvoice = checkAmount($amount, $currency);
 
-                $this->updateOrderMetadata( $order->get_id(), $invoice );
-                return $invoice;
+            if($checkInvoice['result'] === true){
+
+                if($this->getPaymentProvider() === 'btcpay') {
+                    $metadata['orderId'] = $orderID;
+                }
+
+                // Handle currencies non-supported by BTCPay Server, we need to change them BTC and adjust the amount.
+                if (($currency === 'SATS' || $currency === 'RUB') && get_option('coinsnap_provider') === 'btcpay') {
+                    $currency = 'BTC';
+                    $rate = 1/$checkInvoice['rate'];
+                    $amountBTC = bcdiv(strval($amount), strval($rate), 8);
+                    $amount = (float)$amountBTC;
+                }
+
+                $camount = ($currency === 'BTC')? \Coinsnap\Util\PreciseNumber::parseFloat($amount,8) : \Coinsnap\Util\PreciseNumber::parseFloat($amount,2);
+
+
+                //  Set automatic redirect after payment and wallet message (empty)
+                $redirectAutomatically = (get_option('coinsnap_autoredirect', 'yes') === 'yes')? true : false;
+                Logger::debug( 'Setting redirect automatically: ' . $redirectAutomatically );
+
+                $walletMessage = ($this->coinsnap_discount > 0)? 'Coinsnap discount: '.$this->coinsnap_discount.' '.$currency : '';
+                $metadata['coinsnapDiscount'] = $this->coinsnap_discount;
+                
+                Logger::debug( 'Client for invoice is created. Payment amount is '.$amount.' '.$currency );
+                
+                try {
+                    $invoice = $client->createInvoice(
+                        $this->apiHelper->storeId,
+                        $currency,
+                        $camount,
+                        $orderID,
+                        $buyerEmail,
+                        $buyerName,
+                        $redirectUrl,
+                        COINSNAP_WC_REFERRAL_CODE,
+                        $metadata,
+                        $redirectAutomatically,
+                        $walletMessage
+                    );
+
+                    $this->updateOrderMetadata( $order->get_id(), $invoice );
+                    return $invoice;
+                }
+                catch ( \Throwable $e ) {
+                    Logger::debug( $e->getMessage(), true );
+                }
             }
-            catch ( \Throwable $e ) {
-                Logger::debug( $e->getMessage(), true );
-            }
+            
+            
 
             return null;
 	}

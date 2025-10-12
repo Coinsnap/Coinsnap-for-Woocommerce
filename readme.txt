@@ -364,3 +364,4 @@ If you have any other questions, please use our support area. After you have reg
 = 1.6.1 :: 2025-10-10 =
 * Update: Added non-supported by BTCPay server currencies handler on invoice request flow.
 * Update: Added custom redirect after payment page in module settings.
+* Compatibility with Wordpress 6.8.3 and WooCommerce 10.2.2 is tested.
