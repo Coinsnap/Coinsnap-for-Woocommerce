@@ -9,19 +9,7 @@
 * Requires at least: 6.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-* Stable tag: 1.6.1
-=======
 * Stable tag: 1.6.3
->>>>>>> Stashed changes
-=======
-* Stable tag: 1.6.3
->>>>>>> Stashed changes
-=======
-* Stable tag: 1.6.3
->>>>>>> Stashed changes
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -390,8 +378,6 @@ If you have any other questions, please use our support area. After you have reg
 * Update: Added non-supported by BTCPay server currencies handler on invoice request flow.
 * Update: Added custom redirect after payment page in module settings.
 * Compatibility with Wordpress 6.8.3 and WooCommerce 10.2.2 is tested.
-<<<<<<< Updated upstream
-=======
 
 #### 1.6.2 :: 2025-10-17
 * Fixed bug with order amount check method
@@ -400,10 +386,3 @@ If you have any other questions, please use our support area. After you have reg
 * Fixed PHP 8.2+ warnings
 * Compatibility with WooCommerce 10.3.0 is tested.
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
