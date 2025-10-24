@@ -74,7 +74,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
     public function cartCoinsnapDiscount($cart){
         
         $payment_method = WC()->session->get('chosen_payment_method');
-        Logger::debug( 'Payment method: ' . $payment_method );
         
         if(empty($payment_method) && $this->get_option('enabled')>0){
             WC()->session->set('chosen_payment_method', 'coinsnap');
@@ -293,7 +292,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         $amount = $order->get_total();
         $currency = $order->get_currency();
         
-        $checkInvoice = checkAmount($amount, $currency);
+        $checkInvoice = $this -> checkAmount($amount, $currency);
         
         if($checkInvoice['result'] === true){
             Logger::debug( 'Creating invoice on Coinsnap Server' );
@@ -560,13 +559,14 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			case 'Settled':
                         case 'InvoiceSettled':
 				$order->payment_complete();
-				if (property_exists($webhookData,'overPaid')) {
+				/*if (property_exists($webhookData,'overPaid')) {
 					$order->add_order_note(__('Invoice payment settled but was overpaid.', 'coinsnap-for-woocommerce'));
 					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::SETTLED_PAID_OVER]);
-				} else {
+				}
+                                else {*/
 					$order->add_order_note(__('Invoice payment settled.', 'coinsnap-for-woocommerce'));
 					$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::SETTLED]);
-				}
+				//}
 
 				// Store payment data (exchange rate, address).
 				//$this->updateWCOrderPayments($order);
@@ -576,11 +576,12 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                         case 'InvoiceProcessing':
                                 // The invoice is paid in full.
 				$this->updateWCOrderStatus($order, $configuredOrderStates[OrderStates::PROCESSING]);
-				if (property_exists($webhookData,'overPaid')) {
+				/*
+                                if (property_exists($webhookData,'overPaid')) {
 					$order->add_order_note(__('Invoice payment received fully with overpayment, waiting for settlement.', 'coinsnap-for-woocommerce'));
-				} else {
+				} else {*/
 					$order->add_order_note(__('Invoice payment received fully, waiting for settlement.', 'coinsnap-for-woocommerce'));
-				}
+				//}
 				break;
 			case 'Expired':
                         case 'InvoiceExpired':
@@ -725,26 +726,40 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 
             $redirectUrl = (!empty(get_option('coinsnap_returnurl','')))? get_option('coinsnap_returnurl') : $this->get_return_url( $order );
             
-            $currency = $order->get_currency();
-            $amount = $order->get_total();
+            $currency = strtoupper($order->get_currency());
+            $amount = (float)$order->get_total();
 
             // Create the invoice on Coinsnap Server.
             $client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
             
-            $checkInvoice = checkAmount($amount, $currency);
+            $checkInvoice = $this -> checkAmount($amount, $currency);
 
             if($checkInvoice['result'] === true){
 
-                if($this->getPaymentProvider() === 'btcpay') {
+                if(get_option('coinsnap_provider') === 'btcpay') {
                     $metadata['orderId'] = $orderID;
                 }
 
-                // Handle currencies non-supported by BTCPay Server, we need to change them BTC and adjust the amount.
-                if (($currency === 'SATS' || $currency === 'RUB') && get_option('coinsnap_provider') === 'btcpay') {
-                    $currency = 'BTC';
-                    $rate = 1/$checkInvoice['rate'];
-                    $amountBTC = bcdiv(strval($amount), strval($rate), 8);
-                    $amount = (float)$amountBTC;
+                if(get_option('coinsnap_provider') === 'btcpay' && $currency !== 'BTC'){
+                    $store = new \Coinsnap\Client\Store($this->apiHelper->url, $this->apiHelper->apiKey);
+                    $btcpayCurrencies = $store -> getStoreCurrenciesRates($this->apiHelper->storeId,array($currency));
+                    $isCurrency = true;
+                    if(!isset($btcpayCurrencies['result']['error']) && count($btcpayCurrencies['result']['currencies'])>0){
+                            if(!isset($btcpayCurrencies['result']['currencies']['BTC_'.$currency])){
+                                $isCurrency = false;
+                            }
+                    }
+                    else {
+                        $isCurrency = false;
+                    }
+
+                    // Handle currencies non-supported by BTCPay Server, we need to change them BTC and adjust the amount.
+                    if( !$isCurrency ){
+                            $currency = 'BTC';
+                            $rate = 1/$checkInvoice['rate'];
+                            $amountBTC = bcdiv(strval($amount), strval($rate), 8);
+                            $amount = (float)$amountBTC;
+                    }
                 }
 
                 $camount = ($currency === 'BTC')? \Coinsnap\Util\PreciseNumber::parseFloat($amount,8) : \Coinsnap\Util\PreciseNumber::parseFloat($amount,2);
