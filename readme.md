@@ -11,7 +11,11 @@
 * Requires PHP: 7.4
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 * Stable tag: 1.6.1
+=======
+* Stable tag: 1.6.3
+>>>>>>> Stashed changes
 =======
 * Stable tag: 1.6.3
 >>>>>>> Stashed changes
@@ -397,6 +401,9 @@ If you have any other questions, please use our support area. After you have reg
 * Compatibility with WooCommerce 10.3.0 is tested.
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
