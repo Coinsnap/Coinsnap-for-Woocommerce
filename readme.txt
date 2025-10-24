@@ -3,7 +3,11 @@ Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.8
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 Stable tag: 1.6.1
+=======
+Stable tag: 1.6.3
+>>>>>>> Stashed changes
 =======
 Stable tag: 1.6.3
 >>>>>>> Stashed changes
@@ -381,4 +385,7 @@ If you have any other questions, please use our support area. After you have reg
 
 
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

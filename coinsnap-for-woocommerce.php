@@ -8,7 +8,11 @@
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
  * Version:         1.6.1
+=======
+ * Version:         1.6.3
+>>>>>>> Stashed changes
 =======
  * Version:         1.6.3
 >>>>>>> Stashed changes
@@ -35,7 +39,11 @@ use Coinsnap\WC\Helper\Logger;
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.6.1' );}
+=======
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.6.3' );}
+>>>>>>> Stashed changes
 =======
 if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.6.3' );}
 >>>>>>> Stashed changes
