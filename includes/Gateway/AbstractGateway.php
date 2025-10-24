@@ -13,9 +13,12 @@ use Coinsnap\WC\Helper\OrderStates;
 
 abstract class AbstractGateway extends \WC_Payment_Gateway {
     const ICON_MEDIA_OPTION = 'icon_media_id';
+    protected $apiHelper;
     public $tokenType;
     public $primaryPaymentMethod;
-    protected $apiHelper;
+    public $coinsnap_discount;
+    public $debug_php_version;
+    public $debug_plugin_version;
 
     public function __construct() {
         
@@ -171,8 +174,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                                                     /* translators: 1: Currency */
                                                     __( 'Choose discount type: %1$s or percents', 'coinsnap-for-woocommerce' ),$currency),
 				'options'   => [
-                                                    'fixed' => 'Fixed',
-                                                    'percentage'   => 'Percentage'
+                                                    'fixed' => __('Fixed','coinsnap-for-woocommerce'),
+                                                    'percentage'   => __('Percentage','coinsnap-for-woocommerce')
                                                 ],
 				'desc_tip'    => true,
                             'class' => 'discount'
@@ -747,7 +750,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                     $amount = (float)$amountBTC;
                 }
 
-                $camount = ($currency === 'BTC')? \Coinsnap\Util\PreciseNumber::parseFloat($amount,8) : \Coinsnap\Util\PreciseNumber::parseFloat($amount,2);
+                $camount = ($currency === 'BTC')? PreciseNumber::parseFloat($amount,8) : PreciseNumber::parseFloat($amount,2);
 
 
                 //  Set automatic redirect after payment and wallet message (empty)

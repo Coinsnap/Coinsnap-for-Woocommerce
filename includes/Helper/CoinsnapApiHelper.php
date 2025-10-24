@@ -20,6 +20,7 @@ class CoinsnapApiHelper {
     public $url;
     public $apiKey;
     public $storeId;
+    public $webhook;
 
     public function __construct() {
         if ( $config = self::getConfig() ) {
