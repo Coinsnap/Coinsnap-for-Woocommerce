@@ -14,33 +14,29 @@ class CoinsnapApiWebhook {
 //  Get locally stored webhook data and check if it exists on the store.
     public static function webhookExists(string $apiUrl, string $apiKey, string $storeId): bool {
 	$whClient = new Webhook( $apiUrl, $apiKey );
-	if ($storedWebhook = get_option( 'coinsnap_webhook' )) {
-            try {
-		$existingWebhook = $whClient->getWebhook( $storeId, $storedWebhook['id'] );
-		
-                // Check for the url here as it could have been changed on Coinsnap making the webhook not work for WooCommerce anymore.
-		if( $existingWebhook->getData()['id'] === $storedWebhook['id'] && strpos( $existingWebhook->getData()['url'], $storedWebhook['url'] ) !== false){
-                    return true;
-		}
-            }
-            catch (\Throwable $e) {
-		Logger::debug('Error fetching existing Webhook. Message: ' . $e->getMessage());
-            }
-	}
+	$storedWebhook = get_option( 'coinsnap_webhook' );
+        $isWebhook = false;
+        
         try {
-            $storeWebhooks = $whClient->getWebhooks( $storeId );
-            foreach($storeWebhooks as $webhook){
+            $storeWebhooks = $whClient->getWebhooks($storeId);
+            foreach ($storeWebhooks as $webhook) {
                 if(strpos( $webhook->getData()['url'], WC()->api_request_url( 'coinsnap' ) ) !== false){
                     
-                    $whClient->deleteWebhook( $storeId, $webhook->getData()['id'] );
-                    Logger::debug('Deleting webhook ID '.$webhook->getData()['id'].' for '. $webhook->getData()['url']);
+                    if (is_array($storedWebhook) && $webhook->getData()['id'] === $storedWebhook['id']){
+                        $isWebhook = true;
+                    }
+                    else {
+                        $whClient->deleteWebhook( $storeId, $webhook->getData()['id'] );
+                        Logger::debug('Deleting webhook ID '.$webhook->getData()['id'].' for '. $webhook->getData()['url']);
+                    }
                 }
             }
+        } catch (\Throwable $e) {
+            $errorMessage = 'Error fetching webhooks for store ID '.$storeId.'. Message: ' .$e->getMessage();
+            return false;
         }
-        catch (\Throwable $e) {
-            Logger::debug('Error fetching webhooks for store ID '.$storeId.'. Message: ' . $e->getMessage());
-        }
-	return false;
+
+        return $isWebhook;
     }
 
 	/**

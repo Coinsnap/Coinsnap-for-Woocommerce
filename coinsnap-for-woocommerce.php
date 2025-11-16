@@ -7,13 +7,13 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.6.3
+ * Version:         1.6.4
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
- * WC tested up to: 10.3.0
+ * WC tested up to: 10.3.5
  * License:         GPL2
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -462,7 +462,7 @@ add_action( 'template_redirect', function() {
     if (count($client->getStores()) < 1) {
         $messageAbort = __('Error on verifiying redirected API Key with stored BTCPay Server url. Aborting API wizard. Please try again or continue with manual setup.', 'coinsnap-for-woocommerce');
 	Notice::addNotice('error', $messageAbort);
-	wp_redirect($CoinsnapBTCPaySettingsUrl);
+	wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
     }
     
     // Data does get submitted with url-encoded payload, so parse $_POST here.
@@ -499,16 +499,16 @@ add_action( 'template_redirect', function() {
                 Notice::addNotice('error', $messageWebhookError );
             }
 
-            wp_redirect($CoinsnapBTCPaySettingsUrl);
+            wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
 	}
         else {
             Notice::addNotice('error', __('Please make sure you only select one store on the BTCPay API authorization page.', 'coinsnap-for-woocommerce'));
-            wp_redirect($CoinsnapBTCPaySettingsUrl);
+            wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
 	}
     }
     
     Notice::addNotice('error', __('Error processing the data from Coinsnap. Please try again.', 'coinsnap-for-woocommerce'));
-    wp_redirect($CoinsnapBTCPaySettingsUrl);
+    wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
 });
 
 // Installation routine.
