@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.8
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -377,6 +377,9 @@ If you have any other questions, please use our support area. After you have reg
 * Updated stored webhooks filtration
 * Fixed redirection warnings
 * Compatibility with WooCommerce 10.3.5 is tested.
+
+= 1.6.5 :: 2025-11-18 =
+* Fixed AbstractGateway::getDiscount() method return value
 
 
 

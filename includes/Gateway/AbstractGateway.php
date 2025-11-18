@@ -69,6 +69,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
                 return '<span class="discount_percent">-'.esc_html($this->get_option('discount_percentage')).'<small>%</small></span>';
             }
         }
+        else {
+            return '';
+        }
     }
     
     /**
