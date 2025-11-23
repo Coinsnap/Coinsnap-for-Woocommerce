@@ -196,19 +196,19 @@ class GlobalSettings extends \WC_Settings_Page {
     */
     public function save() {
         
-        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         
         if( wp_verify_nonce($_nonce,'woocommerce-settings')){
             Logger::debug('Saving GlobalSettings');
             
-            $coinsnap_provider = filter_input(INPUT_POST,'coinsnap_provider',FILTER_SANITIZE_STRING );
-            $apiUrl  = ($coinsnap_provider !== 'btcpay')? COINSNAP_SERVER_URL : filter_input(INPUT_POST,'btcpay_server_url',FILTER_SANITIZE_STRING );
+            $coinsnap_provider = filter_input(INPUT_POST,'coinsnap_provider',FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+            $apiUrl  = ($coinsnap_provider !== 'btcpay')? COINSNAP_SERVER_URL : filter_input(INPUT_POST,'btcpay_server_url',FILTER_SANITIZE_URL );
             $storeId = ($coinsnap_provider !== 'btcpay')? 
-                sanitize_text_field(filter_input(INPUT_POST,'coinsnap_store_id',FILTER_SANITIZE_STRING )) : 
-                sanitize_text_field(filter_input(INPUT_POST,'btcpay_store_id',FILTER_SANITIZE_STRING ));
+                sanitize_text_field(filter_input(INPUT_POST,'coinsnap_store_id',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) : 
+                sanitize_text_field(filter_input(INPUT_POST,'btcpay_store_id',FILTER_SANITIZE_FULL_SPECIAL_CHARS ));
             $apiKey  = ($coinsnap_provider !== 'btcpay')? 
-                sanitize_text_field(filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_STRING )) : 
-                sanitize_text_field(filter_input(INPUT_POST,'btcpay_api_key',FILTER_SANITIZE_STRING ));
+                sanitize_text_field(filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) : 
+                sanitize_text_field(filter_input(INPUT_POST,'btcpay_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS ));
             
             // If we have url, storeID and apiKey we want to check if the api key works and register a webhook.
             if ( $this->hasNeededApiCredentials($apiUrl,$storeId,$apiKey) ) {

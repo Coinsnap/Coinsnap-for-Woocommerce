@@ -67,7 +67,7 @@ class CoinsnapApiHelper {
             $client = new Store($config['url'], $config['api_key']);            
             $store = $client->getStore($config['store_id']);
             
-            if ($store['code'] === 200) {
+            if ($store->getData()['code'] === 200) {
                 return true;
             }
         }
@@ -79,7 +79,7 @@ class CoinsnapApiHelper {
             $client = new Store($config['url'], $config['api_key']);
             $store = $client->getStore($config['store_id']);
             Logger::debug(wp_json_encode($store), true);
-            if ($store['code'] === 200){ 
+            if ($store->getData()['code'] === 200){ 
                 return (array)$store;
             }
             else {
