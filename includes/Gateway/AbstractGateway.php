@@ -846,6 +846,8 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	protected function updateOrderMetadata( int $orderId, \Coinsnap\Result\Invoice $invoice ) {
 		// Store relevant Coinsnap invoice data.
                 $order = wc_get_order($orderId);
+                $orderTransactionURL = (get_option('coinsnap_provider') === 'btcpay')? get_option('btcpay_server_url').'/invoices/'.$invoice->getData()['id'] : COINSNAP_SERVER_URL.'/td/'.$invoice->getData()['id'];
+		$order->update_meta_data( 'Coinsnap_transactionurl', $orderTransactionURL );
 		$order->update_meta_data( 'Coinsnap_redirect', $invoice->getData()['checkoutLink'] );
 		$order->update_meta_data( 'Coinsnap_id', $invoice->getData()['id'] );
                 Logger::debug( 'Store relevant Coinsnap invoice data for order ' . $orderId . ': Coinsnap_id: ' . $invoice->getData()['id'] );

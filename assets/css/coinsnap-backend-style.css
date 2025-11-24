@@ -35,3 +35,11 @@
 }
 
 .coinsnap-icon-image {vertical-align:middle;}
+
+a.coinsnap-service {
+    border-bottom: dashed 1px; text-underline:false;
+}
+
+a.coinsnap-service:hover {
+    border-bottom: none;
+}

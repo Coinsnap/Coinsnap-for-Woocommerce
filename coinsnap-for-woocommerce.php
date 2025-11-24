@@ -7,7 +7,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.6.5
+ * Version:         1.7.0
  * Requires PHP:    7.4
  * Tested up to:    6.8
  * Requires at least: 6.0
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.6.5' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.7.0' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -48,6 +48,7 @@ class CoinsnapWCPlugin {
     public function __construct() {
 	$this->includes();
         add_action('woocommerce_thankyou_coinsnap', [$this, 'orderStatusThankYouPage'], 10, 1);
+        
 
 	// Run the updates.
 	\Coinsnap\WC\Helper\UpdateManager::processUpdates();
@@ -57,6 +58,30 @@ class CoinsnapWCPlugin {
             add_action( 'admin_enqueue_scripts', [ $this, 'connectionScriptsLoader' ] );
             add_action( 'wp_ajax_coinsnap_connection_handler', [$this, 'coinsnapConnectionHandler'] );
             add_action( 'wp_ajax_btcpay_server_apiurl_handler', [$this, 'btcpayApiUrlHandler'] );
+            
+            if(filter_input(INPUT_GET,'page',FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'wc-orders'){
+            
+                if(filter_input(INPUT_GET,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'edit'){
+                    add_action('woocommerce_admin_order_data_after_billing_address', [$this,'coinsnapOrderDetails']);
+                }
+                else {
+                    add_filter( 'manage_woocommerce_page_wc-orders_columns', [$this, 'coinsnapOrderListColumns']);
+                    add_action( 'manage_woocommerce_page_wc-orders_custom_column', [$this, 'coinsnapOrderListColumnsData'], 10, 2 );
+                }
+            }
+            
+            
+            if(filter_input(INPUT_GET,'post_type',FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'shop_order'){
+                add_filter( 'manage_edit-shop_order_columns', [$this, 'coinsnapOrderListColumns']);
+                add_action( 'manage_shop_order_posts_custom_column', [$this, 'coinsnapOrderListColumnsDataById'], 10, 2 );
+            }
+            if(get_post_type(filter_input(INPUT_GET,'post',FILTER_SANITIZE_NUMBER_INT)) === 'shop_order' && filter_input(INPUT_GET,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS) === 'edit'){
+                add_action('woocommerce_admin_order_data_after_billing_address', [$this,'coinsnapOrderDetails']);
+            }
+        
+            
+            
+            
             
             // Register our custom global settings page.
             add_filter(
@@ -76,6 +101,58 @@ class CoinsnapWCPlugin {
         add_action( 'wp_ajax_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         add_action( 'wp_ajax_nopriv_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         
+    }
+    
+    public function coinsnapOrderDetails($order){
+        if( $order->get_meta( 'Coinsnap_transactionurl') !== null && !empty($order->get_meta( 'Coinsnap_transactionurl'))){
+                echo '<b>'.esc_html__('Transaction details','coinsnap-for-woocommerce').'</b>:<br/><a href="'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'" target="_blank" class="">'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'</a>';
+        }
+    }
+    
+    public function coinsnapOrderListColumnsDataById( $column, $post_id ) {
+        if ( $column === 'order_transaction_details_url' ) {
+            // Get order
+            $order = wc_get_order( $post_id );
+
+            if( $order->get_meta( 'Coinsnap_transactionurl') !== null && !empty($order->get_meta( 'Coinsnap_transactionurl'))){
+                echo '<b><a href="'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'" class="coinsnap-service" target="_blank">'.esc_html__('View details','coinsnap-for-woocommerce').'</a></b>';
+            }
+        }
+    }
+    
+    public function coinsnapOrderListColumnsData( $column, $order ) {
+        if ( 'order_transaction_details_url' === $column ) {
+            // Replace with your custom logic to display data for the column
+            if( $order->get_meta( 'Coinsnap_transactionurl') !== null && !empty($order->get_meta( 'Coinsnap_transactionurl'))){
+                echo '<b><a href="'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'" class="coinsnap-service" target="_blank">'.esc_html__('View details','coinsnap-for-woocommerce').'</a></b>';
+            }
+        }
+    }
+    
+    public function coinsnapOrderListColumns($columns){
+        
+        Logger::debug('Order list columns handler');
+        
+        $new_columns = ( is_array( $columns ) ) ? $columns : array();
+        $isHPOS = false;
+        if(isset($new_columns[ 'wc_actions' ])){
+            unset( $new_columns[ 'wc_actions' ] );
+            $isHPOS = true;
+        }
+        else {
+            unset( $new_columns[ 'order_actions' ] );
+        }
+        
+        $new_columns['order_transaction_details_url'] = __('Transaction','coinsnap-for-woocommerce');
+	
+        if($isHPOS){
+            $new_columns[ 'wc_actions' ] = $columns[ 'wc_actions' ];
+        }
+        else {
+            $new_columns[ 'order_actions' ] = $columns[ 'order_actions' ];
+        }
+        
+  	return $new_columns;
     }
     
     public function coinsnapCheckoutHandler(){

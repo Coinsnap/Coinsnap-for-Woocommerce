@@ -9,7 +9,7 @@
 * Requires at least: 6.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.6.5
+* Stable tag: 1.7.0
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -393,3 +393,10 @@ If you have any other questions, please use our support area. After you have reg
 
 #### 1.6.5 :: 2025-11-18
 * Fixed AbstractGateway::getDiscount() method return value
+
+#### 1.7.0 :: 2025-11-23
+* Updated \Coinsnap\Client\Store class
+* Updated \Coinsnap\Client\Store::getStore() method data usage
+* Updated orders list page and order details page in backend - link to payment details page on the gateway's side is added
+* Fixed backend warnings on PHP 8.3+
+
