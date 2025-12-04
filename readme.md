@@ -7,9 +7,9 @@
 * Contributors: coinsnap
 * Tags: Lightning, Lightning Payment, SATS, Satoshi sats, bitcoin, BTCPay, Coinsnap, Wordpress, WooCommerce, payment gateway, accept bitcoin, bitcoin plugin, bitcoin payment processor, bitcoin e-commerce, Lightning Network, cryptocurrency, lightning payment processor
 * Requires at least: 6.0
-* Tested up to: 6.8
+* Tested up to: 6.9
 * Requires PHP: 7.4
-* Stable tag: 1.7.0
+* Stable tag: 1.7.1
 * License: GPLv2
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,7 +31,7 @@ Also, Coinsnap’s Bitcoin payment plugin for WooCommerce is the only such plugi
 ## Accept Bitcoin payments with WooCommerce in only 3 steps:
 
 1. Get your [free Coinsnap account](https://app.coinsnap.io/register) with just your email
-2. Install, activate and configure the plugin in your WordPress backend ([see the installation guide](https://coinsnap.io/coinsnap-for-woocommerce-installation-guide/))
+2. Install, activate and configure the plugin in your WordPress backend ([see the installation guide](coinsnap.io/modules/woocommerce/woocommerce-installation-guide/))
 3. Activate Bitcoin payments in WooCommerce and accept Bitcoin payments from your customers
 
 
@@ -67,16 +67,16 @@ Also, Coinsnap’s Bitcoin payment plugin for WooCommerce is the only such plugi
 ## More information: 
 
 * Demo Store: [https://woocommerce.coinsnap.org/](https://woocommerce.coinsnap.org/)
-* Product page: [https://coinsnap.io/coinsnap-for-woocommerce-plugin/](https://coinsnap.io/coinsnap-for-woocommerce-plugin/)
-* Installation Guide: [https://coinsnap.io/coinsnap-for-woocommerce-installation-guide/](https://coinsnap.io/coinsnap-for-woocommerce-installation-guide/)
+* Product page: [https://coinsnap.io/modules/woocommerce/](https://coinsnap.io/modules/woocommerce/)
+* Installation Guide: [coinsnap.io/modules/woocommerce/woocommerce-installation-guide/](coinsnap.io/modules/woocommerce/woocommerce-installation-guide/)
 * Github plugin page: [https://github.com/Coinsnap/Coinsnap-for-Woocommerce](https://github.com/Coinsnap/Coinsnap-for-Woocommerce)
 
 ## Documentation: 
 
 * [Coinsnap API (1.0) documentation](https://docs.coinsnap.io/)
-* [Frequently Asked Questions](https://coinsnap.io/en/faq/) 
-* [Terms and Conditions](https://coinsnap.io/en/general-terms-and-conditions/)
-* [Privacy Policy](https://coinsnap.io/en/privacy/)
+* [Frequently Asked Questions](https://coinsnap.io/help/coinsnap-faq/) 
+* [Terms and Conditions](https://coinsnap.io/info/general-terms-and-conditions/)
+* [Privacy Policy](https://coinsnap.io/info/privacy-policy/)
 
 
 # Installation #
