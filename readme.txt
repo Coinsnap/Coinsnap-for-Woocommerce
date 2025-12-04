@@ -24,7 +24,7 @@ Also, Coinsnap’s Bitcoin payment plugin for WooCommerce is the only such plugi
 = Accept Bitcoin payments with WooCommerce in only 3 steps: =
 
 1. Get your [free Coinsnap account](https://app.coinsnap.io/register) with just your email
-2. Install, activate and configure the plugin in your WordPress backend ([see the installation guide](coinsnap.io/modules/woocommerce/woocommerce-installation-guide/))
+2. Install, activate and configure the plugin in your WordPress backend ([see the installation guide](https://coinsnap.io/modules/woocommerce/woocommerce-installation-guide/))
 3. Activate Bitcoin payments in WooCommerce and accept Bitcoin payments from your customers
 
 
@@ -60,7 +60,7 @@ Also, Coinsnap’s Bitcoin payment plugin for WooCommerce is the only such plugi
 
 * Demo Store: [https://woocommerce.coinsnap.org/](https://woocommerce.coinsnap.org/)
 * Product page: [https://coinsnap.io/modules/woocommerce/](https://coinsnap.io/modules/woocommerce/)
-* Installation Guide: [coinsnap.io/modules/woocommerce/woocommerce-installation-guide/](coinsnap.io/modules/woocommerce/woocommerce-installation-guide/)
+* Installation Guide: [https://coinsnap.io/modules/woocommerce/woocommerce-installation-guide/](https://coinsnap.io/modules/woocommerce/woocommerce-installation-guide/)
 * Github plugin page: [https://github.com/Coinsnap/Coinsnap-for-Woocommerce](https://github.com/Coinsnap/Coinsnap-for-Woocommerce)
 
 = Documentation: =
@@ -158,7 +158,7 @@ Follow updates on plugin's [GitHub page](https://github.com/Coinsnap/coinsnap-wo
 
 = What are the requirements for accepting Bitcoin in my WooCommerce shop? =
 
-In addition to your WooCommerce shop, you need a [Coinsnap account](https://coinsnap.io/register) and a [Bitcoin Lightning Wallet](https://coinsnap.io/how-do-i-get-a-lightning-wallet/). There are no further requirements.
+In addition to your WooCommerce shop, you need a [Coinsnap account](https://coinsnap.io/register) and a [Bitcoin Lightning Wallet](https://coinsnap.io/blog/how-do-i-get-a-lightning-wallet/). There are no further requirements.
 
 = Can I customise my Bitcoin Lightning Checkout? =
 
@@ -386,6 +386,10 @@ If you have any other questions, please use our support area. After you have reg
 * Updated \Coinsnap\Client\Store::getStore() method data usage
 * Updated orders list page and order details page in backend - link to payment details page on the gateway's side is added
 * Fixed backend warnings on PHP 8.3+
+
+= 1.7.1 :: 2025-12-04 =
+* Compatibility with WooCommerce 10.3.6 is tested.
+* Compatibility with Wordpress 6.9 is tested.
 
 
 
