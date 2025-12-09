@@ -111,11 +111,12 @@ jobs:
       # Formatting is run on the latest PHP release since PHP-CS-Fixer itself
       # targets modern runtimes and the coding style is PHP-version agnostic.
 
-      - name: Ensure clean working tree
+      - name: Ensure clean working tree (ignoring composer.lock)
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          STATUS=$(git status --porcelain | grep -v '^?? composer.lock$')
+          if [ -n "$STATUS" ]; then
             echo "Working tree has unexpected changes before formatting." >&2
-            git status --short
+            echo "$STATUS"
             exit 1
           fi
 
