@@ -113,7 +113,7 @@ jobs:
 
       - name: Ensure clean working tree (ignoring composer.lock)
         run: |
-          STATUS=$(git status --porcelain | grep -v '^?? composer.lock$')
+          STATUS=$(git status --porcelain | grep -v '^?? composer.lock$' || true)
           if [ -n "$STATUS" ]; then
             echo "Working tree has unexpected changes before formatting." >&2
             echo "$STATUS"
