@@ -1,0 +1,17 @@
+includes:
+  - vendor/phpstan/phpstan/conf/bleedingEdge.neon
+
+parameters:
+  level: 3
+  paths:
+    - coinsnap-for-woocommerce.php
+    - includes
+    - library
+  bootstrapFiles:
+    - vendor/autoload.php
+    - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+    - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+  tmpDir: var/phpstan
+  reportUnmatchedIgnoredErrors: false
+  ignoreErrors:
+    - '#Unsafe usage of new static\(\)#'

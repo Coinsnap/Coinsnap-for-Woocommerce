@@ -1,0 +1,40 @@
+name: PHP job setup
+description: Composite action to set up PHP, cache Composer downloads and vendor directory, and install dependencies.
+
+inputs:
+  php-version:
+    description: PHP version to use for the job.
+    required: true
+  extensions:
+    description: PHP extensions to install.
+    required: false
+    default: curl
+  tools:
+    description: PHP tools to install globally.
+    required: false
+    default: composer
+
+runs:
+  using: composite
+  steps:
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        extensions: ${{ inputs.extensions }}
+        tools: ${{ inputs.tools }}
+
+    - name: Cache vendor directory
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: vendor-${{ runner.os }}-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          vendor-${{ runner.os }}-${{ inputs.php-version }}-
+          vendor-${{ runner.os }}-
+
+    - name: Install dependencies
+      uses: ramsey/composer-install@v3
+      with:
+        dependency-versions: locked
+        composer-options: --no-interaction --no-progress --prefer-dist
