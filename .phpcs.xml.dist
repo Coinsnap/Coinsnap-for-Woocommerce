@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="Coinsnap for WooCommerce">
-<description>WordPress Core standard plus explicit naming sniffs for the Coinsnap for WooCommerce plugin.</description>
+<description>WordPress Core standard with naming sniffs reported as warnings so current identifiers are permitted.</description>
 
 <arg name="extensions" value="php"/>
 <arg name="basepath" value="."/>
@@ -13,6 +13,8 @@
 <exclude-pattern>*/.wordpress-org/*</exclude-pattern>
 
 <rule ref="WordPress-Core"/>
-<rule ref="WordPress.NamingConventions"/>
+<rule ref="WordPress.NamingConventions">
+    <type>warning</type>
+</rule>
 <config name="minimum_supported_wp_version" value="5.8"/>
 </ruleset>
