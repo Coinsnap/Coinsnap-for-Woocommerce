@@ -1,0 +1,37 @@
+name: Sync to WordPress SVN
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  deploy:
+    name: Deploy to WordPress.org SVN
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure tag points to main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Tag commit is not on the main branch; skipping deployment."
+            exit 1
+          fi
+
+      - name: WordPress Plugin SVN Deploy
+        # Marketplace action: https://github.com/marketplace/actions/wordpress-plugin-svn-deploy
+        uses: 10up/action-wordpress-plugin-deploy@v2
+        with:
+          slug: coinsnap-for-woocommerce
+          build_dir: .
+          assets_dir: .wordpress-org
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}

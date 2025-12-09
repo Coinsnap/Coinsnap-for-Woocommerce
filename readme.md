@@ -71,10 +71,10 @@ Also, Coinsnap’s Bitcoin payment plugin for WooCommerce is the only such plugi
 * Installation Guide: [https://coinsnap.io/modules/woocommerce/woocommerce-installation-guide/](https://coinsnap.io/modules/woocommerce/woocommerce-installation-guide/)
 * Github plugin page: [https://github.com/Coinsnap/Coinsnap-for-Woocommerce](https://github.com/Coinsnap/Coinsnap-for-Woocommerce)
 
-## Documentation: 
+## Documentation:
 
 * [Coinsnap API (1.0) documentation](https://docs.coinsnap.io/)
-* [Frequently Asked Questions](https://coinsnap.io/help/coinsnap-faq/) 
+* [Frequently Asked Questions](https://coinsnap.io/help/coinsnap-faq/)
 * [Terms and Conditions](https://coinsnap.io/info/general-terms-and-conditions/)
 * [Privacy Policy](https://coinsnap.io/info/privacy-policy/)
 

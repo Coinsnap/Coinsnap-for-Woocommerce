@@ -1,0 +1,145 @@
+name: CI Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-phpcs:
+    name: Run PHPCS
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        php-version: ["8.1", "8.4"]
+    steps:
+      - name: Setup job
+        uses: ./.github/actions/php-job-setup
+        with:
+          php-version: ${{ matrix.php-version }}
+
+      - name: Run PHPCS
+        id: phpcs
+        run: vendor/bin/phpcs --standard=.phpcs.xml.dist --report=checkstyle --report-file=phpcs-report.xml
+
+      - name: Show PHPCS results in PR
+        if: ${{ always() && steps.phpcs.outcome == 'failure' }}
+        run: vendor/bin/cs2pr ./phpcs-report.xml
+
+      - name: Upload PHPCS report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpcs-report-${{ matrix.php-version }}
+          path: phpcs-report.xml
+          retention-days: 7
+
+  run-phpstan:
+    name: Run PHPStan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        php-version: ["8.1", "8.4"]
+    steps:
+      - name: Setup job
+        uses: ./.github/actions/php-job-setup
+        with:
+          php-version: ${{ matrix.php-version }}
+
+      - name: Ensure PHPStan cache directory exists
+        run: mkdir -p var/phpstan
+
+      - name: Cache PHPStan results
+        uses: actions/cache@v4
+        with:
+          path: var/phpstan
+          key: phpstan-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            phpstan-${{ runner.os }}-${{ matrix.php-version }}-
+            phpstan-${{ runner.os }}-
+
+      - name: Run PHPStan
+        id: phpstan
+        run: |
+          set -o pipefail
+          vendor/bin/phpstan analyse -c phpstan.neon.dist --error-format=checkstyle \
+            --memory-limit=1G --no-progress | tee phpstan-report.xml
+
+      - name: Show PHPStan results in PR
+        if: ${{ always() && steps.phpstan.outcome == 'failure' }}
+        run: vendor/bin/cs2pr ./phpstan-report.xml
+
+      - name: Upload PHPStan report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpstan-report-${{ matrix.php-version }}
+          path: phpstan-report.xml
+          retention-days: 7
+
+  run-php-cs-fixer:
+    name: Check formatting with PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Setup job
+        uses: ./.github/actions/php-job-setup
+        with:
+          php-version: 8.4
+
+      # Formatting is run on the latest PHP release since PHP-CS-Fixer itself
+      # targets modern runtimes and the coding style is PHP-version agnostic.
+
+      - name: Ensure clean working tree
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Working tree has unexpected changes before formatting." >&2
+            git status --short
+            exit 1
+          fi
+
+      - name: Apply formatting
+        # PHP-CS-Fixer only targets PHP files as configured in .php-cs-fixer.php.
+        # Requires the "format" Composer script defined in composer.json.
+        run: composer format
+
+      - name: Capture formatting diff
+        id: format-check
+        run: |
+          git diff --name-only > format-changed-files.txt
+          git diff --binary > php-cs-fixer.patch
+          if git diff --quiet --exit-code; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          elif [ -s format-changed-files.txt ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload formatting patch
+        if: ${{ always() && steps.format-check.outputs.has_changes == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-cs-fixer-patch
+          path: |
+            php-cs-fixer.patch
+            format-changed-files.txt
+          retention-days: 7
+
+      - name: Fail if formatting changes are required
+        if: ${{ steps.format-check.outputs.has_changes == 'true' }}
+        run: |
+          echo "PHP-CS-Fixer made changes. Please apply formatting locally before pushing." >&2
+          exit 1
