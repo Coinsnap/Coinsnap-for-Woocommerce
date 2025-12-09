@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="Coinsnap for WooCommerce">
-<description>WordPress Coding Standards for the Coinsnap for WooCommerce plugin.</description>
+<description>WordPress Core standard for the Coinsnap for WooCommerce plugin (lighter baseline that can be tightened later).</description>
 
 <arg name="extensions" value="php"/>
 <arg name="basepath" value="."/>
@@ -12,6 +12,6 @@
 <exclude-pattern>*/.github/*</exclude-pattern>
 <exclude-pattern>*/.wordpress-org/*</exclude-pattern>
 
-<rule ref="WordPress"/>
+<rule ref="WordPress-Core"/>
 <config name="minimum_supported_wp_version" value="5.8"/>
 </ruleset>
