@@ -1,6 +1,7 @@
 <?php
 declare( strict_types=1 );
 namespace Coinsnap\WC\Helper;
+defined( 'ABSPATH' ) || exit();
 
 //  Helper class to render the order_states as a custom field in global settings form.
 class OrderStates {

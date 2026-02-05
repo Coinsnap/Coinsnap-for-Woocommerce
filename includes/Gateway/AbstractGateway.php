@@ -59,14 +59,17 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
      * Discount value indication
      */
     public function getDiscount(): string {
-	$discount_enabled = (null !== $this->get_option('discount_enable') && $this->get_option('discount_enable') > 0)? true : false;
+	$discount_enabled = ('yes' === $this->get_option('discount_enable') || $this->get_option('discount_enable') > 0)? true : false;
         if($discount_enabled){
             $discount_type = $this->get_option('discount_type');
             if($discount_type === 'fixed' && floatval($this->get_option('discount_amount')) > 0){
                 return '<span class="discount_value">-'.esc_html(floatval($this->get_option('discount_amount'))).'</span><span class="discount_currency">'.esc_html(strtoupper(get_option( 'woocommerce_currency' ))).'</span>';
             }
-            elseif(null !== $this->get_option('discount_percentage')) {
+            elseif(null !== $this->get_option('discount_percentage') && floatval($this->get_option('discount_percentage')) > 0) {
                 return '<span class="discount_percent">-'.esc_html($this->get_option('discount_percentage')).'<small>%</small></span>';
+            }
+            else {
+                return '';
             }
         }
         else {
