@@ -1,7 +1,7 @@
 <?php
-
 declare(strict_types=1);
 namespace Coinsnap\WC\Helper;
+defined( 'ABSPATH' ) || exit();
 
 use Coinsnap\Client\Invoice;
 use Coinsnap\Client\Server;

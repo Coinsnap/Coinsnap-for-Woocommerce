@@ -1,6 +1,6 @@
 <?php
-
 namespace Coinsnap\WC\Gateway;
+defined( 'ABSPATH' ) || exit();
 
 //  Default Gateway that provides all available payment methods of Coinsnap Server store configuration.
 class DefaultGateway extends AbstractGateway {

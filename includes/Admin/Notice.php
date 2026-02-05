@@ -1,7 +1,7 @@
 <?php
-
 declare(strict_types=1);
 namespace Coinsnap\WC\Admin;
+defined( 'ABSPATH' ) || exit();
 
 class Notice {
 //  Adds notice to the admin UI.

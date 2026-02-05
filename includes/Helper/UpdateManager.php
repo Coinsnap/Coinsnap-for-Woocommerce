@@ -1,6 +1,6 @@
 <?php
-
 namespace Coinsnap\WC\Helper;
+defined( 'ABSPATH' ) || exit();
 
 use Coinsnap\WC\Admin\Notice;
 

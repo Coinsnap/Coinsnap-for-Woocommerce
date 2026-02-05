@@ -146,7 +146,6 @@ class Invoice extends AbstractClient{
             'redirectAutomatically' => $redirectAutomatically,
             'walletMessage' => $walletMessage,
             'checkout' => [
-                'redirectUrl'           => $redirectUrl,
                 'redirectAutomatically' => $redirectAutomatically,
                 'redirectUrl' => $redirectUrl,
             ]

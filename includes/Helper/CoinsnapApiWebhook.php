@@ -1,8 +1,7 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Coinsnap\WC\Helper;
+defined( 'ABSPATH' ) || exit();
 
 use Coinsnap\Client\Webhook;
 use Coinsnap\Result\Webhook as WebhookResult;
