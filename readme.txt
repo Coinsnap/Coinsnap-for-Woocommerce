@@ -2,7 +2,7 @@
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
 Tested up to: 6.9
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -400,3 +400,6 @@ If you have any other questions, please use our support area. After you have reg
 = 1.7.3 :: 2026-02-05 =
 * Updated Coinsnap settings form.
 * Compatibility with Wordpress 6.9.1 is tested.
+
+= 1.7.4 :: 2026-03-06 =
+* Compatibility with WooCommerce 10.5.0 - 10.5.3 is tested.
