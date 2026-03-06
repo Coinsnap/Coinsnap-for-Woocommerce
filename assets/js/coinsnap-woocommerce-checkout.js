@@ -24,7 +24,7 @@ jQuery(document).ready(function ($) {
             jQuery.post( ajaxurl, data, function( response ){
                 checkoutDiscountResponse = $.parseJSON(response);
                 console.log(response);
-                if(checkoutDiscountResponse['result'] === true){
+                if(checkoutDiscountResponse['result'] === true && checkoutDiscountResponse['message'] != ''){
                     coinsnapDiscount = checkoutDiscountResponse['message'];
                     if(checkoutElement){
                         checkoutElement.append('<div class="coinsnap-bitcoin-discount">'+coinsnapDiscount+'</div>');

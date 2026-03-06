@@ -115,16 +115,6 @@ class GlobalSettings extends \WC_Settings_Page {
 		'id' => 'btcpay_api_key',
                 'class' => 'btcpay required'
             ],
-            
-            'default_description' => [
-		'title'       => esc_html_x('Default Customer Message','global_settings','coinsnap-for-woocommerce' ),
-		'type'        => 'textarea',
-		'desc'        => esc_html_x('Message to explain how the customer will be paying for the purchase. Can be overwritten on a per gateway basis.', 'global_settings', 'coinsnap-for-woocommerce' ),
-		'default'     => esc_html_x('You will be redirected to the Bitcoin-Lightning Payment Page to complete your purchase','global_settings','coinsnap-for-woocommerce'),
-		'desc_tip'    => true,
-		'id' => 'coinsnap_default_description'
-            ],
-            
             'order_states' => [
                 'type' => 'coinsnap_order_states',
                 'id' => 'coinsnap_order_states'
@@ -145,18 +135,6 @@ class GlobalSettings extends \WC_Settings_Page {
 		'desc' => _x( 'Makes Satoshis/Sats available as currency "SAT" (can be found in WooCommerce->Settings->General) and handles conversion to Bitcoin before creating the invoice on BTCPay server', 'global_settings', 'coinsnap-for-woocommerce' ),
 		'id' => 'coinsnap_sats_mode'
             ],
-            
-            'connection_status_display' => [
-                'title'     => esc_html_x( 'Display connection status', 'global_settings','coinsnap-for-woocommerce' ),
-		'type'      => 'select',
-                'options'   => [
-                    'settingspage' => __( 'On settings page only', 'coinsnap-for-woocommerce' ),
-                    'hideable' => __( 'Can be hidden from Admin pages', 'coinsnap-for-woocommerce' ),
-                    'everywhere'  => __( 'On all Admin pages', 'coinsnap-for-woocommerce' )
-                ],
-                'id' => 'coinsnap_connection_status_display',
-            ],
-                    
             'autoredirect' => [
                 'title' => __( 'Redirect after payment', 'coinsnap-for-woocommerce' ),
 		'type' => 'checkbox',
@@ -177,7 +155,7 @@ class GlobalSettings extends \WC_Settings_Page {
             'debug' => [
 		'title' => __( 'Debug Log', 'coinsnap-for-woocommerce' ),
 		'type' => 'checkbox',
-		'default' => 'no',
+		'default' => 'yes',
 		'desc' => sprintf( 
                     /* translators: 1: Logs link */
                     _x( 'Enable logging (<small><a href="%1$s" target="_blank">View Logs</a></small>)', 'global_settings', 'coinsnap-for-woocommerce' ), Logger::getLogFileUrl()),
@@ -300,12 +278,9 @@ class GlobalSettings extends \WC_Settings_Page {
     }
     
     public function coinsnap_output_custom_markup_field($value) {
-        //$_provider = get_option('coinsnap_provider');
-        //if($_provider === 'btcpay'){
-            echo '<tr valign="top">';
-            echo (!empty($value['title']))? '<th scope="row" class="titledesc">' . esc_html($value['title']) . '</th>' : '<th scope="row" class="titledesc">&nbsp;</th>';
-            echo '<td class="forminp" id="'.esc_html($value['id']).'">'.wp_kses($value['markup'],['button' => array('class' => true,'id' => true,'target' => true)]).'</td>';
-            echo '</tr>';
-        //}
+        echo '<tr valign="top">';
+        echo (!empty($value['title']))? '<th scope="row" class="titledesc">' . esc_html($value['title']) . '</th>' : '<th scope="row" class="titledesc">&nbsp;</th>';
+        echo '<td class="forminp" id="'.esc_html($value['id']).'">'.wp_kses($value['markup'],['button' => array('class' => true,'id' => true,'target' => true)]).'</td>';
+        echo '</tr>';
     }
 }

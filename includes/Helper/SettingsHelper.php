@@ -1,6 +1,6 @@
 <?php
-
 namespace Coinsnap\WC\Helper;
+defined( 'ABSPATH' ) || exit();
 
 class SettingsHelper {
 	public function gatewayFormFields(
