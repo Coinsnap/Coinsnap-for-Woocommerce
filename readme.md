@@ -162,62 +162,15 @@ From here on you can follow 1.1 to 1.4 and you will be set to sell for Bitcoin i
 
 # Frequently Asked Questions
 
-**What are the requirements for accepting Bitcoin in my WooCommerce shop?**
-
-In addition to your WooCommerce shop, you need a [Coinsnap account](https://coinsnap.io/register) and a [Bitcoin Lightning Wallet](https://coinsnap.io/blog/how-do-i-get-a-lightning-wallet/). There are no further requirements.
-
-**Can I customise my Bitcoin Lightning Checkout?**
-
-Yes, you can determine the name of the payment method yourself and upload your own icon/logo. You can also formulate the display texts during the individual steps of the checkout yourself. You can also determine the destination of the redirect upon successful payment yourself.
-
-**Do I need technical knowledge for the installation?**
-
-You can set up the plugin yourself in just a few steps using our [installation instructions](https://coinsnap.io/coinsnap-for-woocommerce-installation-guide/). If you have any difficulties with the installation, you can also contact our [free installation service](https://share-eu1.hsforms.com/1T9orZQ1GRDKWmoS_pOxNtw2d98nw).
-
-**How quickly are Bitcoin payments credited?**
-
-Your customers can pay with both Bitcoin Lightning and Bitcoin on-chain. Bitcoin Lightning payments are immediately available on your wallet. Bitcoin on-chain payments are credited as soon as the first confirmation is received in the blockchain.
-
-**Are my customer transactions stored by Coinsnap?**
-
-Coinsnap does not store any of its merchants' Bitcoin. All of your customer’s Bitcoin payments are transferred directly from your customers’ wallet to the merchant wallet.
-
-**What fees are charged?**
-
-The transaction fee is only 1%*, significantly less than with credit cards or PayPal (* with referrer code).
-
-**Can I receive Bitcoin payments to my bank account?**
-
-Yes, you can select the payout method ‘by bank transfer’ and our partner DFX when registering your Coinsnap account. Your incoming payment will then be forwarded to the Swiss Bitcoin broker, who will pay out the amount in EUR to your bank account. You can find more information here.
-
-**Can customers make a chargeback?**
-
-Chargebacks of customer payments are not possible with Bitcoin payments. This means that every Bitcoin payment is secure and guaranteed for you as a merchant.
-
-**Which wallets can I use?**
-
-You need a [Bitcoin Lightning wallet](https://coinsnap.io/blog/how-do-i-get-a-lightning-wallet/) to credit your Bitcoin transactions. Coinsnap recommends the Bitcoin Lightning Wallets from Wallet of Satoshi, Strike or the Blink Wallet. However, there are many other Bitcoin Lightning wallets that you can also use. You can find more information about Bitcoin Lightning wallets here!
-
-**Does the plugin only work in my region or language area?**
-
-The Coinsnap for WooCommerce plugin, as well as the Bitcoin blockchain and the Lightning network, are globally available and able to transfer payments worldwide, without interference from any banks. You can accept payments from any global customer who has a Lightning Wallet!
-
-**Are there regular updates for the Coinsnap for Woocommerce plugin?**
-
-Yes, our team is constantly working on improvements and new functions for the Coinsnap for WooCommerce plugin. If there is a new version, this will be automatically displayed in WordPress under Plugins and you can update the plugin with one click. This means you always have the latest version of the WooCommerce plugin installed!
-
-**Where can I get support if I have questions?**
-
-Our team is always there for you. If you need help installing the plugin, please refer to the WooCommerce installation guide. There is also an option there to request an installation service.
-
-If you have any other questions, please use our support area. After you have registered with Coinsnap, you will find the support area in your dashboard - here you can ask us your questions at any time!
-
-
-# Frequently Asked Questions
-
 **What are the requirements for accepting Bitcoin in my WooCommerce store?**
 
-You need an active WooCommerce store and a Coinsnap merchant account. You can receive payments in a compatible Bitcoin or Lightning wallet, including the Coinsnap Wallet, or use a supported off-ramp for fiat settlement. You do not need to run your own Lightning node or Bitcoin payment server when using Coinsnap.
+You need an active WooCommerce store and a Coinsnap merchant account. For Bitcoin settlement, you can use a compatible Bitcoin or Lightning wallet. You do not need to run your own Lightning node or Bitcoin payment server when using Coinsnap.
+
+**Which Bitcoin or Lightning wallets can I use?**
+
+You can use a compatible Bitcoin or Lightning wallet as your settlement wallet. One option is the [Coinsnap Wallet](https://coinsnap.io/wallet/), which combines a self-custodial Bitcoin wallet with merchant and point-of-sale functionality.
+
+Other compatible wallets may include solutions such as Wallet of Satoshi, Blink and Zeus, depending on the settlement setup you choose.
 
 **Can I customize my Bitcoin checkout?**
 
@@ -237,7 +190,7 @@ Lightning payments are typically confirmed within seconds. On-chain Bitcoin paym
 
 **Does Coinsnap hold my Bitcoin?**
 
-No. Coinsnap is non-custodial and does not hold or manage merchant funds. Payments are sent directly to the merchant's configured wallet, or converted and settled through a connected off-ramp if the merchant chooses fiat settlement.
+No. Coinsnap is non-custodial and does not hold or manage merchant funds. Payments are sent to the merchant's configured wallet, or converted and settled through a connected off-ramp if the merchant chooses fiat settlement.
 
 **What fees does Coinsnap charge?**
 
@@ -251,9 +204,17 @@ Yes. The WooCommerce plugin also supports BTCPay Server for merchants who prefer
 
 Yes. Coinsnap supports integrations with off-ramp partners that can convert Bitcoin payments and settle the proceeds to a bank account, subject to the selected provider's availability and conditions.
 
+**Can customers charge back a Bitcoin payment?**
+
+Bitcoin payments do not support chargebacks in the same way as card payments. Merchants should still handle refunds according to their own store policies.
+
 **Is the plugin available worldwide?**
 
 Yes. Coinsnap is designed for merchants worldwide. Bitcoin and Lightning payments can be accepted from customers globally, subject to any legal or service restrictions that may apply in the merchant's jurisdiction.
+
+**Are there regular updates for the Coinsnap for WooCommerce plugin?**
+
+Yes. The plugin is actively maintained and updated for compatibility, improvements and new functionality. Available updates are shown in WordPress and can be installed through the normal plugin update process.
 
 **Where can I get support?**
 
