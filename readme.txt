@@ -1,22 +1,24 @@
 === Bitcoin payment for WooCommerce ===
 Contributors: coinsnap
-Tags: Lightning, SATS, bitcoin, WooCommerce, payment gateway
+Tags: bitcoin, lightning, woocommerce, bitcoin payments, btcpay server
+Requires at least: 6.0
 Tested up to: 6.9
+Requires PHP: 7.4
 Stable tag: 1.7.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Accept Bitcoin and Lightning payments in WooCommerce with Coinsnap or your own BTCPay Server. No own Lightning node required.
+Accept Bitcoin and Lightning payments in WooCommerce with Coinsnap or your own BTCPay Server. Self-custody, on-chain + Lightning, Bitcoin discount.
 
 == Description ==
 
 = Accept Bitcoin and Lightning payments in WooCommerce =
 
-Coinsnap for WooCommerce is an open-source Bitcoin payment plugin that adds Bitcoin payments directly to the WooCommerce checkout.
+Coinsnap for WooCommerce is an open-source Bitcoin payment plugin that adds Bitcoin payments directly to the native WooCommerce checkout.
 
-Customers can pay with **Bitcoin via Lightning or on-chain**, while merchants keep their existing WooCommerce order and checkout workflow.
+Customers can pay with **Bitcoin via Lightning or on-chain** while merchants keep their existing WooCommerce order, checkout, tax, shipping, coupon and fulfillment workflows.
 
-When using Coinsnap, merchants do not need to operate their own Bitcoin or Lightning payment infrastructure. Coinsnap follows a **non-custodial / self-custody model** and does not hold merchant funds. Payments are sent to the merchant's configured Bitcoin or Lightning wallet, or can be converted and settled to a bank account through a supported off-ramp.
+When using Coinsnap, merchants do not need to operate their own Bitcoin or Lightning payment infrastructure. Coinsnap follows a **non-custodial / self-custody model** and does not hold merchant Bitcoin.
 
 Coinsnap is **Bitcoin payment software for merchants** and a brand of **Onlineshop24 d.o.o., Serbia**.
 
@@ -26,207 +28,153 @@ Coinsnap is **Bitcoin payment software for merchants** and a brand of **Onlinesh
 * Support for **Lightning and Bitcoin on-chain**
 * Native integration into the WooCommerce checkout
 * Automatic WooCommerce order status updates after payment
+* Works with existing WooCommerce order, tax, shipping and coupon workflows
 * Customizable payment method name, checkout text, icon and redirect behavior
+* Optional **Bitcoin discount** as a fixed amount or percentage
 * No own Lightning node or Bitcoin payment server required when using Coinsnap
 * **Non-custodial / self-custody** payment model
 * Settlement to a configured Bitcoin or Lightning wallet
 * Optional fiat settlement through supported off-ramp partners
-* Support for **BTCPay Server** for merchants who prefer a self-hosted Bitcoin payment infrastructure
+* Support for **BTCPay Server** for merchants who prefer self-hosted Bitcoin payment infrastructure
 * Open source and free to install
 
 = How it works =
 
 1. Create a [Coinsnap merchant account](https://app.coinsnap.io/register).
 2. Install and activate the Coinsnap for WooCommerce plugin.
-3. Connect WooCommerce to your Coinsnap account using your Store ID and API key.
-4. Enable Bitcoin as a payment method in WooCommerce.
-5. Customers select Bitcoin at checkout and pay by scanning the displayed QR code.
-6. Coinsnap detects the payment and updates the WooCommerce order automatically.
+3. Open the Coinsnap settings in WooCommerce.
+4. Select Coinsnap or BTCPay Server as your payment provider.
+5. Connect the selected provider.
+6. Enable Bitcoin as a payment method in WooCommerce.
+7. Optionally configure a Bitcoin discount and customize the checkout.
+8. Customers select Bitcoin at checkout and pay by scanning the displayed QR code.
+9. The WooCommerce order status is updated automatically after payment.
 
 = Coinsnap or BTCPay Server =
 
-The plugin supports two operating modes:
+The plugin supports two payment-provider modes:
 
 * **Coinsnap** – for merchants who want to accept Bitcoin without running their own payment infrastructure.
 * **BTCPay Server** – for merchants who operate their own BTCPay Server and want to connect it to WooCommerce through the same plugin.
+
+= Bitcoin discount =
+
+Merchants can configure a **fixed or percentage-based discount** that applies when customers choose Bitcoin as their payment method.
+
+This can be used to encourage Bitcoin payments directly at checkout.
 
 = Fees =
 
 Coinsnap charges a **1% transaction fee**. The fee is charged separately against the merchant's Coinsnap credit because Coinsnap does not deduct fees from the Bitcoin payment itself.
 
+= Settlement =
+
+Bitcoin payments can be settled to a compatible Bitcoin or Lightning wallet.
+
+One option is the [Coinsnap Wallet](https://coinsnap.io/wallet/), which combines a self-custodial Bitcoin wallet with merchant and point-of-sale functionality.
+
+Depending on the merchant setup and supported partner integrations, Bitcoin payments can also be converted and settled to a bank account.
+
 = More information =
 
 * Demo Store: [https://woocommerce.coinsnap.org/](https://woocommerce.coinsnap.org/)
-* Product page: [https://coinsnap.io/modules/woocommerce/](https://coinsnap.io/modules/woocommerce/)
-* Installation Guide: [https://coinsnap.io/modules/woocommerce/woocommerce-installation-guide/](https://coinsnap.io/modules/woocommerce/woocommerce-installation-guide/)
-* GitHub plugin page: [https://github.com/Coinsnap/Coinsnap-for-Woocommerce](https://github.com/Coinsnap/Coinsnap-for-Woocommerce)
-* WordPress plugin directory: [https://wordpress.org/plugins/coinsnap-for-woocommerce/](https://wordpress.org/plugins/coinsnap-for-woocommerce/)
-
-= Documentation =
-
-* [Coinsnap API documentation](https://docs.coinsnap.io/)
-* [Coinsnap merchant FAQ](https://coinsnap.io/help/coinsnap-bitcoin-payment-faq/)
-* [Terms and Conditions](https://coinsnap.io/info/general-terms-and-conditions/)
-* [Privacy Policy](https://coinsnap.io/info/privacy-policy/)
+* Product page: [https://coinsnap.io/shop-systems/woocommerce/](https://coinsnap.io/shop-systems/woocommerce/)
+* User Guide: [https://coinsnap.io/user-guides/woocommerce-bitcoin-user-guide/](https://coinsnap.io/user-guides/woocommerce-bitcoin-user-guide/)
+* GitHub: [https://github.com/Coinsnap/Coinsnap-for-Woocommerce](https://github.com/Coinsnap/Coinsnap-for-Woocommerce)
+* WordPress Plugin Directory: [https://wordpress.org/plugins/coinsnap-for-woocommerce/](https://wordpress.org/plugins/coinsnap-for-woocommerce/)
+* Coinsnap Wallet: [https://coinsnap.io/wallet/](https://coinsnap.io/wallet/)
 
 == Installation ==
 
-= 1. Install the Coinsnap for WooCommerce plugin from the WordPress plugin repository =
+= Install from WordPress.org =
 
-The Coinsnap for WooCommerce plugin can be searched and installed in the WordPress plugin directory.
+1. In WordPress, go to **Plugins → Add New**.
+2. Search for **Bitcoin payment for WooCommerce** or **Coinsnap**.
+3. Click **Install Now** and activate the plugin.
+4. Go to **WooCommerce → Settings → Coinsnap Settings**.
+5. Select **Coinsnap** or **BTCPay Server** as the payment provider.
+6. Enter the required credentials and check the connection.
+7. Go to **WooCommerce → Settings → Payments** and enable the Bitcoin payment method.
+8. Customize the payment method text, icon, redirect and optional Bitcoin discount.
+9. Make a test payment before going live.
 
-You can easily find the Coinsnap for WooCommerce plugin under Plugins/Install new plugin if you enter Coinsnap WooCommerce in the search field. Simply click on Install now in the Coinsnap plugin and WordPress will install it for you.
+= Install from GitHub =
 
-Now WordPress will offer you to Activate the pugin – click the button and you set to go!
-
-Next, you will connect the plugin with your Coinsnap account.
-
-= 1.1. WooCommerce Coinsnap Settings =
-
-After you have installed and activated the Coinsnap for WooCommerce plugin, you need to configure the Coinsnap settings. To do that, go to **WooCommerce / Settings**. Now open the tab on the far right named **Coinsnap Settings**.
-
-You will see in a red message on the top of the tab, that there is a **Coinsnap serer is disconnected**. Ignore this for now, for we will now connect the plugin with your Coinsnap account.
-
-
-To do that, you need to enter your Coinsnap **Store ID** and your Coinsnap **API key**.
-
-These details are provided in your Coinsnap account in the **store settings** section. If you do not yet have a Coinsnap account, you can register under the following link: [Coinsnap registration](https://app.coinsnap.io/register).
-
-You will be asked to name your store, and to enter your Lightning wallet adress. When this is done you are ready for the next step.
-
-= 1.2. Enter Store ID and API Key in your WooCommerce Coinsnap Settings =
-
-Go to the **Settings** menu item in your Coinsnap merchant admin backend. Then click on **Store** and you will see your Coinsnap **Store ID** and the Coinsnap **API Key** in the **Store** section.
-
-**Copy** these two strings and **paste** them into the matching fields in the **Coinsnap settings in WooCommerce** in your shop’s backend. 
-
-Click on the “**Save changes**” button at the bottom of the page to apply and save the settings. You will now see a green message on top of the tab saying **Coinsnap server is connected**. You are almost ready to start selling for Bitcoin now.
-
-= 1.3. WooCommerce payment settings =
-
-Now you need to **add the payment method** Bitcoin-Lightning payment to your **WooCommerce checkout**.
-
-To do this, navigate to the **Payments** tab under the WooCommerce settings to see a list of all available payment methods. Coinsnap is shown at the bottom of the list.
-
-(1) **Enable** Coinsnap by moving the slider to the right.
-
-You must activate Coinsnap as a payment option!
-
-**Additional configurations – customize your checkout**
-
-To do this, click on the “**Finish setup**” button (or the “**Manage**” button after you activated the payment method). Here you can make some adjustments that impact the customer’s journey during the payment process.
-
-(a) **Enabled/Disabled**: Make sure the gateway is enabled!
-(b) **Title**: You can change the default text, i.e. to „Bitcoin/Lightning payment“.
-(c) **Customer Message**: Here you should let your customer know what to expect next. 
-(d) **Button Text**: you can also change the text on the button that initiates the actual payment and generatest he QR code for your customer’s payment, i.e. to „I want to pay with Bitcoin now!“  
-(e) **Gateway symbol**: Here you can upload an icon of your choice that illustrates the Bitcoin-Lightning payment method in your checkout. This image serves as a visual indicator for a specific payment option or gateway that is displayed to the customer at the time of checkout.
-
-= YOU ARE SET TO SELL FOR BITCOIN NOW! To be sure all works fine, you should now… =
-
-= 1.4. Test the payment method in your WooCommerce store =
-
-After all settings have been made, a test transaction should be carried out.
-
-Place an order in your WooCommerce online store and choose the Bitcoin-Lightning Payment option. Click on Pay with Bitcoin.
-
-You will now be redirected to the Bitcoin-Lightning payment page to complete the purchase. The Bitcoin payment page is now displayed and offers the payer the option of paying with Bitcoin or Lightning. Both methods are integrated in the displayed QR code. After successful payment, the invoice can be viewed in detail.
-
-
-= 2. Install the Coinsnap WooCommerce plugin from our Github page =
-
-If you don’t want to install Coinsnap WooCommerce plugin directly from your WordPress backend, download the Coinsnap for WooCommerce plugin from the [Coinsnap Github page here](https://github.com/Coinsnap/Coinsnap-for-Woocommerce).
-
-Find the green button labeled **Code**. When you click on it, the menu opens and Download ZIP appears. Here you can download the latest version of the Coinsnap plugin to your computer.
-
-Then use the “**Upload plugin**” function to install it. Click on “**Install now**” and the Coinsnap for WooCommerce plugin will be added to your WordPress website. It can then be connected to the Coinsnap payment gateway.
-
-As soon as the Coinsnap for WooCommerce plugin is installed and activated, a message will appear asking you to configure the plugin settings.
-
-From here on you can follow 1.1 to 1.4 and you will be set to sell for Bitcoin in no time at all!
-
-
-
-== Upgrade Notice ==
-
-Follow updates on the plugin's [GitHub page](https://github.com/Coinsnap/Coinsnap-for-Woocommerce).
+1. Download this repository as a ZIP archive.
+2. In WordPress, go to **Plugins → Add New → Upload Plugin**.
+3. Upload, install and activate the plugin.
+4. Configure Coinsnap or BTCPay Server as described above.
 
 == Frequently Asked Questions ==
 
 = What are the requirements for accepting Bitcoin in my WooCommerce store? =
 
-You need an active WooCommerce store and a Coinsnap merchant account. For Bitcoin settlement, you can use a compatible Bitcoin or Lightning wallet. You do not need to run your own Lightning node or Bitcoin payment server when using Coinsnap.
-
-= Which Bitcoin or Lightning wallets can I use? =
-
-You can use a compatible Bitcoin or Lightning wallet as your settlement wallet. One option is the [Coinsnap Wallet](https://coinsnap.io/wallet/), which combines a self-custodial Bitcoin wallet with merchant and point-of-sale functionality.
-
-Other compatible wallets may include solutions such as Wallet of Satoshi, Blink and Zeus, depending on the settlement setup you choose.
-
-= Can I customize my Bitcoin checkout? =
-
-Yes. You can define the payment method name, upload your own icon or logo, customize checkout text, and configure the redirect after a successful payment.
-
-= Do I need technical knowledge to install the plugin? =
-
-No advanced technical knowledge is required. The plugin can be installed through WordPress, connected with your Coinsnap credentials, and enabled as a WooCommerce payment method.
+You need WordPress 6.0 or newer, WooCommerce 6.0 or newer, PHP 7.4 or newer, and either a Coinsnap merchant account or your own BTCPay Server.
 
 = Can customers pay with both Lightning and Bitcoin on-chain? =
 
-Yes. Coinsnap supports Bitcoin payments via both the Lightning Network and Bitcoin on-chain.
+Yes. The plugin supports both Lightning and Bitcoin on-chain payments.
 
-= How quickly are Bitcoin payments processed? =
+= Can I use my own BTCPay Server instead of Coinsnap? =
 
-Lightning payments are typically confirmed within seconds. On-chain Bitcoin payments are detected when the transaction appears on the Bitcoin network, while final blockchain confirmation takes longer depending on network conditions.
+Yes. The plugin supports BTCPay Server as an alternative payment provider.
+
+= Can I offer a Bitcoin discount? =
+
+Yes. You can configure a fixed or percentage-based discount for customers who choose Bitcoin at checkout.
+
+= Can I customize the Bitcoin checkout? =
+
+Yes. You can define the payment method name, upload your own icon or logo, customize checkout text and configure the redirect after successful payment.
+
+= Do I need my own Lightning node? =
+
+No. When using Coinsnap, you do not need to operate your own Lightning node or Bitcoin payment server.
+
+= Which Bitcoin or Lightning wallets can I use? =
+
+You can use a compatible Bitcoin or Lightning wallet for settlement. One option is the [Coinsnap Wallet](https://coinsnap.io/wallet/). Other compatible wallets may include Wallet of Satoshi, Blink and Zeus, depending on the settlement setup you choose.
 
 = Does Coinsnap hold my Bitcoin? =
 
-No. Coinsnap is non-custodial and does not hold or manage merchant funds. Payments are sent to the merchant's configured wallet, or converted and settled through a connected off-ramp if the merchant chooses fiat settlement.
+No. Coinsnap follows a non-custodial approach and does not hold merchant Bitcoin.
 
 = What fees does Coinsnap charge? =
 
 Coinsnap charges a 1% transaction fee. The fee is charged separately against the merchant's Coinsnap credit and is not deducted from the Bitcoin payment.
 
-= Can I use my own BTCPay Server instead of Coinsnap? =
+= Can I receive settlement in my bank account? =
 
-Yes. The WooCommerce plugin also supports BTCPay Server for merchants who prefer to operate their own self-hosted Bitcoin payment infrastructure.
-
-= Can I receive Bitcoin sales in my bank account? =
-
-Yes. Coinsnap supports integrations with off-ramp partners that can convert Bitcoin payments and settle the proceeds to a bank account, subject to the selected provider's availability and conditions.
+Depending on the merchant setup and supported partner integrations, Bitcoin payments can be converted and settled to a bank account.
 
 = Can customers charge back a Bitcoin payment? =
 
-Bitcoin payments do not support chargebacks in the same way as card payments. Merchants should still handle refunds according to their own store policies.
+Bitcoin payments do not support card-style chargebacks. Merchants should still handle refunds according to their own store policies.
 
 = Is the plugin available worldwide? =
 
-Yes. Coinsnap is designed for merchants worldwide. Bitcoin and Lightning payments can be accepted from customers globally, subject to any legal or service restrictions that may apply in the merchant's jurisdiction.
-
-= Are there regular updates for the Coinsnap for WooCommerce plugin? =
-
-Yes. The plugin is actively maintained and updated for compatibility, improvements and new functionality. Available updates are shown in WordPress and can be installed through the normal plugin update process.
+Yes. The plugin is designed for merchants worldwide, subject to any legal or service restrictions that apply in the merchant's jurisdiction.
 
 = Where can I get support? =
 
-Use the support area in your Coinsnap merchant account or visit the [Coinsnap merchant FAQ](https://coinsnap.io/help/coinsnap-bitcoin-payment-faq/).
+Use the support area in your Coinsnap merchant account or visit the official Coinsnap website.
 
 == Screenshots ==
 
-1. Install the Coinsnap for WooCommerce Plugin in WordPress
-2. Activate plugin!
-3. Go to the Coinsnap Settings tab in WooCommerce settings
-4. Now you need to fill the fields „Coinsnap Store ID“ and „Coinsnap API Key“
-5. You find these data in your Coinsnap backend
-6. Add these strings in fields 2 and 3, respectively
-7. Go to „Payments“ tab in the WooCommerce settings to activate Bitcoin payment (1)
-8. Customize the checkout process according to your needs
-9. Bitcoin payment activated
-10. Coinsnap plugin connected to Coinsnap payment gateway
-11. Coinsnap plugin connected to BTCPay server
-12. Download Coinsnap for WooCommerce on github
-13. QR code on the Bitcoin payment page
-14. Invoice is paid
+1. Install the Coinsnap for WooCommerce plugin in WordPress
+2. Activate the plugin
+3. Open Coinsnap Settings in WooCommerce
+4. Enter the Coinsnap Store ID and API key
+5. Connect the plugin to Coinsnap
+6. Enable Bitcoin in WooCommerce payment settings
+7. Customize the Bitcoin checkout
+8. Configure the optional Bitcoin discount
+9. Bitcoin payment method at checkout
+10. Coinsnap payment-provider settings
+11. BTCPay Server payment-provider settings
+12. Bitcoin and Lightning payment page
+13. QR code for payment
+14. Paid WooCommerce order
 
 == Changelog ==
 = 1.0.0 :: 2023-08-03 =
