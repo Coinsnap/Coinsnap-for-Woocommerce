@@ -542,12 +542,41 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			return false;
 		}
 
-		$paid = $isBtcpay ? ($data['amount'] ?? null) : ($data['fiatAmount'] ?? null);
-		if ($paid === null || $paid === '') {
+		[$paid, $tolerance] = $isBtcpay
+			? $this->btcpayPaidAmount($data, $expectedCurrency)
+			: $this->coinsnapPaidAmount($data, $expectedCurrency);
+		if ($paid === null) {
 			return false;
 		}
-		$tolerance = ($expectedCurrency === 'BTC') ? 0.00000001 : (($expectedCurrency === 'SATS') ? 1 : 0.01);
-		return abs((float) $paid - $expectedAmount) <= $tolerance + 1e-12;
+		return abs($paid - $expectedAmount) <= $tolerance + 1e-12;
+	}
+
+	// BTCPay: amount is in the invoice currency, exactly as created.
+	private function btcpayPaidAmount(array $data, string $currency): array {
+		$amount = $data['amount'] ?? null;
+		$tolerance = ($currency === 'BTC') ? 0.00000001 : (($currency === 'SATS') ? 1 : 0.01);
+		return [is_numeric($amount) ? (float) $amount : null, $tolerance];
+	}
+
+	// Coinsnap: amount is whole sats; fiatAmount is derived as sats / 1e8 * exchangeRate (null for BTC/SATS invoices),
+	// so a fiat comparison must allow for rounding to a whole sat.
+	private function coinsnapPaidAmount(array $data, string $currency): array {
+		$sats = $data['amount'] ?? null;
+		if ($currency === 'SATS') {
+			return [is_numeric($sats) ? (float) $sats : null, 1];
+		}
+		if ($currency === 'BTC') {
+			return [is_numeric($sats) ? (float) $sats / 100000000 : null, 0.00000001];
+		}
+		$fiat = $data['fiatAmount'] ?? null;
+		if (!is_numeric($fiat)) {
+			return [null, 0];
+		}
+		$rate = $data['exchangeRate'] ?? null;
+		$satValue = is_numeric($rate) && (float) $rate > 0
+			? (float) $rate / 100000000
+			: ((is_numeric($sats) && (float) $sats > 0) ? (float) $fiat / (float) $sats : 0);
+		return [(float) $fiat, max(0.01, 2 * $satValue)];
 	}
 
 	// Records the invoice as handled. Returns false if it was handled before, so payment is completed only once.
