@@ -196,8 +196,11 @@ class GlobalSettings extends \WC_Settings_Page {
     /**
     * On saving the settings form make sure to check if the API key works and register a webhook if needed.
     */
+    private $previousBtcpayUrl = null;
+
     public function save() {
-        
+        $this->previousBtcpayUrl = (string) get_option('btcpay_server_url', '');
+
         $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         
         if( wp_verify_nonce($_nonce,'woocommerce-settings')){
@@ -211,7 +214,8 @@ class GlobalSettings extends \WC_Settings_Page {
             $apiKey  = ($coinsnap_provider !== 'btcpay')? 
                 sanitize_text_field(filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) : 
                 sanitize_text_field(filter_input(INPUT_POST,'btcpay_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS ));
-            if ($apiKey === '') {
+            // A stored key is reused only for the server it was issued for.
+            if ($apiKey === '' && ($coinsnap_provider !== 'btcpay' || $apiUrl === $this->previousBtcpayUrl)) {
                 $apiKey = (string) get_option(($coinsnap_provider !== 'btcpay') ? 'coinsnap_api_key' : 'btcpay_api_key', '');
             }
             
@@ -316,9 +320,19 @@ class GlobalSettings extends \WC_Settings_Page {
         echo '</td></tr>';
     }
 
-    // An empty secret field keeps the stored value (returning null tells WooCommerce not to save it).
+    // An empty secret field keeps the stored value (returning null tells WooCommerce not to save it),
+    // except that a BTCPay key is cleared when the BTCPay server URL changes.
     public function keepStoredSecret($value, $option, $rawValue) {
-        return (is_string($rawValue) && trim($rawValue) !== '') ? $value : null;
+        if (is_string($rawValue) && trim($rawValue) !== '') {
+            return $value;
+        }
+        if (($option['id'] ?? '') === 'btcpay_api_key' && $this->previousBtcpayUrl !== null) {
+            $postedUrl = (string) filter_input(INPUT_POST, 'btcpay_server_url', FILTER_SANITIZE_URL);
+            if ($postedUrl !== $this->previousBtcpayUrl) {
+                return '';
+            }
+        }
+        return null;
     }
 
     public function coinsnap_output_custom_markup_field($value) {

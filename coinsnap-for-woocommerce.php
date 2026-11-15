@@ -417,7 +417,11 @@ class CoinsnapWCPlugin {
                     null
 		);
 
-		// Store the host to options before we leave the site.
+		// Store the host to options before we leave the site. A key issued by another server is dropped.
+		if ($host !== get_option('btcpay_server_url')) {
+                    update_option('btcpay_api_key', '');
+                    update_option('btcpay_store_id', '');
+		}
 		update_option('btcpay_server_url', $host);
 
 		// Return the redirect url.
