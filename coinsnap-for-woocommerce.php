@@ -404,8 +404,10 @@ class CoinsnapWCPlugin {
             $permissions = BTCPayApiAuthorization::REQUIRED_PERMISSIONS;
 
             try {
+                // Store the host before we leave the site; a change clears the old key (see onServerUrlChange).
+                update_option('btcpay_server_url', $host);
                 $callbackUrl = add_query_arg(
-                    ['coinsnap-for-woocommerce-btcpay-settings-callback' => '1', 'state' => BTCPayApiAuthorization::startState()],
+                    ['coinsnap-for-woocommerce-btcpay-settings-callback' => '1', 'state' => BTCPayApiAuthorization::startState((string) get_option('btcpay_server_url', ''))],
                     home_url('/')
                 );
 
@@ -420,12 +422,6 @@ class CoinsnapWCPlugin {
                     null
 		);
 
-		// Store the host to options before we leave the site. A key issued by another server is dropped.
-		if ($host !== get_option('btcpay_server_url')) {
-                    update_option('btcpay_api_key', '');
-                    update_option('btcpay_store_id', '');
-		}
-		update_option('btcpay_server_url', $host);
 
 		// Return the redirect url.
 		wp_send_json_success(['url' => $url]);
@@ -537,7 +533,7 @@ add_action( 'template_redirect', function() {
     }
 
     $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
-    if (!BTCPayApiAuthorization::consumeState($state)) {
+    if (!BTCPayApiAuthorization::consumeState($state, (string) get_option('btcpay_server_url', ''))) {
         Logger::security('btcpay callback rejected', 'invalid state');
         wp_die(esc_html__('Unauthorized', 'coinsnap-for-woocommerce'), '', ['response' => 403]);
     }
@@ -575,6 +571,9 @@ add_action( 'template_redirect', function() {
     wp_safe_redirect($settingsUrl);
     exit;
 });
+
+// A key and store id belong to the BTCPay server that issued them.
+add_action('update_option_btcpay_server_url', [BTCPayApiAuthorization::class, 'onServerUrlChange'], 10, 2);
 
 // Installation routine.
 register_activation_hook( __FILE__, function() {

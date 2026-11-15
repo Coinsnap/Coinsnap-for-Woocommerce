@@ -320,19 +320,10 @@ class GlobalSettings extends \WC_Settings_Page {
         echo '</td></tr>';
     }
 
-    // An empty secret field keeps the stored value (returning null tells WooCommerce not to save it),
-    // except that a BTCPay key is cleared when the BTCPay server URL changes.
+    // An empty secret field keeps the stored value (returning null tells WooCommerce not to save it).
+    // A changed BTCPay URL clears the stored key separately (BTCPayApiAuthorization::onServerUrlChange).
     public function keepStoredSecret($value, $option, $rawValue) {
-        if (is_string($rawValue) && trim($rawValue) !== '') {
-            return $value;
-        }
-        if (($option['id'] ?? '') === 'btcpay_api_key' && $this->previousBtcpayUrl !== null) {
-            $postedUrl = (string) filter_input(INPUT_POST, 'btcpay_server_url', FILTER_SANITIZE_URL);
-            if ($postedUrl !== $this->previousBtcpayUrl) {
-                return '';
-            }
-        }
-        return null;
+        return (is_string($rawValue) && trim($rawValue) !== '') ? $value : null;
     }
 
     public function coinsnap_output_custom_markup_field($value) {
