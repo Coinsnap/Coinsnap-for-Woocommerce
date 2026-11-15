@@ -510,6 +510,26 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		$this->webhookReply(200, 'OK');
 	}
 
+	// Manual recovery for a missed webhook: asks the payment server for this order's invoice and applies
+	// the same paid decision. Returns [result, invoice status]; result is paid, not_paid, no_invoice or api_error.
+	public function checkPaymentStatus(\WC_Order $order): array {
+		$invoiceId = (string) $order->get_meta('Coinsnap_id');
+		if ($invoiceId === '') {
+			return ['no_invoice', ''];
+		}
+		try {
+			$invoice = (new Invoice($this->apiHelper->url, $this->apiHelper->apiKey))->getInvoice((string) $this->apiHelper->storeId, $invoiceId);
+		} catch (\Throwable $e) {
+			Logger::debug('Manual payment check: could not fetch invoice ' . $invoiceId . ': ' . $e->getMessage(), true);
+			return ['api_error', ''];
+		}
+		if ((string) ($invoice->getData()['id'] ?? '') !== $invoiceId) {
+			return ['api_error', ''];
+		}
+		$this->processOrderStatus($order, $invoice);
+		return [$order->is_paid() ? 'paid' : 'not_paid', (string) ($invoice->getData()['status'] ?? '')];
+	}
+
 	protected function webhookReply(int $status, string $message): void {
 		status_header($status);
 		echo esc_html($message);

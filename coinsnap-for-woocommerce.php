@@ -60,7 +60,9 @@ class CoinsnapWCPlugin {
             add_action( 'admin_enqueue_scripts', [ $this, 'connectionScriptsLoader' ] );
             add_action( 'wp_ajax_coinsnap_connection_handler', [$this, 'coinsnapConnectionHandler'] );
             add_action( 'wp_ajax_btcpay_server_apiurl_handler', [$this, 'btcpayApiUrlHandler'] );
-            
+            add_action( 'admin_post_coinsnap_check_payment', [$this, 'checkPaymentHandler'] );
+            add_action( 'admin_notices', [$this, 'checkPaymentNotice'] );
+
             if(filter_input(INPUT_GET,'page',FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'wc-orders'){
             
                 if(filter_input(INPUT_GET,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'edit'){
@@ -112,6 +114,64 @@ class CoinsnapWCPlugin {
     public function coinsnapOrderDetails($order){
         if( $order->get_meta( 'Coinsnap_transactionurl') !== null && !empty($order->get_meta( 'Coinsnap_transactionurl'))){
                 echo '<b>'.esc_html__('Transaction details','coinsnap-for-woocommerce').'</b>:<br/><a href="'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'" target="_blank" class="">'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'</a>';
+        }
+        // Manual recovery when a webhook was missed (Coinsnap does not redeliver automatically).
+        if ($order->get_meta('Coinsnap_id') && !$order->is_paid() && current_user_can('edit_shop_orders')) {
+            $url = wp_nonce_url(
+                add_query_arg(['action' => 'coinsnap_check_payment', 'order_id' => $order->get_id()], admin_url('admin-post.php')),
+                'coinsnap_check_payment_' . $order->get_id()
+            );
+            echo '<p><a class="button" href="' . esc_url($url) . '">' . esc_html__('Check payment status', 'coinsnap-for-woocommerce') . '</a></p>';
+        }
+    }
+
+    // Asks the payment server for the order's invoice and applies the same paid decision as a webhook.
+    public function checkPaymentHandler() {
+        $orderId = isset($_GET['order_id']) ? absint($_GET['order_id']) : 0;
+        check_admin_referer('coinsnap_check_payment_' . $orderId);
+        if (!current_user_can('edit_shop_orders')) {
+            wp_die(esc_html__('Unauthorized', 'coinsnap-for-woocommerce'), '', ['response' => 403]);
+        }
+        $order = wc_get_order($orderId);
+        if (!$order) {
+            wp_die(esc_html__('Order not found.', 'coinsnap-for-woocommerce'), '', ['response' => 404]);
+        }
+
+        $gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : [];
+        $gateway = (isset($gateways['coinsnap']) && $gateways['coinsnap'] instanceof DefaultGateway) ? $gateways['coinsnap'] : new DefaultGateway();
+        [$result, $status] = $gateway->checkPaymentStatus($order);
+
+        $order->add_order_note(sprintf(
+            /* translators: 1: result, 2: invoice status */
+            __('Payment status checked manually: %1$s (invoice status: %2$s).', 'coinsnap-for-woocommerce'),
+            $result,
+            $status !== '' ? $status : '-'
+        ));
+
+        wp_safe_redirect(add_query_arg(
+            ['coinsnap_check' => $result, 'coinsnap_status' => $status],
+            $order->get_edit_order_url()
+        ));
+        exit;
+    }
+
+    public function checkPaymentNotice() {
+        $result = isset($_GET['coinsnap_check']) ? sanitize_key(wp_unslash($_GET['coinsnap_check'])) : '';
+        if ($result === '' || !current_user_can('edit_shop_orders')) {
+            return;
+        }
+        $status = isset($_GET['coinsnap_status']) ? sanitize_text_field(wp_unslash($_GET['coinsnap_status'])) : '';
+        $known = ['New', 'Processing', 'Settled', 'Expired', 'Invalid'];
+        $status = in_array($status, $known, true) ? $status : '';
+        $messages = [
+            'paid' => ['success', __('Payment confirmed by the payment server. The order is marked as paid.', 'coinsnap-for-woocommerce')],
+            /* translators: %s: invoice status */
+            'not_paid' => ['warning', sprintf(__('The invoice is not paid in full for this order (status: %s). The order was not marked as paid; see the order notes.', 'coinsnap-for-woocommerce'), $status !== '' ? $status : '-')],
+            'no_invoice' => ['warning', __('This order has no Coinsnap invoice.', 'coinsnap-for-woocommerce')],
+            'api_error' => ['error', __('Could not reach the payment server. Please check the connection and try again.', 'coinsnap-for-woocommerce')],
+        ];
+        if (isset($messages[$result])) {
+            printf('<div class="notice notice-%1$s is-dismissible"><p><strong>Coinsnap:</strong> %2$s</p></div>', esc_attr($messages[$result][0]), esc_html($messages[$result][1]));
         }
     }
     

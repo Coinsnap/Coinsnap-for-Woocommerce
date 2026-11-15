@@ -353,6 +353,7 @@ Use the support area in your Coinsnap merchant account or visit the official Coi
 * Security: The connection check requires a shop manager, and admin pages use their own nonce.
 * Fix: "Enable discount" and "Send customer data" were treated as enabled when unchecked on PHP 8. Customer email, name and address are now sent only when "Send customer data" is enabled.
 * Fix: Payment notifications are no longer lost when the payment server is unavailable or rejects the API key; the server retries them.
+* Added: "Check payment status" button on unpaid Coinsnap orders. It asks the payment server for the invoice and updates the order, for example when a webhook was missed. Coinsnap does not resend failed webhooks automatically; they can also be resent from the Coinsnap dashboard.
 * Added: Deleting the plugin removes its settings, API keys, webhook secret and data table.
 * Removed: Wildcard CORS header, unused code and a debug alert on the checkout page.
 
