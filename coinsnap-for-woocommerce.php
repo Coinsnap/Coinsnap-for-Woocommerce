@@ -100,6 +100,10 @@ class CoinsnapWCPlugin {
 	}
         
         
+        // One-time webhook secret renewal, run by WP-Cron so it does not wait for an admin login.
+        add_action( CoinsnapApiWebhook::ROTATE_HOOK, [ CoinsnapApiWebhook::class, 'rotateWebhook' ] );
+        CoinsnapApiWebhook::scheduleRotation();
+
         add_action( 'wp_ajax_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         add_action( 'wp_ajax_nopriv_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         

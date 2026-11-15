@@ -483,6 +483,12 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			$this->webhookReply(503, 'Retry');
 		}
 
+		// A body that claims payment while the API disagrees is the clearest sign of a forged webhook.
+		$bodyType = is_string($data['type'] ?? null) ? $data['type'] : '';
+		if (in_array($bodyType, ['Settled', 'InvoiceSettled'], true) && ($invoice->getData()['status'] ?? '') !== 'Settled') {
+			Logger::security('webhook rejected', 'body claims paid, API disagrees', $invoiceId);
+		}
+
 		$apiInvoiceId = (string) ($invoice->getData()['id'] ?? '');
 		$orders = $apiInvoiceId === '' ? [] : wc_get_orders([
 			'meta_key' => 'Coinsnap_id',
