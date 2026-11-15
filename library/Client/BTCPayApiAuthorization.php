@@ -15,7 +15,6 @@ class BTCPayApiAuthorization {
 		'btcpay.store.canviewinvoices',
 		'btcpay.store.cancreateinvoice',
 		'btcpay.store.canviewstoresettings',
-		'btcpay.store.canmodifyinvoices',
 		'btcpay.store.webhooks.canmodifywebhooks',
 	];
 

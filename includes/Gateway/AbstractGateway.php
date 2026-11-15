@@ -471,13 +471,14 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		try {
 			$invoice = (new Invoice($this->apiHelper->url, $this->apiHelper->apiKey))->getInvoice((string) $this->apiHelper->storeId, $invoiceId);
 		} catch (RequestException $e) {
-			if ($e->getCode() >= 500) {
-				Logger::debug('Webhook: payment server error while fetching invoice ' . $invoiceId);
-				$this->webhookReply(503, 'Retry');
+			// Not found (Coinsnap 400, BTCPay 404): unknown invoice, e.g. a dashboard test webhook.
+			if (in_array($e->getCode(), [400, 404], true)) {
+				Logger::security('webhook rejected', 'unknown invoice', $invoiceId);
+				$this->webhookReply(200, 'OK');
 			}
-			// Unknown invoice, e.g. a dashboard test webhook.
-			Logger::security('webhook rejected', 'unknown invoice', $invoiceId);
-			$this->webhookReply(200, 'OK');
+			// Anything else (5xx, or 401/403 from a revoked key) must not lose the payment: let the provider retry.
+			Logger::debug('Webhook: payment server replied ' . $e->getCode() . ' while fetching invoice ' . $invoiceId . '; asking for a retry.', true);
+			$this->webhookReply(503, 'Retry');
 		} catch (\Throwable $e) {
 			Logger::debug('Webhook: could not fetch invoice ' . $invoiceId . ': ' . $e->getMessage());
 			$this->webhookReply(503, 'Retry');
@@ -500,7 +501,12 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			$this->webhookReply(200, 'OK');
 		}
 
-		$this->processOrderStatus($orders[0], $invoice);
+		try {
+			$this->processOrderStatus($orders[0], $invoice);
+		} catch (\Throwable $e) {
+			Logger::debug('Webhook: error updating order for invoice ' . $invoiceId . ': ' . $e->getMessage(), true);
+			$this->webhookReply(500, 'Error');
+		}
 		$this->webhookReply(200, 'OK');
 	}
 
@@ -559,6 +565,11 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		return $inserted === 1;
 	}
 
+	protected function unmarkInvoiceProcessed(string $invoiceId): void {
+		global $wpdb;
+		$wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}coinsnap_wc_processed WHERE invoice_id = %s", $invoiceId));
+	}
+
 	protected function processOrderStatus(\WC_Order $order, \Coinsnap\Result\Invoice $invoice) {
 		$data = $invoice->getData();
 		$status = (string) ($data['status'] ?? '');
@@ -600,9 +611,15 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 					Logger::debug('Invoice ' . $invoiceId . ' already processed, ignoring repeated webhook.');
 					break;
 				}
-				$order->payment_complete($invoiceId);
-				$order->add_order_note(__('Invoice payment settled.', 'coinsnap-for-woocommerce'));
-				$this->updateWCOrderStatus($order, $mapped(OrderStates::SETTLED));
+				try {
+					$order->payment_complete($invoiceId);
+					$order->add_order_note(__('Invoice payment settled.', 'coinsnap-for-woocommerce'));
+					$this->updateWCOrderStatus($order, $mapped(OrderStates::SETTLED));
+				} catch (\Throwable $e) {
+					// Release the invoice so the provider's retry can complete it.
+					$this->unmarkInvoiceProcessed($invoiceId);
+					throw $e;
+				}
 				break;
 
 			case 'Expired':
@@ -649,16 +666,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		}
 
 		return false;
-	}
-
-	public function markInvoiceInvalid($invoiceId): void {
-		Logger::debug( 'Marking invoice as invalid: ' . $invoiceId);
-		try {
-			$client = new Invoice( $this->apiHelper->url, $this->apiHelper->apiKey );
-			$client->markInvoiceStatus($this->apiHelper->storeId, $invoiceId, 'Invalid');
-		} catch (\Throwable $e) {
-			Logger::debug('Error marking invoice invalid: ' . $e->getMessage());
-		}
 	}
 
 	/**
