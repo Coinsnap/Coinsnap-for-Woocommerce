@@ -4,7 +4,7 @@ Tags: bitcoin, lightning, woocommerce, bitcoin payments, btcpay server
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.7.1
+Stable tag: 1.8.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -343,5 +343,20 @@ Use the support area in your Coinsnap merchant account or visit the official Coi
 * Compatibility with WooCommerce 10.3.6 is tested.
 * Compatibility with Wordpress 6.9 is tested.
 
+= 1.8.0 :: 2026-11-15 =
+* Security: The BTCPay Server setup callback now requires a one-time code from the admin who started the setup, and reads the API key's store and permissions from BTCPay Server instead of the request. Before, anyone who had an API key on the same BTCPay Server could replace the shop's API key, store ID and webhook secret.
+* Security: Webhooks are checked with the Coinsnap or BTCPay Server API before an order changes. An order is marked paid only when the invoice is settled for that order's amount and currency, and only once. Refunded and already paid orders are no longer changed by later webhooks.
+* Security: The webhook secret is renewed once after the update. Versions 1.0 to 1.4.2 wrote the webhook secret to the WooCommerce log.
+* Security: BTCPay Server API keys must be limited to the configured store. Unrestricted, server-wide or all-stores keys are refused. The setup asks for fewer permissions.
+* Security: API keys are no longer shown on the settings page or written to logs. Changing the BTCPay Server URL clears the stored API key and store ID.
+* Security: Webhook signatures use the timestamped X-Coinsnap-Signature header and a timing-safe comparison. Rejected webhooks are logged as security events.
+* Security: The connection check requires a shop manager, and admin pages use their own nonce.
+* Fix: "Enable discount" and "Send customer data" were treated as enabled when unchecked on PHP 8. Customer email, name and address are now sent only when "Send customer data" is enabled.
+* Fix: Payment notifications are no longer lost when the payment server is unavailable or rejects the API key; the server retries them.
+* Added: Deleting the plugin removes its settings, API keys, webhook secret and data table.
+* Removed: Wildcard CORS header, unused code and a debug alert on the checkout page.
 
+== Upgrade Notice ==
 
+= 1.8.0 =
+Security release. Please update. If your shop ever ran version 1.4.2 or older, delete old coinsnap-for-woocommerce log files and check orders marked as paid against your Coinsnap or BTCPay Server invoices.
