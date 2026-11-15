@@ -1,10 +1,5 @@
 jQuery(document).ready(function ($) {
     
-    $(document.body).on('experimental__woocommerce_blocks-updated-checkout', function() {
-        alert('Checkout updated!');
-        // Perform actions after checkout totals or fields are refreshed
-    });
-    
     var coinsnapDiscount = '';
     
     const intervalId = setInterval(function(){
@@ -23,7 +18,6 @@ jQuery(document).ready(function ($) {
 
             jQuery.post( ajaxurl, data, function( response ){
                 checkoutDiscountResponse = $.parseJSON(response);
-                console.log(response);
                 if(checkoutDiscountResponse['result'] === true){
                     coinsnapDiscount = checkoutDiscountResponse['message'];
                     if(checkoutElement){
@@ -42,7 +36,6 @@ jQuery(document).ready(function ($) {
             
             $('input[name="'+paymentMethodFieldName+'"]').change(function(){
                 let paymentMethodFieldValue = $('input[name="'+paymentMethodFieldName+'"]:checked').val();
-                console.log('Payment method: '+paymentMethodFieldValue);
                 if(paymentMethodFieldValue === 'coinsnap'){
                     setTotalElementDiscount();
                 }

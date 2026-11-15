@@ -60,7 +60,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
      * Discount value indication
      */
     public function getDiscount(): string {
-	$discount_enabled = (null !== $this->get_option('discount_enable') && $this->get_option('discount_enable') > 0)? true : false;
+	$discount_enabled = ($this->get_option('discount_enable') === 'yes');
         if($discount_enabled){
             $discount_type = $this->get_option('discount_type');
             if($discount_type === 'fixed' && floatval($this->get_option('discount_amount')) > 0){
@@ -82,7 +82,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         
         $payment_method = WC()->session->get('chosen_payment_method');
         
-        if(empty($payment_method) && $this->get_option('enabled')>0){
+        if(empty($payment_method) && $this->get_option('enabled') === 'yes'){
             WC()->session->set('chosen_payment_method', 'coinsnap');
             WC()->cart->calculate_totals();
             WC()->session->save_data();
@@ -90,7 +90,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
         
         if ($payment_method === 'coinsnap') {
             
-            $discount_enabled = (null !== $this->get_option('discount_enable') && $this->get_option('discount_enable') > 0)? true : false;
+            $discount_enabled = ($this->get_option('discount_enable') === 'yes');
             if($discount_enabled){
             
                 $cart_amount = $cart->cart_contents_total;
@@ -716,15 +716,11 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             $orderID = ''.$order->get_id();
             Logger::debug( 'Got order number: ' . $orderNumber . ' (order ID: ' . $orderID .')' );
 
-            $metadata = [];
-                
-            // Send customer data only if option is set.
-            if ( get_option( 'coinsnap_send_customer_data' ) ) {
-                $metadata = $this->prepareCustomerMetadata( $order );
-            }
-                
-            $buyerEmail = $this->prepareCustomerMetadata( $order )['buyerEmail'];
-            $buyerName = $this->prepareCustomerMetadata( $order )['buyerName'];
+            // Send customer data (email, name, address) only if the merchant enabled it.
+            $sendCustomerData = ( get_option( 'coinsnap_send_customer_data' ) === 'yes' );
+            $metadata = $sendCustomerData ? $this->prepareCustomerMetadata( $order ) : [];
+            $buyerEmail = $sendCustomerData ? $metadata['buyerEmail'] : null;
+            $buyerName = $sendCustomerData ? $metadata['buyerName'] : null;
 
             // Set included tax amount.
             $metadata['taxIncluded'] = $order->get_cart_tax();

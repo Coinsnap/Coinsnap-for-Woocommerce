@@ -158,7 +158,7 @@ class CoinsnapWCPlugin {
     }
     
     public function coinsnapCheckoutHandler(){
-        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        $_nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
         if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
             wp_die('Unauthorized!', '', ['response' => 401]);
         }
@@ -178,13 +178,16 @@ class CoinsnapWCPlugin {
         
         wp_localize_script('coinsnap-connection-check', 'coinsnap_ajax', array(
           'ajax_url' => admin_url('admin-ajax.php'),
-          'nonce'  => wp_create_nonce( 'coinsnap-ajax-nonce' ),
+          'nonce'  => wp_create_nonce( 'coinsnap-admin-nonce' ),
         ));
     }
     
     public function coinsnapConnectionHandler(){
         
-        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        $_nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
+        if ( !wp_verify_nonce($_nonce, 'coinsnap-admin-nonce') || !current_user_can('manage_woocommerce') ) {
+            wp_send_json_error(null, 403);
+        }
         $apiHelper = new CoinsnapApiHelper();
         
         if(empty($apiHelper->url) || empty($apiHelper->apiKey)){
@@ -240,7 +243,7 @@ class CoinsnapWCPlugin {
             __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce') : 
             __('WooCommerce: BTCPay server is connected', 'coinsnap-for-woocommerce');
         
-        if( wp_verify_nonce($_nonce,'coinsnap-ajax-nonce') ){
+        {
             $response = ['result' => false,'message' => $_message_disconnected,'display' => get_option('coinsnap_connection_status_display')];
 
             try {
@@ -384,8 +387,8 @@ class CoinsnapWCPlugin {
      * Handles the BTCPay server AJAX callback from the GlobalSettings form.
      */
     public function btcpayApiUrlHandler() {
-        $_nonce = filter_input(INPUT_POST,'apiNonce',FILTER_SANITIZE_STRING);
-        if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
+        $_nonce = isset($_POST['apiNonce']) ? sanitize_text_field(wp_unslash($_POST['apiNonce'])) : '';
+        if ( !wp_verify_nonce( $_nonce, 'coinsnap-admin-nonce' ) ) {
             wp_die('Unauthorized!', '', ['response' => 401]);
         }
         
