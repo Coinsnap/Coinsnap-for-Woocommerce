@@ -577,6 +577,8 @@ add_action( 'template_redirect', function() {
 register_activation_hook( __FILE__, function() {
 	update_option('coinsnap_permalinks_flushed', 0);
 	update_option( COINSNAP_VERSION_KEY, COINSNAP_WC_VERSION );
+	require_once COINSNAP_PLUGIN_FILE_PATH . 'library/loader.php';
+	\Coinsnap\WC\Helper\UpdateManager::ensureTables();
 });
 
 // Initialize payment gateways and plugin.

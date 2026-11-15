@@ -156,12 +156,19 @@ class CoinsnapApiHelper {
 	}
 
 	//  Check webhook signature to be a valid request.
-	public function validWebhookRequest(string $signature, string $requestData): bool {
-        //    \Coinsnap\WC\Helper\Logger::debug( $signature . ' - ' . $requestData . ' - ' . $this->webhook['secret'], true );
-            if ($this->configured) {
-                return Webhook::isIncomingWebhookRequestValid($requestData, $signature, $this->webhook['secret']);
+	//  $headers: lowercase header name => value. Only the header that matches the configured provider is accepted.
+	public function validWebhookRequest(array $headers, string $requestData): bool {
+            $secret = is_array($this->webhook) && is_string($this->webhook['secret'] ?? null) ? $this->webhook['secret'] : '';
+            if (!$this->configured || $secret === '') {
+                return false;
             }
-            return false;
+            if (get_option('coinsnap_provider') === 'btcpay') {
+                return Webhook::isIncomingWebhookRequestValid($requestData, (string) ($headers['btcpay-sig'] ?? ''), $secret);
+            }
+            if (!empty($headers['x-coinsnap-signature'])) {
+                return Webhook::isTimestampedSignatureValid($requestData, (string) $headers['x-coinsnap-signature'], $secret);
+            }
+            return Webhook::isIncomingWebhookRequestValid($requestData, (string) ($headers['x-coinsnap-sig'] ?? ''), $secret);
 	}
 
 	//  Checks if the provided API config already exists in options table.
