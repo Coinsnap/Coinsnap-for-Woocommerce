@@ -137,6 +137,14 @@ class CoinsnapWCPlugin {
             wp_die(esc_html__('Order not found.', 'coinsnap-for-woocommerce'), '', ['response' => 404]);
         }
 
+        // One check per order every 30 seconds, so repeated clicks do not hammer the payment server API.
+        $throttleKey = 'coinsnap_wc_check_' . $order->get_id();
+        if (get_transient($throttleKey)) {
+            wp_safe_redirect(add_query_arg(['coinsnap_check' => 'wait'], $order->get_edit_order_url()));
+            exit;
+        }
+        set_transient($throttleKey, 1, 30);
+
         $gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : [];
         $gateway = (isset($gateways['coinsnap']) && $gateways['coinsnap'] instanceof DefaultGateway) ? $gateways['coinsnap'] : new DefaultGateway();
         [$result, $status] = $gateway->checkPaymentStatus($order);
@@ -169,6 +177,7 @@ class CoinsnapWCPlugin {
             'not_paid' => ['warning', sprintf(__('The invoice is not paid in full for this order (status: %s). The order was not marked as paid; see the order notes.', 'coinsnap-for-woocommerce'), $status !== '' ? $status : '-')],
             'no_invoice' => ['warning', __('This order has no Coinsnap invoice.', 'coinsnap-for-woocommerce')],
             'api_error' => ['error', __('Could not reach the payment server. Please check the connection and try again.', 'coinsnap-for-woocommerce')],
+            'wait' => ['info', __('The payment status of this order was checked a moment ago. Please wait 30 seconds and try again.', 'coinsnap-for-woocommerce')],
         ];
         if (isset($messages[$result])) {
             printf('<div class="notice notice-%1$s is-dismissible"><p><strong>Coinsnap:</strong> %2$s</p></div>', esc_attr($messages[$result][0]), esc_html($messages[$result][1]));
