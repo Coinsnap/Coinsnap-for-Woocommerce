@@ -55,6 +55,8 @@ class CoinsnapWCPlugin {
 
 	if (is_admin()) {
             
+            add_action( 'admin_init', [ Notice::class, 'showFlash' ] );
+            add_action( 'admin_init', [ CoinsnapApiWebhook::class, 'maybeRotateWebhook' ] );
             add_action( 'admin_enqueue_scripts', [ $this, 'connectionScriptsLoader' ] );
             add_action( 'wp_ajax_coinsnap_connection_handler', [$this, 'coinsnapConnectionHandler'] );
             add_action( 'wp_ajax_btcpay_server_apiurl_handler', [$this, 'btcpayApiUrlHandler'] );
@@ -396,9 +398,14 @@ class CoinsnapWCPlugin {
                 wp_send_json_error("Error validating BTCPayServer URL.");
             }
 
-            $permissions = array_merge(BTCPayApiAuthorization::REQUIRED_PERMISSIONS, BTCPayApiAuthorization::OPTIONAL_PERMISSIONS);
+            $permissions = BTCPayApiAuthorization::REQUIRED_PERMISSIONS;
 
             try {
+                $callbackUrl = add_query_arg(
+                    ['coinsnap-for-woocommerce-btcpay-settings-callback' => '1', 'state' => BTCPayApiAuthorization::startState()],
+                    home_url('/')
+                );
+
 		// Create the redirect url to BTCPay instance.
 		$url = \Coinsnap\Client\BTCPayApiKey::getAuthorizeUrl(
                     $host,
@@ -406,7 +413,7 @@ class CoinsnapWCPlugin {
                     'WooCommerce',
                     true,
                     true,
-                    home_url('?coinsnap-for-woocommerce-btcpay-settings-callback'),
+                    $callbackUrl,
                     null
 		);
 
@@ -509,83 +516,57 @@ add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), function ($links){
 add_filter('request', function($vars) {
     if (isset($vars['coinsnap-for-woocommerce-btcpay-settings-callback'])) {
         $vars['coinsnap-for-woocommerce-btcpay-settings-callback'] = true;
-        $vars['coinsnap-for-woocommerce-btcpay-nonce'] = wp_create_nonce('coinsnap-btcpay-nonce');
     }
     return $vars;
 });
 
-// Adding template redirect handling for coinsnap-for-woocommerce-btcpay-settings-callback.
+// BTCPay posts the new API key here from its own site, so the admin login cookie is usually absent.
+// The proof is the one-time state created when the admin started the wizard.
 add_action( 'template_redirect', function() {
     global $wp_query;
 
-    // Only continue on a coinsnap-for-woocommerce-btcpay-settings-callback request.
     if (! isset( $wp_query->query_vars['coinsnap-for-woocommerce-btcpay-settings-callback'] ) ) {
         return;
     }
-            
-    if(!isset($wp_query->query_vars['coinsnap-for-woocommerce-btcpay-nonce']) || !wp_verify_nonce($wp_query->query_vars['coinsnap-for-woocommerce-btcpay-nonce'],'coinsnap-btcpay-nonce')){
-        return;
+
+    $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
+    if (!BTCPayApiAuthorization::consumeState($state)) {
+        Logger::security('btcpay callback rejected', 'invalid state');
+        wp_die(esc_html__('Unauthorized', 'coinsnap-for-woocommerce'), '', ['response' => 403]);
     }
 
-    $CoinsnapBTCPaySettingsUrl = admin_url('admin.php?page=wc-settings&tab=coinsnap_settings&provider=btcpay');
+    $settingsUrl = admin_url('admin.php?page=wc-settings&tab=coinsnap_settings&provider=btcpay');
+    $btcpayUrl = (string) get_option('btcpay_server_url', '');
+    $apiKey = isset($_POST['apiKey']) ? sanitize_text_field(wp_unslash($_POST['apiKey'])) : '';
 
-    $rawData = file_get_contents('php://input');
-    Logger::debug('Redirect payload: ' . $rawData);
-    
-    $btcpay_server_url = get_option( 'btcpay_server_url');
-    $btcpay_api_key  = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    
-    $client = new \Coinsnap\Client\Store($btcpay_server_url,$btcpay_api_key);
-    if (count($client->getStores()) < 1) {
-        $messageAbort = __('Error on verifiying redirected API Key with stored BTCPay Server url. Aborting API wizard. Please try again or continue with manual setup.', 'coinsnap-for-woocommerce');
-	Notice::addNotice('error', $messageAbort);
-	wp_redirect($CoinsnapBTCPaySettingsUrl);
+    // Ask BTCPay what the key can do; never trust permissions or a store id from the request.
+    $apiData = \Coinsnap\Client\BTCPayApiAuthorization::fromServer($btcpayUrl, $apiKey);
+    if ($apiData === null) {
+        Notice::addFlash('error', __('Could not verify the API key with the stored BTCPay Server URL. Please try again or continue with manual setup.', 'coinsnap-for-woocommerce'));
+        wp_safe_redirect($settingsUrl);
+        exit;
     }
-    
-    // Data does get submitted with url-encoded payload, so parse $_POST here.
-    if (!empty($_POST)) {
-        $data['apiKey'] = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? null;
-            if(isset($_POST['permissions'])){
-                $permissions = array_map('sanitize_text_field', wp_unslash($_POST['permissions']));
-                if(is_array($permissions)){
-                foreach ($permissions as $key => $value) {
-                    $data['permissions'][$key] = sanitize_text_field($permissions[$key] ?? null);
-                }
-            }
-        }
+
+    if (!$apiData->hasSingleStore() || !$apiData->hasRequiredPermissions()) {
+        Notice::addFlash('error', __('The API key must be limited to one store and have exactly the requested store permissions.', 'coinsnap-for-woocommerce'));
+        wp_safe_redirect($settingsUrl);
+        exit;
     }
-    
-    if (isset($data['apiKey']) && isset($data['permissions'])) {
-        
-        $apiData = new \Coinsnap\Client\BTCPayApiAuthorization($data);
-	if ($apiData->hasSingleStore() && $apiData->hasRequiredPermissions()) {
-			
-            update_option('btcpay_api_key', $apiData->getApiKey());
-            update_option('btcpay_store_id', $apiData->getStoreID());
-            update_option('coinsnap_provider', 'btcpay');
 
-            Notice::addNotice('success', __('Successfully received api key and store id from BTCPay Server API. Please finish setup by saving this settings form.', 'coinsnap-for-woocommerce'));
+    update_option('btcpay_api_key', $apiData->getApiKey());
+    update_option('btcpay_store_id', $apiData->getStoreID());
+    update_option('coinsnap_provider', 'btcpay');
+    Notice::addFlash('success', __('Successfully received api key and store id from BTCPay Server API. Please finish setup by saving this settings form.', 'coinsnap-for-woocommerce'));
 
-            // Register a webhook.
-            if (CoinsnapApiWebhook::registerWebhook($btcpay_server_url, $apiData->getApiKey(), $apiData->getStoreID())) {
-                $messageWebhookSuccess = __( 'Successfully registered a new webhook on BTCPay Server.', 'coinsnap-for-woocommerce' );
-                Notice::addNotice('success', $messageWebhookSuccess, true );
-            }
-            else {
-                $messageWebhookError = __( 'Could not register a new webhook on the store.', 'coinsnap-for-woocommerce' );
-                Notice::addNotice('error', $messageWebhookError );
-            }
-
-            wp_redirect($CoinsnapBTCPaySettingsUrl);
-	}
-        else {
-            Notice::addNotice('error', __('Please make sure you only select one store on the BTCPay API authorization page.', 'coinsnap-for-woocommerce'));
-            wp_redirect($CoinsnapBTCPaySettingsUrl);
-	}
+    if (CoinsnapApiWebhook::registerWebhook($btcpayUrl, $apiData->getApiKey(), $apiData->getStoreID())) {
+        Notice::addFlash('success', __('Successfully registered a new webhook on BTCPay Server.', 'coinsnap-for-woocommerce'));
     }
-    
-    Notice::addNotice('error', __('Error processing the data from Coinsnap. Please try again.', 'coinsnap-for-woocommerce'));
-    wp_redirect($CoinsnapBTCPaySettingsUrl);
+    else {
+        Notice::addFlash('error', __('Could not register a new webhook on the store.', 'coinsnap-for-woocommerce'));
+    }
+
+    wp_safe_redirect($settingsUrl);
+    exit;
 });
 
 // Installation routine.

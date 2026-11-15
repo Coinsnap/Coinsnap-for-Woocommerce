@@ -20,6 +20,10 @@ class GlobalSettings extends \WC_Settings_Page {
         // Register custom field type order_states with OrderStatesField class.
 	add_action('woocommerce_admin_field_coinsnap_order_states', [(new OrderStates()), 'renderOrderStatesHtml']);
         add_action('woocommerce_admin_field_custom_markup', [$this, 'coinsnap_output_custom_markup_field']);
+        add_action('woocommerce_admin_field_coinsnap_secret', [$this, 'outputSecretField']);
+        foreach (['coinsnap_api_key', 'btcpay_api_key'] as $secretOption) {
+            add_filter('woocommerce_admin_settings_sanitize_option_' . $secretOption, [$this, 'keepStoredSecret'], 10, 3);
+        }
         parent::__construct();
     }        
 
@@ -67,13 +71,12 @@ class GlobalSettings extends \WC_Settings_Page {
 
             'api_key' => [
                 'title'       => esc_html_x( 'API Key*', 'global_settings','coinsnap-for-woocommerce' ),
-                'type'        => 'text',
+                'type'        => 'coinsnap_secret',
                 'desc_tip'    => _x( 'Your Coinsnap API Key. You can find it on the store settings page on your Coinsnap Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
 		'desc'        => _x('Coinsnap API requires authentication with an API key.<br/>Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.', 'global_settings', 'coinsnap-for-woocommerce'),
                 'default'     => '',
-                'custom_attributes' => ['required' => 'required'],
 		'id' => 'coinsnap_api_key',
-                'class' => 'coinsnap required'
+                'class' => 'coinsnap'
             ],
                     
             'btcpay_server_url' => [
@@ -108,12 +111,11 @@ class GlobalSettings extends \WC_Settings_Page {
             
             'btcpay_api_key' => [
                 'title'       => esc_html_x( 'API Key*', 'global_settings','coinsnap-for-woocommerce' ),
-                'type'        => 'text',
+                'type'        => 'coinsnap_secret',
 		'desc_tip'    => _x( 'Your BTCPay server API Key. You can generate it in your BTCPay Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
 		'default'     => '',
-                'custom_attributes' => ['required' => 'required'],
 		'id' => 'btcpay_api_key',
-                'class' => 'btcpay required'
+                'class' => 'btcpay'
             ],
             
             'default_description' => [
@@ -209,6 +211,9 @@ class GlobalSettings extends \WC_Settings_Page {
             $apiKey  = ($coinsnap_provider !== 'btcpay')? 
                 sanitize_text_field(filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) : 
                 sanitize_text_field(filter_input(INPUT_POST,'btcpay_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS ));
+            if ($apiKey === '') {
+                $apiKey = (string) get_option(($coinsnap_provider !== 'btcpay') ? 'coinsnap_api_key' : 'btcpay_api_key', '');
+            }
             
             // If we have url, storeID and apiKey we want to check if the api key works and register a webhook.
             if ( $this->hasNeededApiCredentials($apiUrl,$storeId,$apiKey) ) {
@@ -299,6 +304,23 @@ class GlobalSettings extends \WC_Settings_Page {
 		
     }
     
+    // Never prints a stored key; shows only its last 4 characters as a hint.
+    public function outputSecretField($value) {
+        $stored = (string) get_option($value['id'], '');
+        $hint = ($stored === '') ? __('Paste your API key', 'coinsnap-for-woocommerce') : '••••••••' . substr($stored, -4);
+        echo '<tr valign="top"><th scope="row" class="titledesc"><label for="' . esc_attr($value['id']) . '">' . esc_html($value['title']) . '</label></th>';
+        echo '<td class="forminp"><input type="password" name="' . esc_attr($value['id']) . '" id="' . esc_attr($value['id']) . '" value="" autocomplete="new-password" class="' . esc_attr($value['class'] ?? '') . '" placeholder="' . esc_attr($hint) . '" />';
+        if (!empty($value['desc'])) {
+            echo '<p class="description">' . wp_kses_post($value['desc']) . '</p>';
+        }
+        echo '</td></tr>';
+    }
+
+    // An empty secret field keeps the stored value (returning null tells WooCommerce not to save it).
+    public function keepStoredSecret($value, $option, $rawValue) {
+        return (is_string($rawValue) && trim($rawValue) !== '') ? $value : null;
+    }
+
     public function coinsnap_output_custom_markup_field($value) {
         //$_provider = get_option('coinsnap_provider');
         //if($_provider === 'btcpay'){

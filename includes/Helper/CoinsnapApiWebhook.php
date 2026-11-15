@@ -10,11 +10,48 @@ use Coinsnap\Result\Webhook as WebhookResult;
 class CoinsnapApiWebhook {
     public const COINSNAP_WEBHOOK_EVENTS = ['New','Expired','Settled','Processing','Invalid'];
     public const BTCPAY_WEBHOOK_EVENTS = ['InvoiceCreated','InvoiceExpired','InvoiceSettled','InvoiceProcessing','InvoiceInvalid'];
+    public const OPTION = 'coinsnap_wc_webhook';
+    private const LEGACY_OPTION = 'coinsnap_webhook';
+    private const ROTATED_FLAG = 'coinsnap_wc_webhook_rotated';
+
+    // This plugin's webhook (id, secret, url), falling back to the pre-rotation option.
+    public static function getStored() {
+        $stored = get_option(self::OPTION);
+        return is_array($stored) ? $stored : get_option(self::LEGACY_OPTION);
+    }
+
+    // Once per install: create a new webhook so any secret saved before the callback fix stops working.
+    public static function maybeRotateWebhook(): void {
+        if (get_option(self::ROTATED_FLAG) || wp_doing_ajax() || !current_user_can('manage_options') || get_transient('coinsnap_wc_rotate_wait')) {
+            return;
+        }
+        $config = CoinsnapApiHelper::getConfig();
+        if (!$config || empty($config['store_id'])) {
+            delete_option(self::LEGACY_OPTION);
+            update_option(self::ROTATED_FLAG, 1);
+            return;
+        }
+        $old = self::getStored();
+        if (!self::registerWebhook($config['url'], $config['api_key'], $config['store_id'])) {
+            set_transient('coinsnap_wc_rotate_wait', 1, HOUR_IN_SECONDS);
+            \Coinsnap\WC\Admin\Notice::addNotice('warning', __('Coinsnap could not renew its webhook secret. Please re-save the Coinsnap settings.', 'coinsnap-for-woocommerce'));
+            return;
+        }
+        if (is_array($old) && !empty($old['id'])) {
+            try {
+                (new Webhook($config['url'], $config['api_key']))->deleteWebhook($config['store_id'], (string) $old['id']);
+            } catch (\Throwable $e) {
+                Logger::debug('Could not delete the previous webhook: ' . $e->getMessage());
+            }
+        }
+        delete_option(self::LEGACY_OPTION);
+        update_option(self::ROTATED_FLAG, 1);
+    }
 
 //  Get locally stored webhook data and check if it exists on the store.
     public static function webhookExists(string $apiUrl, string $apiKey, string $storeId): bool {
 	$whClient = new Webhook( $apiUrl, $apiKey );
-	$storedWebhook = get_option( 'coinsnap_webhook' );
+	$storedWebhook = self::getStored();
         $isWebhook = false;
         
         try {
@@ -55,12 +92,13 @@ class CoinsnapApiWebhook {
 
 			// Store in option table.
 			update_option(
-				'coinsnap_webhook',
+				self::OPTION,
 				[
 					'id' => $webhook->getData()['id'],
 					'secret' => $webhook->getData()['secret'],
 					'url' => $webhook->getData()['url']
-				]
+				],
+				false
 			);
                         Logger::debug('New webhook is created');
 			return $webhook;
@@ -114,7 +152,7 @@ class CoinsnapApiWebhook {
 	 * Load existing webhook data from Coinsnap, defaults to locally stored webhook.
 	 */
 	public static function getWebhook(?string $webhookId): ?WebhookResult {
-		$existingWebhook = get_option('coinsnap_webhook');
+		$existingWebhook = self::getStored();
 		$config = CoinsnapApiHelper::getConfig();
 
 		try {

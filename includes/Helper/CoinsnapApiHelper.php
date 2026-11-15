@@ -36,7 +36,7 @@ class CoinsnapApiHelper {
         $url = (get_option('coinsnap_provider')!=='btcpay')? COINSNAP_SERVER_URL : get_option('btcpay_server_url');
         $api_key = (get_option('coinsnap_provider')!=='btcpay')? get_option('coinsnap_api_key') : get_option('btcpay_api_key');
         $store_id = (get_option('coinsnap_provider')!=='btcpay')? get_option('coinsnap_store_id', null) : get_option('btcpay_store_id', null);
-        $webhook = get_option('coinsnap_webhook', null);
+        $webhook = CoinsnapApiWebhook::getStored();
         
         if($url && $api_key) {
             return [
