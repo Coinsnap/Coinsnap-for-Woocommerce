@@ -20,10 +20,10 @@ class Logger {
 	}
 
 	// Always logged. $id comes from the request, so it is cleaned before it reaches the log.
+	// No IP: it is personal data, and the web server's access log already has it.
 	public static function security( string $event, string $reason, string $id = '' ): void {
 		$id = substr( (string) preg_replace( '/[^A-Za-z0-9_-]/', '', $id ), 0, 64 );
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '-';
-		self::debug( sprintf( 'SECURITY %s reason=%s id=%s ip=%s', $event, $reason, $id !== '' ? $id : '-', $ip ), true );
+		self::debug( sprintf( 'SECURITY %s reason=%s id=%s', $event, $reason, $id !== '' ? $id : '-' ), true );
 	}
 
 	public static function getLogFileUrl(): string {
