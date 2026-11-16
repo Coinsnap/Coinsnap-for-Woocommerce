@@ -8,7 +8,7 @@ function coinsnap_wc_uninstall_site(): void {
 	$options = [
 		// Credentials and webhook secrets.
 		'coinsnap_api_key', 'coinsnap_store_id', 'btcpay_api_key', 'btcpay_store_id', 'btcpay_server_url',
-		'coinsnap_webhook', 'coinsnap_wc_webhook',
+		'coinsnap_wc_webhook',
 		// Settings.
 		'coinsnap_provider', 'coinsnap_autoredirect', 'coinsnap_connection_status_display', 'coinsnap_debug',
 		'coinsnap_default_description', 'coinsnap_modal_checkout', 'coinsnap_order_states', 'coinsnap_returnurl',

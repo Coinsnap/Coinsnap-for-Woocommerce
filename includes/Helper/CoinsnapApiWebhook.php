@@ -116,8 +116,8 @@ class CoinsnapApiWebhook {
         }
     }
 
+    // The legacy option name is shared with other Coinsnap plugins, so it is left in place.
     private static function markRotated(): void {
-        delete_option(self::LEGACY_OPTION);
         delete_option(self::ROTATE_ERROR);
         update_option(self::ROTATED_FLAG, 1);
     }
@@ -187,7 +187,6 @@ class CoinsnapApiWebhook {
 			);
 			// A webhook registered by this version has a fresh secret, so the one-time renewal is not needed.
 			update_option(self::ROTATED_FLAG, 1);
-			delete_option(self::LEGACY_OPTION);
 			delete_option(self::ROTATE_ERROR);
                         Logger::debug('New webhook is created');
 			return $webhook;

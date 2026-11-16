@@ -496,6 +496,14 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			'meta_value' => $apiInvoiceId,
 			'limit' => 2,
 		]);
+		// An earlier invoice of the order (the customer retried checkout, then paid the first one).
+		if ($orders === [] && $apiInvoiceId !== '') {
+			$orders = wc_get_orders([
+				'meta_key' => 'Coinsnap_invoice_ref',
+				'meta_value' => $apiInvoiceId,
+				'limit' => 2,
+			]);
+		}
 		if (count($orders) !== 1) {
 			Logger::security('webhook rejected', count($orders) === 0 ? 'no order for invoice' : 'multiple orders for invoice', $invoiceId);
 			$this->webhookReply(200, 'OK');
@@ -570,8 +578,13 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 			return false;
 		}
 
-		$expectedAmount = (float) ($order->get_meta('Coinsnap_expected_amount') ?: $order->get_total());
-		$expectedCurrency = strtoupper((string) ($order->get_meta('Coinsnap_expected_currency') ?: $order->get_currency()));
+		$invoices = $order->get_meta('Coinsnap_invoices');
+		$recorded = is_array($invoices) ? ($invoices[(string) ($data['id'] ?? '')] ?? null) : null;
+		if ($recorded === null && is_array($invoices) && (string) ($data['id'] ?? '') !== (string) $order->get_meta('Coinsnap_id')) {
+			return false;
+		}
+		$expectedAmount = (float) ($recorded['amount'] ?? ($order->get_meta('Coinsnap_expected_amount') ?: $order->get_total()));
+		$expectedCurrency = strtoupper((string) ($recorded['currency'] ?? ($order->get_meta('Coinsnap_expected_currency') ?: $order->get_currency())));
 		if ($expectedAmount <= 0) {
 			return false;
 		}
@@ -933,6 +946,12 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 		$order->update_meta_data( 'Coinsnap_id', $invoice->getData()['id'] );
 		$order->update_meta_data( 'Coinsnap_expected_amount', $expectedAmount );
 		$order->update_meta_data( 'Coinsnap_expected_currency', $expectedCurrency );
+		// Every invoice created for the order stays valid for the amount it was created for.
+		$invoices = $order->get_meta( 'Coinsnap_invoices' );
+		$invoices = is_array( $invoices ) ? $invoices : [];
+		$invoices[ (string) $invoice->getData()['id'] ] = [ 'amount' => $expectedAmount, 'currency' => $expectedCurrency ];
+		$order->update_meta_data( 'Coinsnap_invoices', $invoices );
+		$order->add_meta_data( 'Coinsnap_invoice_ref', (string) $invoice->getData()['id'], false );
                 Logger::debug( 'Store relevant Coinsnap invoice data for order ' . $orderId . ': Coinsnap_id: ' . $invoice->getData()['id'] );
                 $order->save();
 	}
