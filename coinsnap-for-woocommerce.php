@@ -337,7 +337,8 @@ class CoinsnapWCPlugin {
                 $response['message'] = $webhook ? $_message_connected.' ('.$connectionData.')' : $_message_disconnected.' (Webhook)';
                 $response['display'] = get_option('coinsnap_connection_status_display');
             }
-            catch (Exception $e) {
+            catch (\Throwable $e) {
+                // Includes a failed webhook lookup; no new webhook is created then.
                 $response['message'] =  __('WooCommerce: API connection is not established', 'coinsnap-for-woocommerce');
                 Logger::debug($e->getMessage());
             }

@@ -513,21 +513,38 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	// Manual recovery for a missed webhook: asks the payment server for this order's invoice and applies
 	// the same paid decision. Returns [result, invoice status]; result is paid, not_paid, no_invoice or api_error.
 	public function checkPaymentStatus(\WC_Order $order): array {
-		$invoiceId = (string) $order->get_meta('Coinsnap_id');
-		if ($invoiceId === '') {
+		if ((string) $order->get_meta('Coinsnap_id') === '') {
 			return ['no_invoice', ''];
 		}
-		try {
-			$invoice = (new Invoice($this->apiHelper->url, $this->apiHelper->apiKey))->getInvoice((string) $this->apiHelper->storeId, $invoiceId);
-		} catch (\Throwable $e) {
-			Logger::debug('Manual payment check: could not fetch invoice ' . $invoiceId . ': ' . $e->getMessage(), true);
-			return ['api_error', ''];
-		}
-		if ((string) ($invoice->getData()['id'] ?? '') !== $invoiceId) {
+		$invoice = $this->fetchOrderInvoice($order);
+		if ($invoice === null) {
 			return ['api_error', ''];
 		}
 		$this->processOrderStatus($order, $invoice);
 		return [$order->is_paid() ? 'paid' : 'not_paid', (string) ($invoice->getData()['status'] ?? '')];
+	}
+
+	// Applies a Settled invoice to an unpaid order whose webhook may have been missed; other statuses are left alone.
+	public function recoverSettledPayment(\WC_Order $order): void {
+		if ($order->is_paid() || (string) $order->get_meta('Coinsnap_id') === '') {
+			return;
+		}
+		$invoice = $this->fetchOrderInvoice($order);
+		if ($invoice !== null && ($invoice->getData()['status'] ?? '') === 'Settled') {
+			$this->processOrderStatus($order, $invoice);
+		}
+	}
+
+	// The order's invoice from the payment server, or null when it can't be fetched.
+	private function fetchOrderInvoice(\WC_Order $order): ?\Coinsnap\Result\Invoice {
+		$invoiceId = (string) $order->get_meta('Coinsnap_id');
+		try {
+			$invoice = (new Invoice($this->apiHelper->url, $this->apiHelper->apiKey))->getInvoice((string) $this->apiHelper->storeId, $invoiceId);
+		} catch (\Throwable $e) {
+			Logger::debug('Payment check: could not fetch invoice ' . $invoiceId . ': ' . $e->getMessage(), true);
+			return null;
+		}
+		return (string) ($invoice->getData()['id'] ?? '') === $invoiceId ? $invoice : null;
 	}
 
 	protected function webhookReply(int $status, string $message): void {

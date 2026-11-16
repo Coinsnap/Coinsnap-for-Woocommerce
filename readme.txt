@@ -346,13 +346,14 @@ Use the support area in your Coinsnap merchant account or visit the official Coi
 = 1.8.0 :: 2026-11-15 =
 * Security: The BTCPay Server setup callback now requires a one-time code from the admin who started the setup, and reads the API key's store and permissions from BTCPay Server instead of the request. Before, anyone who had an API key on the same BTCPay Server could replace the shop's API key, store ID and webhook secret.
 * Security: Webhooks are checked with the Coinsnap or BTCPay Server API before an order changes. An order is marked paid only when the invoice is settled for that order's amount and currency, and only once. Refunded and already paid orders are no longer changed by later webhooks.
-* Security: The webhook secret is renewed once after the update. Versions 1.0 to 1.4.2 wrote the webhook secret to the WooCommerce log.
+* Security: The webhook secret is renewed once after the update. Versions 1.0 to 1.4.2 wrote the webhook secret to the WooCommerce log. Recent unpaid orders are re-checked with the payment server right after the renewal, so a payment notification sent during it is not lost.
 * Security: BTCPay Server API keys must be limited to the configured store. Unrestricted, server-wide or all-stores keys are refused. The setup asks for fewer permissions.
 * Security: API keys are no longer shown on the settings page or written to logs. Changing the BTCPay Server URL clears the stored API key and store ID.
 * Security: Webhook signatures use the timestamped X-Coinsnap-Signature header and a timing-safe comparison. Rejected webhooks are logged as security events.
 * Security: The connection check requires a shop manager, and admin pages use their own nonce.
 * Fix: "Enable discount" and "Send customer data" were treated as enabled when unchecked on PHP 8. Customer email, name and address are now sent only when "Send customer data" is enabled.
 * Fix: Payment notifications are no longer lost when the payment server is unavailable or rejects the API key; the server retries them.
+* Fix: When the payment server cannot be reached, checking the connection or saving the settings no longer creates a new webhook and replaces a working webhook secret.
 * Added: "Check payment status" button on unpaid Coinsnap orders. It asks the payment server for the invoice and updates the order, for example when a webhook was missed. Coinsnap does not resend failed webhooks automatically; they can also be resent from the Coinsnap dashboard.
 * Added: Deleting the plugin removes its settings, API keys, webhook secret and data table.
 * Removed: Wildcard CORS header, unused code and a debug alert on the checkout page.

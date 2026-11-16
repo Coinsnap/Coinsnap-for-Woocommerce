@@ -6,6 +6,7 @@ namespace Coinsnap\WC\Helper;
 
 use Coinsnap\Client\Webhook;
 use Coinsnap\Result\Webhook as WebhookResult;
+use Coinsnap\WC\Gateway\DefaultGateway;
 
 class CoinsnapApiWebhook {
     public const COINSNAP_WEBHOOK_EVENTS = ['New','Expired','Settled','Processing','Invalid'];
@@ -24,6 +25,7 @@ class CoinsnapApiWebhook {
     private const ROTATE_WAIT = 'coinsnap_wc_rotate_wait';
     private const ROTATE_LOCK = 'coinsnap_wc_rotate_lock';
     private const ROTATE_ERROR = 'coinsnap_wc_rotate_error';
+    private const RECOVERY_MAX_ORDERS = 20;
 
     // Schedules the one-time secret renewal in WP-Cron so it does not wait for an admin page load.
     public static function scheduleRotation(): void {
@@ -82,9 +84,35 @@ class CoinsnapApiWebhook {
                 }
             }
             self::markRotated();
+            self::recoverRecentPayments();
             return true;
         } finally {
             delete_option(self::ROTATE_LOCK);
+        }
+    }
+
+    // A delivery in flight to the old webhook during the swap is signed with the old secret and rejected,
+    // and Coinsnap does not redeliver. Re-check recent unpaid orders so such a payment is not lost.
+    private static function recoverRecentPayments(): void {
+        $gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : [];
+        $gateway = (isset($gateways['coinsnap']) && $gateways['coinsnap'] instanceof DefaultGateway) ? $gateways['coinsnap'] : new DefaultGateway();
+
+        $orders = wc_get_orders([
+            'status' => ['pending', 'on-hold', 'failed', 'cancelled'],
+            'date_created' => '>' . (time() - 2 * DAY_IN_SECONDS),
+            'limit' => 50,
+        ]);
+        $checked = 0;
+        foreach ($orders as $order) {
+            if ($checked >= self::RECOVERY_MAX_ORDERS || $order->is_paid() || (string) $order->get_meta('Coinsnap_id') === '') {
+                continue;
+            }
+            $checked++;
+            try {
+                $gateway->recoverSettledPayment($order);
+            } catch (\Throwable $e) {
+                Logger::debug('Payment recovery after webhook renewal failed for order ' . $order->get_id() . ': ' . $e->getMessage(), true);
+            }
         }
     }
 
@@ -107,29 +135,27 @@ class CoinsnapApiWebhook {
         return __('Coinsnap could not renew its webhook secret. Please check the connection in the Coinsnap settings; it will be retried automatically.', 'coinsnap-for-woocommerce');
     }
 
-//  Get locally stored webhook data and check if it exists on the store.
+    // Whether this plugin's stored webhook exists on the store. Throws when the API can't be asked: an API
+    // error is not "no webhook", and answering false would create a new webhook and replace a working secret.
     public static function webhookExists(string $apiUrl, string $apiKey, string $storeId): bool {
-	$whClient = new Webhook( $apiUrl, $apiKey );
-	$storedWebhook = self::getStored();
+        $whClient = new Webhook( $apiUrl, $apiKey );
+        $storedWebhook = self::getStored();
         $isWebhook = false;
-        
-        try {
-            $storeWebhooks = $whClient->getWebhooks($storeId);
-            foreach ($storeWebhooks as $webhook) {
-                if(strpos( $webhook->getData()['url'], WC()->api_request_url( 'coinsnap' ) ) !== false){
-                    
-                    if (is_array($storedWebhook) && $webhook->getData()['id'] === $storedWebhook['id']){
-                        $isWebhook = true;
-                    }
-                    else {
-                        $whClient->deleteWebhook( $storeId, $webhook->getData()['id'] );
-                        Logger::debug('Deleting webhook ID '.$webhook->getData()['id'].' for '. $webhook->getData()['url']);
-                    }
-                }
+
+        foreach ($whClient->getWebhooks($storeId) as $webhook) {
+            if (strpos( $webhook->getData()['url'], WC()->api_request_url( 'coinsnap' ) ) === false) {
+                continue;
             }
-        } catch (\Throwable $e) {
-            $errorMessage = 'Error fetching webhooks for store ID '.$storeId.'. Message: ' .$e->getMessage();
-            return false;
+            if (is_array($storedWebhook) && $webhook->getData()['id'] === $storedWebhook['id']) {
+                $isWebhook = true;
+                continue;
+            }
+            try {
+                $whClient->deleteWebhook( $storeId, $webhook->getData()['id'] );
+                Logger::debug('Deleting webhook ID '.$webhook->getData()['id'].' for '. $webhook->getData()['url']);
+            } catch (\Throwable $e) {
+                Logger::debug('Could not delete stale webhook ' . $webhook->getData()['id'] . ': ' . $e->getMessage());
+            }
         }
 
         return $isWebhook;
