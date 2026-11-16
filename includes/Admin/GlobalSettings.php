@@ -236,7 +236,7 @@ class GlobalSettings extends \WC_Settings_Page {
                         
                         //  Check if we already have a webhook registered for that store.
 			if (CoinsnapApiWebhook::webhookExists( $apiUrl, $apiKey, $storeId )){
-                            $messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation for store ', 'coinsnap-for-woocommerce' ).$storeId;
+                            $messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation.', 'coinsnap-for-woocommerce' );
                             Notice::addNotice('info', $messageReuseWebhook, true);
                             Logger::debug($messageReuseWebhook);
 			}
@@ -256,7 +256,7 @@ class GlobalSettings extends \WC_Settings_Page {
                                 Logger::debug( $messageWebhookSuccess );
                             }
                             else {
-				$messageWebhookError = __( 'Could not register a new webhook on the store ','coinsnap-for-woocommerce' ).$storeId;
+				$messageWebhookError = __( 'Could not register a new webhook on the store.','coinsnap-for-woocommerce' );
 				Notice::addNotice('error', $messageWebhookError );
 				Logger::debug($messageWebhookError, true);
                             }
