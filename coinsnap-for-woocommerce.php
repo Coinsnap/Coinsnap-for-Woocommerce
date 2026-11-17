@@ -106,6 +106,10 @@ class CoinsnapWCPlugin {
         add_action( CoinsnapApiWebhook::ROTATE_HOOK, [ CoinsnapApiWebhook::class, 'rotateWebhook' ] );
         CoinsnapApiWebhook::scheduleRotation();
 
+        // Mark the Coinsnap discount fee line, and drop it when the order is paid another way (6.10).
+        add_action('woocommerce_checkout_create_order_fee_item', [$this, 'markCoinsnapDiscountFee'], 10, 4);
+        add_action('woocommerce_before_pay_action', [$this, 'removeDiscountForOtherMethod'], 10, 1);
+
         add_action( 'wp_ajax_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         add_action( 'wp_ajax_nopriv_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         
@@ -230,6 +234,22 @@ class CoinsnapWCPlugin {
   	return $new_columns;
     }
     
+    public function markCoinsnapDiscountFee($item, $feeKey, $fee, $order){
+        // The fee is only added to the cart while Coinsnap is the chosen payment method.
+        if (is_object($fee) && isset($fee->name) && $fee->name === __('Bitcoin discount','coinsnap-for-woocommerce')) {
+            $item->add_meta_data('_coinsnap_discount', 'yes', true);
+        }
+    }
+
+    public function removeDiscountForOtherMethod($order){
+        // "Pay for order" page, before the new payment method is set; WooCommerce has checked its nonce.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $method = isset($_POST['payment_method']) ? sanitize_text_field(wp_unslash($_POST['payment_method'])) : '';
+        if ($order instanceof \WC_Order && $method !== 'coinsnap') {
+            \Coinsnap\WC\Gateway\AbstractGateway::removeCoinsnapDiscount($order);
+        }
+    }
+
     public function coinsnapCheckoutHandler(){
         $_nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
         if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
@@ -469,7 +489,7 @@ class CoinsnapWCPlugin {
         Logger::debug('current_user_can_manage_options: ' . current_user_can( 'manage_options' ));
 
 	if ( current_user_can( 'manage_options' ) ) {
-            $host = filter_var(filter_input(INPUT_POST,'host',FILTER_SANITIZE_STRING), FILTER_VALIDATE_URL);
+            $host = filter_var(isset($_POST['host']) ? esc_url_raw(wp_unslash($_POST['host'])) : '', FILTER_VALIDATE_URL);
 
             if ($host === false || (substr( $host, 0, 7 ) !== "http://" && substr( $host, 0, 8 ) !== "https://")) {
                 wp_send_json_error("Error validating BTCPayServer URL.");
