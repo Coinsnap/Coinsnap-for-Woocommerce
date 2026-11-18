@@ -5,7 +5,6 @@ namespace Coinsnap\Client;
 if (!defined('ABSPATH')) {
     exit;
 }
-header('Access-Control-Allow-Origin: *');
 
 use Coinsnap\Result\InvoicePaymentMethod;
 use Coinsnap\Util\PreciseNumber;

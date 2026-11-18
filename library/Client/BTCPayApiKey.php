@@ -55,4 +55,19 @@ class BTCPayApiKey extends AbstractClient{
         $url .= '?' . $queryParams;
         return $url;
     }
+
+    /**
+     * Permissions of this client's API key as reported by the server, or null if the key is rejected.
+     * @throws \Coinsnap\Exception\ConnectException on network errors
+     */
+    public function getCurrentPermissions(): ?array
+    {
+        $url = $this->getApiUrl() . 'api-keys/current';
+        $response = $this->getHttpClient()->request('GET', $url, $this->getRequestHeaders());
+        if ($response->getStatus() !== 200) {
+            return null;
+        }
+        $data = json_decode($response->getBody(), true);
+        return (is_array($data) && is_array($data['permissions'] ?? null)) ? $data['permissions'] : null;
+    }
 }

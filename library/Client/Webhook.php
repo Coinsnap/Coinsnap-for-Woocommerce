@@ -132,14 +132,27 @@ class Webhook extends AbstractClient {
     }
 
     //  Check if the request your received from a webhook is authentic and can be trusted.
+    //  Legacy X-Coinsnap-Sig and BTCPay-Sig format: "sha256=<hex>".
     public static function isIncomingWebhookRequestValid(string $requestBody, string $coinsnapSignatureHeader, string $secret): bool{
-        if ($requestBody && $coinsnapSignatureHeader) {            
-            $expectedHeader = 'sha256='.hash_hmac('sha256', $requestBody, $secret);
-            if ($expectedHeader === $coinsnapSignatureHeader) {
-                return true;
-            }
+        if ($requestBody === '' || $coinsnapSignatureHeader === '' || $secret === '') {
+            return false;
         }
-        return false;
+        return hash_equals('sha256='.hash_hmac('sha256', $requestBody, $secret), $coinsnapSignatureHeader);
+    }
+
+    //  X-Coinsnap-Signature format: "t=<unix time>,v1=<hex>", v1 = HMAC-SHA256 of "t.body". Rejects t older than $maxAge seconds.
+    public static function isTimestampedSignatureValid(string $requestBody, string $signatureHeader, string $secret, int $maxAge = 300, ?int $now = null): bool{
+        if ($requestBody === '' || $signatureHeader === '' || $secret === '') {
+            return false;
+        }
+        parse_str(str_replace(',', '&', $signatureHeader), $parts);
+        $t = (int) ($parts['t'] ?? 0);
+        $v1 = is_string($parts['v1'] ?? null) ? $parts['v1'] : '';
+        $now = $now ?? time();
+        if ($t <= 0 || $v1 === '' || abs($now - $t) > $maxAge) {
+            return false;
+        }
+        return hash_equals(hash_hmac('sha256', $t . '.' . $requestBody, $secret), $v1);
     }
 
     public function deleteWebhook(string $storeId, string $webhookId): void {

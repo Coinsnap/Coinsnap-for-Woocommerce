@@ -19,6 +19,29 @@ class Logger {
 		}
 	}
 
+	// Always logged. $id comes from the request, so it is cleaned before it reaches the log.
+	// No IP: it is personal data, and the web server's access log already has it.
+	// At most 10 lines a minute, so a flood of fake requests can't fill the disk.
+	public static function security( string $event, string $reason, string $id = '' ): void {
+		$key = 'coinsnap_wc_seclog_' . gmdate( 'YmdHi' );
+		$count = (int) get_transient( $key ) + 1;
+		set_transient( $key, $count, 2 * MINUTE_IN_SECONDS );
+		if ( $count === 11 ) {
+			self::debug( 'SECURITY more rejections this minute, not logged', true );
+		}
+		if ( $count > 10 ) {
+			return;
+		}
+		$id = substr( (string) preg_replace( '/[^A-Za-z0-9_-]/', '', $id ), 0, 64 );
+		self::debug( sprintf( 'SECURITY %s reason=%s id=%s', $event, $reason, $id !== '' ? $id : '-' ), true );
+	}
+
+	// Normal traffic (test webhooks, other plugins' invoices, retries): always logged, never as SECURITY.
+	public static function info( string $event, string $reason, string $id = '' ): void {
+		$id = substr( (string) preg_replace( '/[^A-Za-z0-9_-]/', '', $id ), 0, 64 );
+		self::debug( sprintf( 'INFO %s reason=%s id=%s', $event, $reason, $id !== '' ? $id : '-' ), true );
+	}
+
 	public static function getLogFileUrl(): string {
 		$log_file = COINSNAP_WC_PLUGIN_ID . '-' . gmdate('Y-m-d') . '-' . sanitize_file_name( wp_hash( COINSNAP_WC_PLUGIN_ID ) ) . '-log';
 		return esc_url(admin_url('admin.php?page=wc-status&tab=logs&log_file=' . $log_file));

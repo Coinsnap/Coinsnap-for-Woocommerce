@@ -20,6 +20,10 @@ class GlobalSettings extends \WC_Settings_Page {
         // Register custom field type order_states with OrderStatesField class.
 	add_action('woocommerce_admin_field_coinsnap_order_states', [(new OrderStates()), 'renderOrderStatesHtml']);
         add_action('woocommerce_admin_field_custom_markup', [$this, 'coinsnap_output_custom_markup_field']);
+        add_action('woocommerce_admin_field_coinsnap_secret', [$this, 'outputSecretField']);
+        foreach (['coinsnap_api_key', 'btcpay_api_key'] as $secretOption) {
+            add_filter('woocommerce_admin_settings_sanitize_option_' . $secretOption, [$this, 'keepStoredSecret'], 10, 3);
+        }
         parent::__construct();
     }        
 
@@ -67,13 +71,12 @@ class GlobalSettings extends \WC_Settings_Page {
 
             'api_key' => [
                 'title'       => esc_html_x( 'API Key*', 'global_settings','coinsnap-for-woocommerce' ),
-                'type'        => 'text',
+                'type'        => 'coinsnap_secret',
                 'desc_tip'    => _x( 'Your Coinsnap API Key. You can find it on the store settings page on your Coinsnap Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
 		'desc'        => _x('Coinsnap API requires authentication with an API key.<br/>Generate your API key by visiting the <a href="https://app.coinsnap.io/register" target="_blank">Coinsnap registration Page</a>.', 'global_settings', 'coinsnap-for-woocommerce'),
                 'default'     => '',
-                'custom_attributes' => ['required' => 'required'],
 		'id' => 'coinsnap_api_key',
-                'class' => 'coinsnap required'
+                'class' => 'coinsnap'
             ],
                     
             'btcpay_server_url' => [
@@ -108,12 +111,11 @@ class GlobalSettings extends \WC_Settings_Page {
             
             'btcpay_api_key' => [
                 'title'       => esc_html_x( 'API Key*', 'global_settings','coinsnap-for-woocommerce' ),
-                'type'        => 'text',
+                'type'        => 'coinsnap_secret',
 		'desc_tip'    => _x( 'Your BTCPay server API Key. You can generate it in your BTCPay Server.', 'global_settings', 'coinsnap-for-woocommerce' ),
 		'default'     => '',
-                'custom_attributes' => ['required' => 'required'],
 		'id' => 'btcpay_api_key',
-                'class' => 'btcpay required'
+                'class' => 'btcpay'
             ],
             
             'default_description' => [
@@ -194,8 +196,12 @@ class GlobalSettings extends \WC_Settings_Page {
     /**
     * On saving the settings form make sure to check if the API key works and register a webhook if needed.
     */
+    private $previousBtcpayUrl = null;
+    private $rejectBtcpayKey = false;
+
     public function save() {
-        
+        $this->previousBtcpayUrl = (string) get_option('btcpay_server_url', '');
+
         $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         
         if( wp_verify_nonce($_nonce,'woocommerce-settings')){
@@ -209,25 +215,36 @@ class GlobalSettings extends \WC_Settings_Page {
             $apiKey  = ($coinsnap_provider !== 'btcpay')? 
                 sanitize_text_field(filter_input(INPUT_POST,'coinsnap_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS )) : 
                 sanitize_text_field(filter_input(INPUT_POST,'btcpay_api_key',FILTER_SANITIZE_FULL_SPECIAL_CHARS ));
+            // A stored key is reused only for the server it was issued for.
+            if ($apiKey === '' && ($coinsnap_provider !== 'btcpay' || $apiUrl === $this->previousBtcpayUrl)) {
+                $apiKey = (string) get_option(($coinsnap_provider !== 'btcpay') ? 'coinsnap_api_key' : 'btcpay_api_key', '');
+            }
             
             // If we have url, storeID and apiKey we want to check if the api key works and register a webhook.
             if ( $this->hasNeededApiCredentials($apiUrl,$storeId,$apiKey) ) {
                 
                 try {        
                     
+                    // A BTCPay key must be limited to this one store (no unrestricted or server rights), as reported by BTCPay itself.
+                    if ( $coinsnap_provider === 'btcpay' && !$this->btcpayKeyIsAcceptable((string) $apiUrl, $apiKey, $storeId) ) {
+                        $this->rejectBtcpayKey = true;
+                        Notice::addNotice('error', __( 'This BTCPay API key was not saved: it must be limited to this store and have only store permissions. Please use the "Generate API key" button, or create a key in BTCPay with only the required permissions for this store.', 'coinsnap-for-woocommerce' ));
+                        Logger::debug('Saving GlobalSettings: BTCPay API key refused (permissions not limited to the configured store)', true);
+                    }
                     // Continue creating the webhook if the API key permissions are OK.
-                    if ( $apiAuth = CoinsnapApiHelper::checkApiConnection($apiUrl,$storeId,$apiKey) ){
+                    elseif ( $apiAuth = CoinsnapApiHelper::checkApiConnection($apiUrl,$storeId,$apiKey) ){
                         
                         //  Check if we already have a webhook registered for that store.
 			if (CoinsnapApiWebhook::webhookExists( $apiUrl, $apiKey, $storeId )){
-                            $messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation for store ', 'coinsnap-for-woocommerce' ).$storeId;
+                            $messageReuseWebhook = __( 'Webhook already exists, skipping webhook creation.', 'coinsnap-for-woocommerce' );
                             Notice::addNotice('info', $messageReuseWebhook, true);
                             Logger::debug($messageReuseWebhook);
 			}
                         else {
                             // Register a new webhook.
                             $webhook = CoinsnapApiWebhook::registerWebhook($apiUrl, $apiKey, $storeId);
-                            Logger::debug('webhook '.wp_json_encode($webhook));
+                            // The webhook carries its secret; only the id goes to the log.
+                            Logger::debug('Webhook registered: ' . ($webhook ? (string) ($webhook->getData()['id'] ?? '') : 'failed'));
                                     
                                 
                             //  if webhook is created
@@ -239,7 +256,7 @@ class GlobalSettings extends \WC_Settings_Page {
                                 Logger::debug( $messageWebhookSuccess );
                             }
                             else {
-				$messageWebhookError = __( 'Could not register a new webhook on the store ','coinsnap-for-woocommerce' ).$storeId;
+				$messageWebhookError = __( 'Could not register a new webhook on the store.','coinsnap-for-woocommerce' );
 				Notice::addNotice('error', $messageWebhookError );
 				Logger::debug($messageWebhookError, true);
                             }
@@ -254,11 +271,9 @@ class GlobalSettings extends \WC_Settings_Page {
                 } 
                         
                 catch ( \Throwable $e ) {
-                    $messageException = sprintf(
-                        /* translators: 1: Error message */
-                        __( 'Error fetching data for this API key from server. Please check if the key is valid. Error: %1$s', 'coinsnap-for-woocommerce' ),$e->getMessage());
-                    Notice::addNotice('error', $messageException );
-                    Logger::debug($messageException, true);
+                    // Show a generic message; the raw API error (URL, response body) goes to the log only.
+                    Notice::addNotice('error', __( 'Could not connect with this API key. Please check the server URL, store ID and API key.', 'coinsnap-for-woocommerce' ) );
+                    Logger::debug('Saving GlobalSettings: API error: ' . $e->getMessage(), true);
 		}
             }
         }
@@ -299,6 +314,32 @@ class GlobalSettings extends \WC_Settings_Page {
 		
     }
     
+    // Never prints a stored key; shows only its last 4 characters as a hint.
+    public function outputSecretField($value) {
+        $stored = (string) get_option($value['id'], '');
+        $hint = ($stored === '') ? __('Paste your API key', 'coinsnap-for-woocommerce') : '••••••••' . substr($stored, -4);
+        echo '<tr valign="top"><th scope="row" class="titledesc"><label for="' . esc_attr($value['id']) . '">' . esc_html($value['title']) . '</label></th>';
+        echo '<td class="forminp"><input type="password" name="' . esc_attr($value['id']) . '" id="' . esc_attr($value['id']) . '" value="" autocomplete="new-password" class="' . esc_attr($value['class'] ?? '') . '" placeholder="' . esc_attr($hint) . '" />';
+        if (!empty($value['desc'])) {
+            echo '<p class="description">' . wp_kses_post($value['desc']) . '</p>';
+        }
+        echo '</td></tr>';
+    }
+
+    // An empty secret field keeps the stored value (returning null tells WooCommerce not to save it).
+    // A changed BTCPay URL clears the stored key separately (BTCPayApiAuthorization::onServerUrlChange).
+    public function keepStoredSecret($value, $option, $rawValue) {
+        if (($option['id'] ?? '') === 'btcpay_api_key' && $this->rejectBtcpayKey) {
+            return null;
+        }
+        return (is_string($rawValue) && trim($rawValue) !== '') ? $value : null;
+    }
+
+    private function btcpayKeyIsAcceptable(string $apiUrl, string $apiKey, string $storeId): bool {
+        $auth = \Coinsnap\Client\BTCPayApiAuthorization::fromServer($apiUrl, $apiKey);
+        return $auth !== null && $auth->hasRequiredPermissions() && $auth->getStoreID() === $storeId;
+    }
+
     public function coinsnap_output_custom_markup_field($value) {
         //$_provider = get_option('coinsnap_provider');
         //if($_provider === 'btcpay'){

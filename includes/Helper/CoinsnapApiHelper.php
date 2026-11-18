@@ -36,7 +36,7 @@ class CoinsnapApiHelper {
         $url = (get_option('coinsnap_provider')!=='btcpay')? COINSNAP_SERVER_URL : get_option('btcpay_server_url');
         $api_key = (get_option('coinsnap_provider')!=='btcpay')? get_option('coinsnap_api_key') : get_option('btcpay_api_key');
         $store_id = (get_option('coinsnap_provider')!=='btcpay')? get_option('coinsnap_store_id', null) : get_option('btcpay_store_id', null);
-        $webhook = get_option('coinsnap_webhook', null);
+        $webhook = CoinsnapApiWebhook::getStored();
         
         if($url && $api_key) {
             return [
@@ -78,7 +78,6 @@ class CoinsnapApiHelper {
         if ($config = self::getConfig()) {
             $client = new Store($config['url'], $config['api_key']);
             $store = $client->getStore($config['store_id']);
-            Logger::debug(wp_json_encode($store), true);
             if ($store->getData()['code'] === 200){ 
                 return (array)$store;
             }
@@ -156,12 +155,17 @@ class CoinsnapApiHelper {
 	}
 
 	//  Check webhook signature to be a valid request.
-	public function validWebhookRequest(string $signature, string $requestData): bool {
-        //    \Coinsnap\WC\Helper\Logger::debug( $signature . ' - ' . $requestData . ' - ' . $this->webhook['secret'], true );
-            if ($this->configured) {
-                return Webhook::isIncomingWebhookRequestValid($requestData, $signature, $this->webhook['secret']);
+	//  $headers: lowercase header name => value. Only the header that matches the configured provider is accepted.
+	public function validWebhookRequest(array $headers, string $requestData): bool {
+            $secret = is_array($this->webhook) && is_string($this->webhook['secret'] ?? null) ? $this->webhook['secret'] : '';
+            if (!$this->configured || $secret === '') {
+                return false;
             }
-            return false;
+            if (get_option('coinsnap_provider') === 'btcpay') {
+                return Webhook::isIncomingWebhookRequestValid($requestData, (string) ($headers['btcpay-sig'] ?? ''), $secret);
+            }
+            // Only the timestamped header: the old X-Coinsnap-Sig has no time in it, so a captured webhook could be replayed forever.
+            return Webhook::isTimestampedSignatureValid($requestData, (string) ($headers['x-coinsnap-signature'] ?? ''), $secret);
 	}
 
 	//  Checks if the provided API config already exists in options table.

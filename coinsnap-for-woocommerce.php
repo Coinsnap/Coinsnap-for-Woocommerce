@@ -7,7 +7,7 @@
  * Author URI:      https://coinsnap.io/
  * Text Domain:     coinsnap-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.7.1
+ * Version:         1.8.0
  * Requires PHP:    7.4
  * Tested up to:    6.9
  * Requires at least: 6.0
@@ -30,7 +30,7 @@ use Coinsnap\WC\Helper\Logger;
 
 defined( 'ABSPATH' ) || exit();
 if(!defined('COINSNAP_WC_PHP_VERSION')){define( 'COINSNAP_WC_PHP_VERSION', '7.4' );}
-if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.7.1' );}
+if(!defined('COINSNAP_WC_VERSION')){define( 'COINSNAP_WC_VERSION', '1.8.0' );}
 if(!defined('COINSNAP_VERSION_KEY')){define( 'COINSNAP_VERSION_KEY', 'coinsnap_version' );}
 if(!defined('COINSNAP_PLUGIN_FILE_PATH')){define( 'COINSNAP_PLUGIN_FILE_PATH', plugin_dir_path( __FILE__ ) );}
 if(!defined('COINSNAP_PLUGIN_URL')){define( 'COINSNAP_PLUGIN_URL', plugin_dir_url(__FILE__ ) );}
@@ -55,10 +55,14 @@ class CoinsnapWCPlugin {
 
 	if (is_admin()) {
             
+            add_action( 'admin_init', [ Notice::class, 'showFlash' ] );
+            add_action( 'admin_init', [ CoinsnapApiWebhook::class, 'maybeRotateWebhook' ] );
             add_action( 'admin_enqueue_scripts', [ $this, 'connectionScriptsLoader' ] );
             add_action( 'wp_ajax_coinsnap_connection_handler', [$this, 'coinsnapConnectionHandler'] );
             add_action( 'wp_ajax_btcpay_server_apiurl_handler', [$this, 'btcpayApiUrlHandler'] );
-            
+            add_action( 'admin_post_coinsnap_check_payment', [$this, 'checkPaymentHandler'] );
+            add_action( 'admin_notices', [$this, 'checkPaymentNotice'] );
+
             if(filter_input(INPUT_GET,'page',FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'wc-orders'){
             
                 if(filter_input(INPUT_GET,'action',FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'edit'){
@@ -98,6 +102,14 @@ class CoinsnapWCPlugin {
 	}
         
         
+        // One-time webhook secret renewal, run by WP-Cron so it does not wait for an admin login.
+        add_action( CoinsnapApiWebhook::ROTATE_HOOK, [ CoinsnapApiWebhook::class, 'rotateWebhook' ] );
+        CoinsnapApiWebhook::scheduleRotation();
+
+        // Mark the Coinsnap discount fee line, and drop it when the order is paid another way (6.10).
+        add_action('woocommerce_checkout_create_order_fee_item', [$this, 'markCoinsnapDiscountFee'], 10, 4);
+        add_action('woocommerce_before_pay_action', [$this, 'removeDiscountForOtherMethod'], 10, 1);
+
         add_action( 'wp_ajax_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         add_action( 'wp_ajax_nopriv_coinsnap_checkout', [$this, 'coinsnapCheckoutHandler'] );
         
@@ -106,6 +118,73 @@ class CoinsnapWCPlugin {
     public function coinsnapOrderDetails($order){
         if( $order->get_meta( 'Coinsnap_transactionurl') !== null && !empty($order->get_meta( 'Coinsnap_transactionurl'))){
                 echo '<b>'.esc_html__('Transaction details','coinsnap-for-woocommerce').'</b>:<br/><a href="'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'" target="_blank" class="">'.esc_url($order->get_meta( 'Coinsnap_transactionurl')).'</a>';
+        }
+        // Manual recovery when a webhook was missed (Coinsnap does not redeliver automatically).
+        if ($order->get_meta('Coinsnap_id') && !$order->is_paid() && current_user_can('edit_shop_orders')) {
+            $url = wp_nonce_url(
+                add_query_arg(['action' => 'coinsnap_check_payment', 'order_id' => $order->get_id()], admin_url('admin-post.php')),
+                'coinsnap_check_payment_' . $order->get_id()
+            );
+            echo '<p><a class="button" href="' . esc_url($url) . '">' . esc_html__('Check payment status', 'coinsnap-for-woocommerce') . '</a></p>';
+        }
+    }
+
+    // Asks the payment server for the order's invoice and applies the same paid decision as a webhook.
+    public function checkPaymentHandler() {
+        $orderId = isset($_GET['order_id']) ? absint($_GET['order_id']) : 0;
+        check_admin_referer('coinsnap_check_payment_' . $orderId);
+        if (!current_user_can('edit_shop_orders')) {
+            wp_die(esc_html__('Unauthorized', 'coinsnap-for-woocommerce'), '', ['response' => 403]);
+        }
+        $order = wc_get_order($orderId);
+        if (!$order) {
+            wp_die(esc_html__('Order not found.', 'coinsnap-for-woocommerce'), '', ['response' => 404]);
+        }
+
+        // One check per order every 30 seconds, so repeated clicks do not hammer the payment server API.
+        $throttleKey = 'coinsnap_wc_check_' . $order->get_id();
+        if (get_transient($throttleKey)) {
+            wp_safe_redirect(add_query_arg(['coinsnap_check' => 'wait'], $order->get_edit_order_url()));
+            exit;
+        }
+        set_transient($throttleKey, 1, 30);
+
+        $gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : [];
+        $gateway = (isset($gateways['coinsnap']) && $gateways['coinsnap'] instanceof DefaultGateway) ? $gateways['coinsnap'] : new DefaultGateway();
+        [$result, $status] = $gateway->checkPaymentStatus($order);
+
+        $order->add_order_note(sprintf(
+            /* translators: 1: result, 2: invoice status */
+            __('Payment status checked manually: %1$s (invoice status: %2$s).', 'coinsnap-for-woocommerce'),
+            $result,
+            $status !== '' ? $status : '-'
+        ));
+
+        wp_safe_redirect(add_query_arg(
+            ['coinsnap_check' => $result, 'coinsnap_status' => $status],
+            $order->get_edit_order_url()
+        ));
+        exit;
+    }
+
+    public function checkPaymentNotice() {
+        $result = isset($_GET['coinsnap_check']) ? sanitize_key(wp_unslash($_GET['coinsnap_check'])) : '';
+        if ($result === '' || !current_user_can('edit_shop_orders')) {
+            return;
+        }
+        $status = isset($_GET['coinsnap_status']) ? sanitize_text_field(wp_unslash($_GET['coinsnap_status'])) : '';
+        $known = ['New', 'Processing', 'Settled', 'Expired', 'Invalid'];
+        $status = in_array($status, $known, true) ? $status : '';
+        $messages = [
+            'paid' => ['success', __('Payment confirmed by the payment server. The order is marked as paid.', 'coinsnap-for-woocommerce')],
+            /* translators: %s: invoice status */
+            'not_paid' => ['warning', sprintf(__('The invoice is not paid in full for this order (status: %s). The order was not marked as paid; see the order notes.', 'coinsnap-for-woocommerce'), $status !== '' ? $status : '-')],
+            'no_invoice' => ['warning', __('This order has no Coinsnap invoice.', 'coinsnap-for-woocommerce')],
+            'api_error' => ['error', __('Could not reach the payment server. Please check the connection and try again.', 'coinsnap-for-woocommerce')],
+            'wait' => ['info', __('The payment status of this order was checked a moment ago. Please wait 30 seconds and try again.', 'coinsnap-for-woocommerce')],
+        ];
+        if (isset($messages[$result])) {
+            printf('<div class="notice notice-%1$s is-dismissible"><p><strong>Coinsnap:</strong> %2$s</p></div>', esc_attr($messages[$result][0]), esc_html($messages[$result][1]));
         }
     }
     
@@ -155,8 +234,24 @@ class CoinsnapWCPlugin {
   	return $new_columns;
     }
     
+    public function markCoinsnapDiscountFee($item, $feeKey, $fee, $order){
+        // The fee is only added to the cart while Coinsnap is the chosen payment method.
+        if (is_object($fee) && isset($fee->name) && $fee->name === __('Bitcoin discount','coinsnap-for-woocommerce')) {
+            $item->add_meta_data('_coinsnap_discount', 'yes', true);
+        }
+    }
+
+    public function removeDiscountForOtherMethod($order){
+        // "Pay for order" page, before the new payment method is set; WooCommerce has checked its nonce.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $method = isset($_POST['payment_method']) ? sanitize_text_field(wp_unslash($_POST['payment_method'])) : '';
+        if ($order instanceof \WC_Order && $method !== 'coinsnap') {
+            \Coinsnap\WC\Gateway\AbstractGateway::removeCoinsnapDiscount($order);
+        }
+    }
+
     public function coinsnapCheckoutHandler(){
-        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        $_nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
         if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
             wp_die('Unauthorized!', '', ['response' => 401]);
         }
@@ -176,13 +271,16 @@ class CoinsnapWCPlugin {
         
         wp_localize_script('coinsnap-connection-check', 'coinsnap_ajax', array(
           'ajax_url' => admin_url('admin-ajax.php'),
-          'nonce'  => wp_create_nonce( 'coinsnap-ajax-nonce' ),
+          'nonce'  => wp_create_nonce( 'coinsnap-admin-nonce' ),
         ));
     }
     
     public function coinsnapConnectionHandler(){
         
-        $_nonce = filter_input(INPUT_POST,'_wpnonce',FILTER_SANITIZE_STRING);
+        $_nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
+        if ( !wp_verify_nonce($_nonce, 'coinsnap-admin-nonce') || !current_user_can('manage_woocommerce') ) {
+            wp_send_json_error(null, 403);
+        }
         $apiHelper = new CoinsnapApiHelper();
         
         if(empty($apiHelper->url) || empty($apiHelper->apiKey)){
@@ -238,7 +336,7 @@ class CoinsnapWCPlugin {
             __('WooCommerce: Coinsnap server is connected', 'coinsnap-for-woocommerce') : 
             __('WooCommerce: BTCPay server is connected', 'coinsnap-for-woocommerce');
         
-        if( wp_verify_nonce($_nonce,'coinsnap-ajax-nonce') ){
+        {
             $response = ['result' => false,'message' => $_message_disconnected,'display' => get_option('coinsnap_connection_status_display')];
 
             try {
@@ -259,7 +357,8 @@ class CoinsnapWCPlugin {
                 $response['message'] = $webhook ? $_message_connected.' ('.$connectionData.')' : $_message_disconnected.' (Webhook)';
                 $response['display'] = get_option('coinsnap_connection_status_display');
             }
-            catch (Exception $e) {
+            catch (\Throwable $e) {
+                // Includes a failed webhook lookup; no new webhook is created then.
                 $response['message'] =  __('WooCommerce: API connection is not established', 'coinsnap-for-woocommerce');
                 Logger::debug($e->getMessage());
             }
@@ -382,23 +481,30 @@ class CoinsnapWCPlugin {
      * Handles the BTCPay server AJAX callback from the GlobalSettings form.
      */
     public function btcpayApiUrlHandler() {
-        $_nonce = filter_input(INPUT_POST,'apiNonce',FILTER_SANITIZE_STRING);
-        if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
+        $_nonce = isset($_POST['apiNonce']) ? sanitize_text_field(wp_unslash($_POST['apiNonce'])) : '';
+        if ( !wp_verify_nonce( $_nonce, 'coinsnap-admin-nonce' ) ) {
             wp_die('Unauthorized!', '', ['response' => 401]);
         }
         
         Logger::debug('current_user_can_manage_options: ' . current_user_can( 'manage_options' ));
 
 	if ( current_user_can( 'manage_options' ) ) {
-            $host = filter_var(filter_input(INPUT_POST,'host',FILTER_SANITIZE_STRING), FILTER_VALIDATE_URL);
+            $host = filter_var(isset($_POST['host']) ? esc_url_raw(wp_unslash($_POST['host'])) : '', FILTER_VALIDATE_URL);
 
             if ($host === false || (substr( $host, 0, 7 ) !== "http://" && substr( $host, 0, 8 ) !== "https://")) {
                 wp_send_json_error("Error validating BTCPayServer URL.");
             }
 
-            $permissions = array_merge(BTCPayApiAuthorization::REQUIRED_PERMISSIONS, BTCPayApiAuthorization::OPTIONAL_PERMISSIONS);
+            $permissions = BTCPayApiAuthorization::REQUIRED_PERMISSIONS;
 
             try {
+                // Store the host before we leave the site; a change clears the old key (see onServerUrlChange).
+                update_option('btcpay_server_url', $host);
+                $callbackUrl = add_query_arg(
+                    ['coinsnap-for-woocommerce-btcpay-settings-callback' => '1', 'state' => BTCPayApiAuthorization::startState((string) get_option('btcpay_server_url', ''))],
+                    home_url('/')
+                );
+
 		// Create the redirect url to BTCPay instance.
 		$url = \Coinsnap\Client\BTCPayApiKey::getAuthorizeUrl(
                     $host,
@@ -406,12 +512,10 @@ class CoinsnapWCPlugin {
                     'WooCommerce',
                     true,
                     true,
-                    home_url('?coinsnap-for-woocommerce-btcpay-settings-callback'),
+                    $callbackUrl,
                     null
 		);
 
-		// Store the host to options before we leave the site.
-		update_option('btcpay_server_url', $host);
 
 		// Return the redirect url.
 		wp_send_json_success(['url' => $url]);
@@ -509,89 +613,68 @@ add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), function ($links){
 add_filter('request', function($vars) {
     if (isset($vars['coinsnap-for-woocommerce-btcpay-settings-callback'])) {
         $vars['coinsnap-for-woocommerce-btcpay-settings-callback'] = true;
-        $vars['coinsnap-for-woocommerce-btcpay-nonce'] = wp_create_nonce('coinsnap-btcpay-nonce');
     }
     return $vars;
 });
 
-// Adding template redirect handling for coinsnap-for-woocommerce-btcpay-settings-callback.
+// BTCPay posts the new API key here from its own site, so the admin login cookie is usually absent.
+// The proof is the one-time state created when the admin started the wizard.
 add_action( 'template_redirect', function() {
     global $wp_query;
 
-    // Only continue on a coinsnap-for-woocommerce-btcpay-settings-callback request.
     if (! isset( $wp_query->query_vars['coinsnap-for-woocommerce-btcpay-settings-callback'] ) ) {
         return;
     }
-            
-    if(!isset($wp_query->query_vars['coinsnap-for-woocommerce-btcpay-nonce']) || !wp_verify_nonce($wp_query->query_vars['coinsnap-for-woocommerce-btcpay-nonce'],'coinsnap-btcpay-nonce')){
-        return;
+
+    $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
+    if (!BTCPayApiAuthorization::consumeState($state, (string) get_option('btcpay_server_url', ''))) {
+        Logger::security('btcpay callback rejected', 'invalid state');
+        wp_die(esc_html__('Unauthorized', 'coinsnap-for-woocommerce'), '', ['response' => 403]);
     }
 
-    $CoinsnapBTCPaySettingsUrl = admin_url('admin.php?page=wc-settings&tab=coinsnap_settings&provider=btcpay');
+    $settingsUrl = admin_url('admin.php?page=wc-settings&tab=coinsnap_settings&provider=btcpay');
+    $btcpayUrl = (string) get_option('btcpay_server_url', '');
+    $apiKey = isset($_POST['apiKey']) ? sanitize_text_field(wp_unslash($_POST['apiKey'])) : '';
 
-    $rawData = file_get_contents('php://input');
-    Logger::debug('Redirect payload: ' . $rawData);
-    
-    $btcpay_server_url = get_option( 'btcpay_server_url');
-    $btcpay_api_key  = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    
-    $client = new \Coinsnap\Client\Store($btcpay_server_url,$btcpay_api_key);
-    if (count($client->getStores()) < 1) {
-        $messageAbort = __('Error on verifiying redirected API Key with stored BTCPay Server url. Aborting API wizard. Please try again or continue with manual setup.', 'coinsnap-for-woocommerce');
-	Notice::addNotice('error', $messageAbort);
-	wp_redirect($CoinsnapBTCPaySettingsUrl);
+    // Ask BTCPay what the key can do; never trust permissions or a store id from the request.
+    $apiData = \Coinsnap\Client\BTCPayApiAuthorization::fromServer($btcpayUrl, $apiKey);
+    if ($apiData === null) {
+        Notice::addFlash('error', __('Could not verify the API key with the stored BTCPay Server URL. Please try again or continue with manual setup.', 'coinsnap-for-woocommerce'));
+        wp_safe_redirect($settingsUrl);
+        exit;
     }
-    
-    // Data does get submitted with url-encoded payload, so parse $_POST here.
-    if (!empty($_POST)) {
-        $data['apiKey'] = filter_input(INPUT_POST,'apiKey',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? null;
-            if(isset($_POST['permissions'])){
-                $permissions = array_map('sanitize_text_field', wp_unslash($_POST['permissions']));
-                if(is_array($permissions)){
-                foreach ($permissions as $key => $value) {
-                    $data['permissions'][$key] = sanitize_text_field($permissions[$key] ?? null);
-                }
-            }
-        }
+
+    if (!$apiData->hasSingleStore() || !$apiData->hasRequiredPermissions()) {
+        Notice::addFlash('error', __('The API key must be limited to one store and have exactly the requested store permissions.', 'coinsnap-for-woocommerce'));
+        wp_safe_redirect($settingsUrl);
+        exit;
     }
-    
-    if (isset($data['apiKey']) && isset($data['permissions'])) {
-        
-        $apiData = new \Coinsnap\Client\BTCPayApiAuthorization($data);
-	if ($apiData->hasSingleStore() && $apiData->hasRequiredPermissions()) {
-			
-            update_option('btcpay_api_key', $apiData->getApiKey());
-            update_option('btcpay_store_id', $apiData->getStoreID());
-            update_option('coinsnap_provider', 'btcpay');
 
-            Notice::addNotice('success', __('Successfully received api key and store id from BTCPay Server API. Please finish setup by saving this settings form.', 'coinsnap-for-woocommerce'));
+    update_option('btcpay_api_key', $apiData->getApiKey());
+    update_option('btcpay_store_id', $apiData->getStoreID());
+    update_option('coinsnap_provider', 'btcpay');
+    Notice::addFlash('success', __('Successfully received api key and store id from BTCPay Server API. Please finish setup by saving this settings form.', 'coinsnap-for-woocommerce'));
 
-            // Register a webhook.
-            if (CoinsnapApiWebhook::registerWebhook($btcpay_server_url, $apiData->getApiKey(), $apiData->getStoreID())) {
-                $messageWebhookSuccess = __( 'Successfully registered a new webhook on BTCPay Server.', 'coinsnap-for-woocommerce' );
-                Notice::addNotice('success', $messageWebhookSuccess, true );
-            }
-            else {
-                $messageWebhookError = __( 'Could not register a new webhook on the store.', 'coinsnap-for-woocommerce' );
-                Notice::addNotice('error', $messageWebhookError );
-            }
-
-            wp_redirect($CoinsnapBTCPaySettingsUrl);
-	}
-        else {
-            Notice::addNotice('error', __('Please make sure you only select one store on the BTCPay API authorization page.', 'coinsnap-for-woocommerce'));
-            wp_redirect($CoinsnapBTCPaySettingsUrl);
-	}
+    if (CoinsnapApiWebhook::registerWebhook($btcpayUrl, $apiData->getApiKey(), $apiData->getStoreID())) {
+        Notice::addFlash('success', __('Successfully registered a new webhook on BTCPay Server.', 'coinsnap-for-woocommerce'));
     }
-    
-    Notice::addNotice('error', __('Error processing the data from Coinsnap. Please try again.', 'coinsnap-for-woocommerce'));
-    wp_redirect($CoinsnapBTCPaySettingsUrl);
+    else {
+        Notice::addFlash('error', __('Could not register a new webhook on the store.', 'coinsnap-for-woocommerce'));
+    }
+
+    wp_safe_redirect($settingsUrl);
+    exit;
 });
+
+// A key and store id belong to the BTCPay server that issued them.
+add_action('update_option_btcpay_server_url', [BTCPayApiAuthorization::class, 'onServerUrlChange'], 10, 2);
 
 // Installation routine.
 register_activation_hook( __FILE__, function() {
 	update_option('coinsnap_permalinks_flushed', 0);
 	update_option( COINSNAP_VERSION_KEY, COINSNAP_WC_VERSION );
+	require_once COINSNAP_PLUGIN_FILE_PATH . 'library/loader.php';
+	\Coinsnap\WC\Helper\UpdateManager::ensureTables();
 });
 
 // Initialize payment gateways and plugin.
