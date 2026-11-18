@@ -16,7 +16,7 @@ function coinsnap_wc_uninstall_site(): void {
 		'coinsnap_payment_methods_generated', 'woocommerce_coinsnap_settings',
 		// Internal state.
 		'coinsnap_version', 'coinsnap_permalinks_flushed', 'coinsnap_wc_db_version', 'coinsnap_wc_webhook_rotated',
-		'coinsnap_wc_rotate_error', 'coinsnap_wc_rotate_lock',
+		'coinsnap_wc_rotate_error', 'coinsnap_wc_rotate_lock', 'coinsnap_wc_security_upgraded_at',
 	];
 	foreach ( $options as $option ) {
 		delete_option( $option );
