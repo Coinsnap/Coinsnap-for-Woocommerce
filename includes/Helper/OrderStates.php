@@ -35,7 +35,9 @@ class OrderStates {
 
 	$wcStates = wc_get_order_statuses();
 	$wcStates = [self::IGNORE => _x('- no mapping / defaults -', 'global_settings', 'coinsnap-for-woocommerce')] + $wcStates;
-	$orderStates = get_option($value['id']);?>
+	// Not saved yet on a fresh install (false), or saved before a state existed.
+	$orderStates = get_option($value['id']);
+	$orderStates = is_array($orderStates) ? $orderStates : [];?>
             <tr valign="top">
 		<th scope="row" class="titledesc">Order States:</th>
 		<td class="forminp" id="<?php echo esc_attr($value['id']) ?>">
@@ -44,7 +46,7 @@ class OrderStates {
 			<tr><th><?php echo esc_html($coinsnapName); ?></th>
                             <td><select name="<?php echo esc_attr($value['id']) ?>[<?php echo esc_html($coinsnapState); ?>]"><?php
                                 foreach ($wcStates as $wcState => $wcName) {
-                                    $selectedOption = $orderStates[$coinsnapState];
+                                    $selectedOption = $orderStates[$coinsnapState] ?? '';
 
                                     if (true === empty($selectedOption)) {
                                         $selectedOption = $defaultStates[$coinsnapState];
