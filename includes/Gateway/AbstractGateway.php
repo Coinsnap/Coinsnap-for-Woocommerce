@@ -901,11 +901,14 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             $orderID = ''.$order->get_id();
             Logger::debug( 'Got order number: ' . $orderNumber . ' (order ID: ' . $orderID .')' );
 
-            // Send customer data (email, name, address) only if the merchant enabled it.
+            // Send customer data (name, email, phone, address, order note) only if the merchant enabled it.
             $sendCustomerData = ( get_option( 'coinsnap_send_customer_data' ) === 'yes' );
             $metadata = $sendCustomerData ? $this->prepareCustomerMetadata( $order ) : [];
-            $buyerEmail = $sendCustomerData ? $metadata['buyerEmail'] : null;
-            $buyerName = $sendCustomerData ? $metadata['buyerName'] : null;
+            $buyerEmail = $metadata['buyerEmail'] ?? null;
+            $buyerName = $metadata['buyerName'] ?? null;
+
+            // Order data (no personal data) is always sent.
+            $metadata = array_merge( $metadata, $this->prepareOrderMetadata( $order ) );
 
             // Set included tax amount.
             $metadata['taxIncluded'] = $order->get_cart_tax();
@@ -913,9 +916,9 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             if(isset($orderNumber) && !empty($orderNumber)){
                 $metadata['orderNumber'] = $orderNumber;
             }
-            if(get_option('coinsnap_provider') === 'btcpay') {
-                $metadata['orderId'] = $orderID;
-            }
+            // The webhook binds the invoice to the order by metadata.orderId = order ID (invoicePaysOrder()).
+            // Coinsnap copies the top-level orderId there, BTCPay only knows metadata: same value for both.
+            $metadata['orderId'] = $orderID;
                 
             $redirectUrl = (!empty(get_option('coinsnap_returnurl','')))? get_option('coinsnap_returnurl') : $this->get_return_url( $order );
             
@@ -928,10 +931,6 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
             $checkInvoice = $this -> checkAmount($amount, $currency);
 
             if($checkInvoice['result'] === true){
-
-                if(get_option('coinsnap_provider') === 'btcpay') {
-                    $metadata['orderId'] = $orderID;
-                }
 
                 if(get_option('coinsnap_provider') === 'btcpay' && $currency !== 'BTC'){
                     $store = new \Coinsnap\Client\Store($this->apiHelper->url, $this->apiHelper->apiKey);
@@ -1004,16 +1003,75 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 	 * Maps customer billing metadata.
 	 */
 	protected function prepareCustomerMetadata( \WC_Order $order ): array {
-            return [
+            $name = trim( (string) $order->get_formatted_billing_full_name() );
+            return self::withoutEmptyValues( [
 		'buyerEmail'    => $order->get_billing_email(),
-		'buyerName'     => $order->get_formatted_billing_full_name(),
+		'buyerName'     => $name,
+		'customerName'  => $name,
+		'buyerPhone'    => $order->get_billing_phone(),
 		'buyerAddress1' => $order->get_billing_address_1(),
 		'buyerAddress2' => $order->get_billing_address_2(),
 		'buyerCity'     => $order->get_billing_city(),
 		'buyerState'    => $order->get_billing_state(),
 		'buyerZip'      => $order->get_billing_postcode(),
-		'buyerCountry'  => $order->get_billing_country()
-            ];
+		'buyerCountry'  => $order->get_billing_country(),
+		'buyerMessage'  => $order->get_customer_note(),
+            ] );
+	}
+
+	/**
+	 * Order data sent with every invoice: identifiers, items and totals, no personal data.
+	 */
+	protected function prepareOrderMetadata( \WC_Order $order ): array {
+            $lineItems = [];
+            $names = [];
+            foreach ( $order->get_items() as $item ) {
+                if ( !$item instanceof \WC_Order_Item_Product ) {
+                    continue;
+                }
+                $product = $item->get_product();
+                $quantity = (int) $item->get_quantity();
+                $lineItems[] = self::withoutEmptyValues( [
+                    'name'      => wp_strip_all_tags( (string) $item->get_name() ),
+                    'sku'       => $product ? (string) $product->get_sku() : '',
+                    'productId' => (int) ( $item->get_variation_id() ?: $item->get_product_id() ),
+                    'quantity'  => $quantity,
+                    'price'     => $quantity > 0 ? round( (float) $item->get_total() / $quantity, wc_get_price_decimals() ) : null,
+                    'total'     => (float) $item->get_total(),
+                ] );
+                $names[] = wp_strip_all_tags( (string) $item->get_name() ) . ( $quantity > 1 ? ' x ' . $quantity : '' );
+            }
+
+            $itemDesc = implode( ', ', $names );
+            if ( function_exists( 'mb_strlen' ) && mb_strlen( $itemDesc ) > 250 ) {
+                $itemDesc = mb_substr( $itemDesc, 0, 247 ) . '...';
+            }
+            $itemCode = '';
+            if ( count( $lineItems ) === 1 ) {
+                $itemCode = (string) ( $lineItems[0]['sku'] ?? ( $lineItems[0]['productId'] ?? '' ) );
+            }
+
+            return self::withoutEmptyValues( [
+                'orderUrl'       => $order->get_edit_order_url(),
+                'itemDesc'       => $itemDesc,
+                'itemCode'       => $itemCode,
+                'lineItems'      => $lineItems,
+                'shippingMethod' => $order->get_shipping_method(),
+                'couponCodes'    => array_values( $order->get_coupon_codes() ),
+                'discountTotal'  => (float) $order->get_discount_total() > 0 ? (float) $order->get_discount_total() : null,
+                'taxTotal'       => (float) $order->get_total_tax() > 0 ? (float) $order->get_total_tax() : null,
+                'shippingTotal'  => (float) $order->get_shipping_total() > 0 ? (float) $order->get_shipping_total() : null,
+                'platform'       => 'woocommerce',
+                'pluginVersion'  => COINSNAP_WC_VERSION,
+                'language'       => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
+            ] );
+	}
+
+	// Drops null, '' and [] so the invoice carries only values that exist.
+	protected static function withoutEmptyValues( array $values ): array {
+            return array_filter( $values, function ( $value ) {
+                return $value !== null && $value !== '' && $value !== [];
+            } );
 	}
 
 	/**
