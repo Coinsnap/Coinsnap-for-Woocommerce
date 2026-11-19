@@ -405,9 +405,8 @@ class CoinsnapWCPlugin {
             return $currencies;
         }
         
-        $apiHelper = new CoinsnapApiHelper();
-        $client = new \Coinsnap\Client\Invoice($apiHelper->url, $apiHelper->apiKey);
-        $coinsnapCurrencies = $client->getCurrencies();
+        // A fixed list: no API client, so this also works before an API key is saved.
+        $coinsnapCurrencies = COINSNAP_CURRENCIES;
         
         foreach($currencies as $currency_key => $currency_value){
             if( !in_array($currency_key,$coinsnapCurrencies) ){
