@@ -733,7 +733,7 @@ abstract class AbstractGateway extends \WC_Payment_Gateway {
 
 		switch ($status) {
 			case 'New':
-				$order->add_order_note(__('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.', 'coinsnap-for-woocommerce'));
+				$order->add_order_note(__('Invoice created. Waiting for the customer to pay.', 'coinsnap-for-woocommerce'));
 				break;
 
 			case 'Processing':
